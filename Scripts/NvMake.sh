@@ -6,7 +6,7 @@ buildArch=amd64
 buildJobs="-j$(nproc)"
 buildMisc="-time"
 buildRoot=/media/wanliz/NTFS-DATA/Wanliz-Nvidia-GPU-Drivers
-buildWorkDir=
+buildWorkDir=$buildRoot/rel/gpu_drv/r580/r580_00
 
 while [[ "$#" -gt 0 ]]; do 
     case $1 in 
@@ -21,6 +21,10 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift 
 done 
+
+echo "WorkDir: $buildWorkDir"
+echo "   Args: $buildModule linux $buildArch $buildConfig $buildJobs $buildMisc"
+read -p "Press [Enter] to continue: " _
 
 pushd $buildWorkDir || exit 1
 $buildRoot/misc/linux/unix-build \

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -f "~/.bashrc" ] || ! grep -q "WZhu Perforce Env" "~/.bashrc"; then
+if [ ! -f ~/.bashrc ] || ! grep -q "WZhu Perforce Env" ~/.bashrc; then
 cat << "END_OF_FILE" >> ~/.bashrc
 
 # === WZhu Perforce Env ===
@@ -10,7 +10,7 @@ export P4IGNORE=$HOME/.p4ignore
 END_OF_FILE
 fi
 
-if [ ! -f "~/.p4ignore" ]; then 
+if [ ! -f ~/.p4ignore ]; then 
 cat << "END_OF_FILE" >> ~/.p4ignore
 _out
 .git
