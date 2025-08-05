@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -f "~/.bashrc" ] || ! grep -q "WZhu NvMake Env" "~/.bashrc"; then
+if [ ! -f "~/.bashrc" ] || ! grep -q "WZhu Perforce Env" "~/.bashrc"; then
 cat << "END_OF_FILE" >> ~/.bashrc
 
 # === WZhu Perforce Env ===
