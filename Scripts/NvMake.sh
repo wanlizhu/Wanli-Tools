@@ -5,7 +5,7 @@ buildConfig=develop
 buildArch=amd64 
 buildJobs="-j$(nproc)"
 buildMisc="-time"
-buildRoot=/media/wanliz/NTFS-DATA/Wanliz-Nvidia-GPU-Drivers
+buildRoot=/mnt/c/Users/WanliZhu/Documents/Wanliz-Nvidia-GPU-Drivers
 buildWorkDir=$buildRoot/rel/gpu_drv/r580/r580_00
 
 while [[ "$#" -gt 0 ]]; do 
