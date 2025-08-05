@@ -1,4 +1,4 @@
-$!/bin/bash
+#!/bin/bash
 
 if [ ! -f "~/.bashrc" ] || ! grep -q "WZhu NvMake Env" "~/.bashrc"; then
 cat << "END_OF_FILE" >> ~/.bashrc

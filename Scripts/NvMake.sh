@@ -1,4 +1,4 @@
-$!/bin/bash
+#!/bin/bash
 
 buildModule="drivers dist" 
 buildConfig=develop

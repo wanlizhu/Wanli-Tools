@@ -1,4 +1,4 @@
-$!/bin/bash
+#!/bin/bash
 
 if ! dpkg --print-foreign-architectures | grep -q '^i386$'; then
     echo "Enabling i386 architecture"
