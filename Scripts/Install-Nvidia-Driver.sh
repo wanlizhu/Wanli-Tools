@@ -11,7 +11,7 @@ fi
 if [[ -z $1 ]]; then
     sudo su -c "/mnt/linuxqa/nvt.sh driver --help"
 else 
-    sudo su -c "/mnt/linuxqa/nvt.sh driver $*" || exit 1
+    sudo su -c " NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh driver $*" || exit 1
     read -p "ENVVARS: " envvars
     for pair in $envvars; do 
         echo "export ${pair%%=*}=${pair#*=}"
