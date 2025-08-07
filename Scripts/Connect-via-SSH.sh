@@ -6,17 +6,7 @@ if [[ -z $1 ]]; then
 fi 
 
 if [[ ! -f ~/.ssh/id_ed25519 ]]; then 
-    echo '-----BEGIN OPENSSH PRIVATE KEY-----
-b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-QyNTUxOQAAACB8e4c/PmyYwYqGt0Zb5mom/KTEndF05kcF8Gsa094RSwAAAJhfAHP9XwBz
-/QAAAAtzc2gtZWQyNTUxOQAAACB8e4c/PmyYwYqGt0Zb5mom/KTEndF05kcF8Gsa094RSw
-AAAECa55qWiuh60rKkJLljELR5X1FhzceY/beegVBrDPv6yXx7hz8+bJjBioa3Rlvmaib8
-pMSd0XTmRwXwaxrT3hFLAAAAE3dhbmxpekBFbnpvLU1hY0Jvb2sBAg==
------END OPENSSH PRIVATE KEY-----' > ~/.ssh/id_ed25519
-    chmod 600 ~/.ssh/id_ed25519
-
-    echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHx7hz8+bJjBioa3Rlvmaib8pMSd0XTmRwXwaxrT3hFL wanliz@Enzo-MacBook' > ~/.ssh/id_ed25519.pub
-    chmod 644 ~/.ssh/id_ed25519.pub
+    echo "Run commands in \"SSH Key to access NvTest.txt\" to generate ~/.ssh/id_ed25519"
 fi 
 
 declare -A hostsInLab=(
