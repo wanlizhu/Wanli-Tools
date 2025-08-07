@@ -1,8 +1,7 @@
 #!/bin/bash
 
-if [[ $UID -ne 0 ]]; then
+if [[ $EUID -ne 0 ]]; then
     echo -n "Please run as root"
-    [[ $EUID -ne 0 ]] && echo "" || echo " (instead of sudo)" 
     echo "Aborting!"
     exit 1
 fi 

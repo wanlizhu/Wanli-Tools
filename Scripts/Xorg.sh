@@ -1,28 +1,6 @@
 #!/bin/bash
 
-function Start-SSH-Session {
-    if [[ -z $1 ]]; then 
-        echo "Host name is required"
-        return 1
-    fi 
-
-    declare -A hostsInLab=(
-        [proxy]="10.176.11.106"
-        [horizon5]="172.16.178.123"
-        [horizon6]="172.16.177.182"
-        [horizon7]="172.16.177.216"
-    )
-
-    if [[ ! -z "${hostsInLab[$1]+set}" ]]; then
-        dpkg -s sshpass &>/dev/null || sudo apt install -y sshpass 
-        sshpass -p nvidia ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no nvidia@${hostsInLab[$1]}
-        return 
-    fi 
-
-    echo "Host not found: $1"
-}
-
-function Start-Xorg-in-NvTest {
+if [[ -z $1 ]]; then 
     echo "Starting Xorg using /mnt/linuxqa/nvt.sh"
     dpkg -s tmux &>/dev/null || sudo apt install -y tmux
     sudo tmux new-session -d -s startx-in-nvtest "NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'" && sleep 2
@@ -33,17 +11,13 @@ function Start-Xorg-in-NvTest {
         sudo tar -xf /root/nvt/driver/tests-Linux-$(uname -m).tar
         ./tests-Linux-x86_64/sandbag-tool/sandbag-tool -unsandbag
     popd >/dev/null 
-}
-
-function Start-Xorg-bare {
+elif [[ $1 == -bare ]]; then
     echo "Starting Xorg bare"
     dpkg -s tmux &>/dev/null || sudo apt install -y tmux
     sudo tmux new-session -d -s "startx-bare" "X :0 +iglx" && sleep 2
     xrandr --fb 3840x2160 && xrandr | grep current
     echo "Don't forget to unsandbag the driver"
-}
-
-function Start-VNC-Server {
+elif [[ $1 == -vnc ]]; then 
     echo "[1] Create a virtual desktop"
     echo "[2] Mirror the current screen"
     read -e -i 1 -p "Select: " vncType
@@ -65,9 +39,7 @@ startxfce4' > ~/.vnc/xstartup
     fi 
 
     sudo ss -tulpn | grep -E "5900|5901|5902"
-}
-
-function Config-Xauthority {
+elif [[ $1 == -xauth ]]; then 
     xauthPath=$(ps aux | grep '[X]org' | grep -oP '(?<=-auth )[^ ]+')
     sudo cp -vf $xauthPath ~/.Xauthority
     sudo chown $USER:$(id -gn) ~/.Xauthority
@@ -77,4 +49,4 @@ function Config-Xauthority {
     sudo cp -vf $xauthPath /root/.Xauthority
     sudo chown root:root /root/.Xauthority
     sudo chmod 600 /root/.Xauthority
-}
+fi 

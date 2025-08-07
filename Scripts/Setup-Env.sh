@@ -39,9 +39,9 @@ if [ ! -f ~/.bashrc ] || ! grep -q "WZhu Func Loader" ~/.bashrc; then
 cat << "END_OF_FILE" >> ~/.bashrc
 
 # === WZhu Func Loader ===
-function Load-WZhu-Functions {
-    if [[ -f ~/WZhu/Scripts/Define-Functions.sh ]]; then 
-        source ~/WZhu/Scripts/Define-Functions.sh
+function Load-Micro-Functions {
+    if [[ -f ~/WZhu/Scripts/MicroFunctions.sh ]]; then 
+        source ~/WZhu/Scripts/MicroFunctions.sh
     fi 
 }
 END_OF_FILE
@@ -83,5 +83,3 @@ if ! ls /etc/ssl/certs/certnew*.pem &>/dev/null; then
         sudo update-ca-certificates
     fi 
 fi
-
-
