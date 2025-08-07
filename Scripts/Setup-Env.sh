@@ -43,12 +43,13 @@ if [ ! -f ~/.p4ignore ]; then
 fi 
 
 # Install package dependencies
-# Run `QT_DEBUG_PLUGINS=1 p4v` to debug if p4v crashed
 for pkg in libopengl0 libnss3 libxkbfile1 \
     libxcb-cursor0 libxcb-icccm4 libxcb-image0 \
     libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
     libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 \
-    libxcb-shape0 libxcb1-dev; do 
+    libxcb-shape0 libxcb1-dev \
+    screen x11-xserver-utils sshpass nfs-common \
+    xfce4 xfce4-goodies tigervnc-standalone-server x11vnc; do 
     dpkg -s $pkg &>/dev/null || sudo apt install -y $pkg 
 done 
 

@@ -16,7 +16,6 @@ declare -A hostsInLab=(
 )
 
 if [[ ! -z "${hostsInLab[$1]+set}" ]]; then
-    dpkg -s sshpass &>/dev/null || sudo apt install -y sshpass 
     sshpass -p nvidia ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no nvidia@${hostsInLab[$1]}
     exit 
 elif [[ $1 == proxy ]]; then 
