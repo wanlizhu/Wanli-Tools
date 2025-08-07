@@ -35,6 +35,18 @@ _out
 END_OF_FILE
 fi 
 
+if [ ! -f ~/.bashrc ] || ! grep -q "WZhu Func Loader" ~/.bashrc; then
+cat << "END_OF_FILE" >> ~/.bashrc
+
+# === WZhu Func Loader ===
+function load-wzhu-functions {
+    if [[ -f ~/WZhu/Scripts/Define-Functions.sh ]]; then 
+        source ~/WZhu/Scripts/Define-Functions.sh
+    fi 
+}"
+END_OF_FILE
+fi 
+
 # Install package dependencies
 for pkg in libopengl0 libnss3 libxkbfile1 \
     libxcb-cursor0 libxcb-icccm4 libxcb-image0 \
