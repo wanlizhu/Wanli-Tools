@@ -34,7 +34,7 @@ function Unsandbag-NvTest-Driver {
     driver=$1
     if [[ -z $driver ]]; then 
         if [[ ! -z $NVTEST_DRIVER ]]; then 
-            $driver=$NVTEST_DRIVER
+            driver=$NVTEST_DRIVER
         else 
             echo "Driver URL/Path is required, aborting!"
             return 1
