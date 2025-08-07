@@ -5,6 +5,11 @@ if [[ $UID -ne 0 ]] && ! sudo grep -q "$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoer
     echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 fi 
 
+if [[ ! -z $(sudo ls /root/WZhu 2>/dev/null) ]]; then
+    echo "Create symbolic link /root/WZhu"
+    sudo ln -s $HOME/WZhu /root/WZhu
+fi 
+
 if ! grep -q "WZhu Env PATH" ~/.bashrc; then
     echo ' 
 # === WZhu Env PATH ===
