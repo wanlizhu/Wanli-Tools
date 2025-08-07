@@ -9,9 +9,9 @@ if [[ ! -z $(ls /root/nvt 2>/dev/null) ]]; then
 fi 
 
 if [[ -z $1 ]]; then
-    sudo su -c "bash -c \"/mnt/linuxqa/nvt.sh driver --help\""
+    sudo su -c "/mnt/linuxqa/nvt.sh driver --help"
 else 
-    sudo su -c "bash -c \"/mnt/linuxqa/nvt.sh driver $@\"" || exit 1
+    sudo su -c "/mnt/linuxqa/nvt.sh driver \"$@\"" || exit 1
     read -p "ENVVARS: " envvars
     for pair in $envvars; do 
         echo "export ${pair%%=*}=${pair#*=}"
