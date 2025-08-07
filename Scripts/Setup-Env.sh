@@ -13,7 +13,8 @@ export __GL_SYNC_TO_VBLANK=0
 export vblank_mode=0
 export __GL_DEBUG_BYPASS_ASSERT=c 
 export PIP_BREAK_SYSTEM_PACKAGES=1
-export SSL_CERT_DIR=/etc/ssl/certs
+[[ -z $SSL_CERT_DIR ]] && export SSL_CERT_DIR=/etc/ssl/certs
+[[ -z $DISPLAY ]] && export DISPLAY=:0
 
 export P4PORT=p4proxy-sc.nvidia.com:2006
 export P4USER=wanliz
