@@ -35,9 +35,9 @@ if [[ ! -z $(ls /root/nvt 2>/dev/null) ]]; then
 fi 
 
 if [[ -z $1 ]]; then
-    sudo su -c "/mnt/linuxqa/nvt.sh driver --help"
+    su - root -c "/mnt/linuxqa/nvt.sh driver --help"
 else 
-    sudo su -c "/mnt/linuxqa/nvt.sh driver $@"
+    su - root -c "/mnt/linuxqa/nvt.sh driver $@"
     read -p "ENVVARS: " envvars
     for pair in $envvars; do 
         echo "export ${pair%%=*}=${pair#*=}"
