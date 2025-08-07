@@ -1,6 +1,6 @@
 #!/bin/bash
 
-Load-Micro-Functions 
+source $(dirname $0)/Micro-Functions.sh
 Mount-NvTest-Dirs
 
 if [[ ! -z $(ls /root/nvt 2>/dev/null) ]]; then
