@@ -9,6 +9,12 @@ if ! grep -q "WZhu Env Setup" ~/.bashrc; then
     echo ' 
 # === WZhu Env Setup ===
 export PATH="$PATH:$HOME/WZhu/Scripts"
+export __GL_SYNC_TO_VBLANK=0
+export vblank_mode=0
+export __GL_DEBUG_BYPASS_ASSERT=c 
+export PIP_BREAK_SYSTEM_PACKAGES=1
+export SSL_CERT_DIR=/etc/ssl/certs
+
 export P4PORT=p4proxy-sc.nvidia.com:2006
 export P4USER=wanliz
 export P4CLIENT=wanliz-sw-gpu-driver-home

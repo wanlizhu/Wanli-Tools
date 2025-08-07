@@ -44,8 +44,8 @@ if [[ -z $1 ]]; then
     /mnt/linuxqa/nvt.sh driver --help 
 else 
     /mnt/linuxqa/nvt.sh driver $@ 
-    read -p "ENV VARS: " vars
-    for pair in $vars; do 
+    read -p "ENVVARS: " envvars
+    for pair in $envvars; do 
         echo "export ${pair%%=*}=${pair#*=}"
         export ${pair%%=*}=${pair#*=}
     done 
