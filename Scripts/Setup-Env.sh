@@ -39,11 +39,11 @@ if [ ! -f ~/.bashrc ] || ! grep -q "WZhu Func Loader" ~/.bashrc; then
 cat << "END_OF_FILE" >> ~/.bashrc
 
 # === WZhu Func Loader ===
-function load-wzhu-functions {
+function Load-WZhu-Functions {
     if [[ -f ~/WZhu/Scripts/Define-Functions.sh ]]; then 
         source ~/WZhu/Scripts/Define-Functions.sh
     fi 
-}"
+}
 END_OF_FILE
 fi 
 
