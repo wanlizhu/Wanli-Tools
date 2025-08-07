@@ -1,11 +1,15 @@
 #!/bin/bash
 
+sudo apt autoremove &>/dev/null 
+sudo apt update &>/dev/null 
+
 if [[ $UID -ne 0 ]] && ! sudo grep -q "$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoers; then
     echo "Setting up NoPasswd sudo for $USER"
     echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 fi 
 
 if ! grep -q "WZhu Env Setup" ~/.bashrc; then
+    echo "Setting up ~/.bashrc"
     echo ' 
 # === WZhu Env Setup ===
 export PATH="$PATH:$HOME/WZhu/Scripts"
@@ -29,6 +33,7 @@ function Load-Micro-Functions {
 fi 
 
 if [ ! -f ~/.p4ignore ]; then 
+    echo "Setting up ~/.p4ignore"
     echo "_out
 .git
 .vscode
@@ -50,7 +55,7 @@ done
 if ! dpkg --print-foreign-architectures | grep -q '^i386$'; then
     echo "Enabling i386 architecture"
     sudo dpkg --add-architecture i386
-    sudo apt update
+    sudo apt update 
     sudo apt install -y libc6:i386 libncurses6:i386 libstdc++6:i386
 fi
 
