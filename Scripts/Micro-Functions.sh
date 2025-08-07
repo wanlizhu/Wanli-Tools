@@ -2,8 +2,12 @@
 
 function Unsandbag-NvTest-Driver {
     driver=$1
-    if [[ "$1" == "http"* ]]; then 
-        driver=/root/nvt/driver/$(basename "$1")
+    if [[ -z $driver ]]; then 
+        echo "Driver URL/Path is required, aborting!"
+        return 1
+    fi 
+    if [[ "$driver" == "http"* ]]; then 
+        driver=/root/nvt/driver/$(basename "$driver")
     fi 
     pushd /tmp >/dev/null 
         sudo rm -rf /tmp/tests-Linux-$(uname -m)

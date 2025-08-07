@@ -14,8 +14,27 @@ fi
 if ! sudo grep -q "WZhu Env PATH" /root/.bashrc; then
     echo "
 # === WZhu Env PATH ===
-export PATH=\"\$PATH:$HOME/WZhu/Scripts\"" > /tmp/file
-    cat /tmp/file | sudo tee -a /root/.bashrc >/dev/null 
+export PATH=\"\$PATH:$HOME/WZhu/Scripts\"" | sudo tee -a /root/.bashrc >/dev/null 
+fi 
+
+if [ ! -f ~/.bashrc ] || ! grep -q "WZhu Func Loader" ~/.bashrc; then
+    echo '
+# === WZhu Func Loader ===
+function Load-Micro-Functions {
+    if [[ -f ~/WZhu/Scripts/MicroFunctions.sh ]]; then 
+        source ~/WZhu/Scripts/MicroFunctions.sh
+    fi 
+}' >> ~/.bashrc
+fi 
+
+if ! sudo grep -q "WZhu Func Loader" /root/.bashrc; then
+    echo "
+# === WZhu Func Loader ===
+function Load-Micro-Functions {
+    if [[ -f $HOME/WZhu/Scripts/MicroFunctions.sh ]]; then 
+        source $HOME/WZhu/Scripts/MicroFunctions.sh
+    fi 
+}" | sudo tee -a /root/.bashrc >/dev/null 
 fi 
 
 if [ ! -f ~/.bashrc ] || ! grep -q "WZhu Perforce Env" ~/.bashrc; then
@@ -34,16 +53,6 @@ if [ ! -f ~/.p4ignore ]; then
 .cursorignore
 .clangd
 *.code-workspace" > ~/.p4ignore
-fi 
-
-if [ ! -f ~/.bashrc ] || ! grep -q "WZhu Func Loader" ~/.bashrc; then
-    echo '
-# === WZhu Func Loader ===
-function Load-Micro-Functions {
-    if [[ -f ~/WZhu/Scripts/MicroFunctions.sh ]]; then 
-        source ~/WZhu/Scripts/MicroFunctions.sh
-    fi 
-}' >> ~/.bashrc
 fi 
 
 # Install package dependencies
