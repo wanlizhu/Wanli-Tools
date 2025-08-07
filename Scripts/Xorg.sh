@@ -1,16 +1,14 @@
 #!/bin/bash
 
+export DISPLAY=:0
+echo "export DISPLAY=:0"
+
 if [[ -z $1 ]]; then 
     echo "Starting Xorg using /mnt/linuxqa/nvt.sh"
     dpkg -s tmux &>/dev/null || sudo apt install -y tmux
     sudo tmux new-session -d -s startx-in-nvtest "NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'" && sleep 2
     xrandr | grep current
-    read -p "Press [Enter] to unsandbag the driver: " _
-    pushd /tmp >/dev/null 
-        sudo rm -rf /tmp/tests-Linux-$(uname -m)
-        sudo tar -xf /root/nvt/driver/tests-Linux-$(uname -m).tar
-        ./tests-Linux-x86_64/sandbag-tool/sandbag-tool -unsandbag
-    popd >/dev/null 
+    echo "Don't forget to unsandbag the driver"
 elif [[ $1 == -bare ]]; then
     echo "Starting Xorg bare"
     dpkg -s tmux &>/dev/null || sudo apt install -y tmux

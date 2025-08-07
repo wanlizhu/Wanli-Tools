@@ -11,7 +11,8 @@ function Unsandbag-NvTest-Driver {
     fi 
     pushd /tmp >/dev/null 
         sudo rm -rf /tmp/tests-Linux-$(uname -m)
-        tar -xvf $(dirname $driver)/tests-Linux-$(uname -m).tar
+        tar -xf $(dirname $driver)/tests-Linux-$(uname -m).tar 
+        echo "(Nothing prints out if there is no GPU workload)"
         ./tests-Linux-aarch64/sandbag-tool/sandbag-tool -unsandbag
         ./tests-Linux-aarch64/sandbag-tool/sandbag-tool -print 
     popd >/dev/null 
