@@ -83,3 +83,6 @@ if ! ls /etc/ssl/certs/certnew*.pem &>/dev/null; then
         sudo update-ca-certificates
     fi 
 fi
+
+source ~/.bashrc
+/bin/bash
