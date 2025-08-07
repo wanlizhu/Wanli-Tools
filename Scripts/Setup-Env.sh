@@ -5,46 +5,45 @@ if [[ $UID -ne 0 ]] && ! sudo grep -q "$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoer
     echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 fi 
 
-if [ ! -f ~/.bashrc ] || ! grep -q "WZhu Env PATH" ~/.bashrc; then
-cat << "END_OF_FILE" >> ~/.bashrc
-
+if ! grep -q "WZhu Env PATH" ~/.bashrc; then
+    echo ' 
 # === WZhu Env PATH ===
-export PATH="$PATH:$HOME/WZhu/Scripts"
-END_OF_FILE
+export PATH="$PATH:$HOME/WZhu/Scripts"' >> ~/.bashrc
+fi 
+
+if ! sudo grep -q "WZhu Env PATH" /root/.bashrc; then
+    echo "
+# === WZhu Env PATH ===
+export PATH=\"\$PATH:$HOME/WZhu/Scripts\"" > /tmp/file
+    cat /tmp/file | sudo tee -a /root/.bashrc >/dev/null 
 fi 
 
 if [ ! -f ~/.bashrc ] || ! grep -q "WZhu Perforce Env" ~/.bashrc; then
-cat << "END_OF_FILE" >> ~/.bashrc
-
+    echo '
 # === WZhu Perforce Env ===
 export P4PORT=p4proxy-sc.nvidia.com:2006
 export P4USER=wanliz
 export P4CLIENT=wanliz-sw-gpu-driver-home
-export P4IGNORE=$HOME/.p4ignore
-END_OF_FILE
+export P4IGNORE=$HOME/.p4ignore' >> ~/.bashrc
 fi
 
 if [ ! -f ~/.p4ignore ]; then 
-cat << "END_OF_FILE" >> ~/.p4ignore
-_out
+    echo "_out
 .git
 .vscode
 .cursorignore
 .clangd
-*.code-workspace
-END_OF_FILE
+*.code-workspace" > ~/.p4ignore
 fi 
 
 if [ ! -f ~/.bashrc ] || ! grep -q "WZhu Func Loader" ~/.bashrc; then
-cat << "END_OF_FILE" >> ~/.bashrc
-
+    echo '
 # === WZhu Func Loader ===
 function Load-Micro-Functions {
     if [[ -f ~/WZhu/Scripts/MicroFunctions.sh ]]; then 
         source ~/WZhu/Scripts/MicroFunctions.sh
     fi 
-}
-END_OF_FILE
+}' >> ~/.bashrc
 fi 
 
 # Install package dependencies
