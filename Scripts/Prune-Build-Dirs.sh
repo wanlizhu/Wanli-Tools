@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-rootDir=/media/wanliz/data/wanliz-sw-gpu-driver-office
-outputFile=/media/wanliz/data/wanliz-sw-gpu-driver-office/rel/gpu_drv/r580/r580_00/_out/Linux_amd64_develop/NVIDIA-Linux-x86_64-*-internal.run
+rootDir=/media/wanliz/data/wanliz-sw-gpu-driver-home
+outputFile=/media/wanliz/data/wanliz-sw-gpu-driver-home/rel/gpu_drv/r580/r580_00/_out/Linux_amd64_develop/NVIDIA-Linux-x86_64-*-internal.run
 buildScript=$HOME/WZhu/Scripts/NvMake.sh
 
 Run-Build-Script() {
