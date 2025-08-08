@@ -47,7 +47,7 @@ Process-Children-Dirs() {
             $child == *"_out"* || 
             $child == *"-hide-and-checked"* ||
             $child == *"-hide-and-checking"* ]] && continue
-        Hide-Dir-And-Test-Build "$child"
+        Hide-Dir-and-Test-Build "$child"
     done
 }
 
