@@ -6,10 +6,11 @@ outputFile=/media/wanliz/data/wanliz-sw-gpu-driver-home/rel/gpu_drv/r580/r580_00
 buildScript=$HOME/WZhu/Scripts/NvMake.sh
 
 Run-Build-Script() {
-  bash $buildScript sweep <<< "" &>/dev/null 
-  bash $buildScript <<< "" &>/dev/null 
-  if (( $? != 0 )) || [[ -z $(ls $outputFile 2>/dev/null) ]]; then return 1; fi
-  return 0
+    export P4ROOT=$rootDir
+    bash $buildScript sweep <<< "" &>/dev/null 
+    bash $buildScript <<< "" &>/dev/null 
+    if (( $? != 0 )) || [[ -z $(ls $outputFile 2>/dev/null) ]]; then return 1; fi
+    return 0
 }
 
 Hide-Dir-And-Test-Build() {

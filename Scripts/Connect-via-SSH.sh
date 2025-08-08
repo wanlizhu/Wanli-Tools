@@ -18,6 +18,8 @@ declare -A hostsInLab=(
 if [[ ! -z "${hostsInLab[$1]+set}" ]]; then
     sshpass -p nvidia ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no nvidia@${hostsInLab[$1]}
     exit 
+elif [[ $1 == office ]]; then 
+    ssh wanliz@172.16.179.143 # Use public key
 elif [[ $1 == proxy ]]; then 
     ssh nvidia@10.176.11.106 # Use public key
 fi 
