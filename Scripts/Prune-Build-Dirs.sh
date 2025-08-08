@@ -23,8 +23,8 @@ Run-Build-Script() {
 Hide-Dir-and-Test-Build() {
     dirPath="$1"
     if [[ "$dirPath" == *"_out"* || 
-        "$dirPath" == *"-hide-and-checked"* ||
-        "$dirPath" == *"-hide-and-checking"* ]]; then
+          "$dirPath" == *"-hide-and-checked"* ||
+          "$dirPath" == *"-hide-and-checking"* ]]; then
         return 0
     fi
 
@@ -44,8 +44,8 @@ Process-Children-Dirs() {
     for child in $1/*/; do
         child="${child%/}"
         [[ ! -d "$child" || 
-            $child == *"_out"* ||
-            $child == *"-hide-and-checked"*
+            $child == *"_out"* || 
+            $child == *"-hide-and-checked"* ||
             $child == *"-hide-and-checking"* ]] && continue
         Hide-Dir-And-Test-Build "$child"
     done
