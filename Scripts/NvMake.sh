@@ -5,9 +5,15 @@ buildConfig=develop
 buildArch=amd64 
 buildJobs="-j$(nproc)"
 buildMisc="-time"
-buildRoot=/mnt/g/wanliz-sw-gpu-driver-office
+buildRoot=
 branchDir=rel/gpu_drv/r580/r580_00
 moduleDir=
+
+if [[ $HOSTNAME == wanliz-sc-ubuntu24 ]]; then 
+    buildRoot=/media/wanliz/data/wanliz-sw-gpu-driver-office
+elif [[ $HOSTNAME == Wanliz-WorkMachine ]]; then 
+    buildRoot=$HOME/wanliz-sw-gpu-driver-home
+fi 
 
 while [[ "$#" -gt 0 ]]; do 
     case $1 in 
@@ -28,11 +34,11 @@ echo "   Args: $buildModule linux $buildArch $buildConfig $buildJobs $buildMisc"
 read -p "Press [Enter] to continue: " _
 
 pushd $buildRoot/$branchDir/$moduleDir >/dev/null || exit 1
-$buildRoot/tools/linux/unix-build/2.00/unix-build \
+$buildRoot/tools/linux/unix-build/unix-build \
     --tools  $buildRoot/tools \
     --devrel $buildRoot/devrel/SDK/inc/GL \
     --unshare-namespaces \
-    nvmake-2.09 \
+    nvmake \
     NV_COLOR_OUTPUT=1 \
     NV_GUARDWORD= \
     NV_COMPRESS_THREADS=$(nproc) \
