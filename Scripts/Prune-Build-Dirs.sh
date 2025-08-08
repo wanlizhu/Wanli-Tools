@@ -12,14 +12,6 @@ Cleanup-and-Restore() {
 }
 trap Cleanup-and-Restore EXIT INT TERM
 
-Run-Build-Script() {
-    export P4ROOT=$rootDir
-    bash $buildScript sweep <<< "" 
-    bash $buildScript <<< "" 
-    if (( $? != 0 )) || [[ -z $(ls $outputFile 2>/dev/null) ]]; then return 1; fi
-    return 0
-}
-
 Hide-Dir-and-Test-Build() {
     dirPath="$1"
     if [[ "$dirPath" == *"_out"* || 
@@ -28,9 +20,13 @@ Hide-Dir-and-Test-Build() {
         return 0
     fi
 
+    export P4ROOT=$rootDir
+    sudo rm -rf "$outputFile"
     mv "$dirPath" "$dirPath-hide-and-checking"
+    bash $buildScript sweep <<< "" 
+    bash $buildScript <<< "" 
 
-    if Run-Build-Script; then
+    if [[ -f "$outputFile" ]]; then
         mv "$dirPath-hide-and-checking" "$dirPath-hide-and-checked"
         echo "[Found] $dirPath" | tee -a hide-and-checked.txt
     else
