@@ -31,7 +31,7 @@ if [[ $userInput == c || $userInput == C ]]; then
     read -e -i "$builderThreads" -p "Builder Threads: " builderThreads
 fi 
 
-commandLine="cd $codeBaseDir/$branchName/$moduleDir && $codeBaseDir/tools/linux/unix-build/unix-build --tools $codeBaseDir/tools --devrel $codeBaseDir/devrel/SDK/inc/GL --unshare-namespaces nvmake NV_COLOR_OUTPUT=1 NV_GUARDWORD= NV_COMPRESS_THREADS=$(nproc) NV_FAST_PACKAGE_COMPRESSION=zstd NV_USE_FRAME_POINTER=1 NV_UNIX_LTO_ENABLED= NV_MANGLE_SYMBOLS= NV_TRACE_CODE=1 $moduleName linux $targetArch $targetConfig $builderThreads -time"
+commandLine="cd $codeBaseDir/$branchName/$moduleDir && $codeBaseDir/tools/linux/unix-build/unix-build --tools $codeBaseDir/tools --devrel $codeBaseDir/devrel/SDK/inc/GL --unshare-namespaces nvmake NV_COLOR_OUTPUT=1 NV_GUARDWORD= NV_COMPRESS_THREADS=$(nproc) NV_FAST_PACKAGE_COMPRESSION=zstd NV_USE_FRAME_POINTER=1 NV_UNIX_LTO_ENABLED= NV_MANGLE_SYMBOLS= NV_TRACE_CODE=1 -time $moduleName linux $targetArch $targetConfig -j$builderThreads"
 echo -e "\n${commandLine}\n"
 
 if [[ $1 == -dr ]]; then
