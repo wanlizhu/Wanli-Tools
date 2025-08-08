@@ -4,7 +4,7 @@ if [[ ! -z $P4ROOT ]]; then
     codeBaseDir=$P4ROOT 
 elif [[ $HOSTNAME == wanliz-sc-ubuntu24 ]]; then 
     codeBaseDir=/media/wanliz/data/wanliz-sw-gpu-driver-office
-elif [[ $HOSTNAME == Wanliz-WorkMachine ]]; then 
+elif [[ $HOSTNAME == Wanlis-WorkMachine ]]; then 
     codeBaseDir=$HOME/wanliz-sw-gpu-driver-home
 else
     echo "P4ROOT is not defined, aborting!"
@@ -17,6 +17,9 @@ moduleDir=""
 targetArch=amd64 
 targetConfig=develop
 builderThreads=$(nproc)
+
+[[ $1 == sweep ]] && { moduleName="sweep"; moduleDir=""; }
+[[ $1 == opengl ]] && { moduleName="opengl"; moduleDir="drivers/OpenGL"; }
 
 echo "WorkDir: $codeBaseDir/$branchName/$moduleDir"
 echo "   Args: $moduleName linux $buildArch $targetConfig $builderThreads"
