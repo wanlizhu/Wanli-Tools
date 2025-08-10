@@ -22,7 +22,7 @@ builderThreads=$(nproc)
 [[ $1 == opengl ]] && { moduleName="opengl"; moduleDir="drivers/OpenGL"; }
 
 echo "WorkDir: $codeBaseDir/$branchName/$moduleDir"
-echo "   Args: $moduleName linux $buildArch $targetConfig $builderThreads"
+echo "   Args: $moduleName linux $targetArch $targetConfig $builderThreads"
 read -p "Press [Enter] to continue or [c] to change: " userInput
 if [[ $userInput == c || $userInput == C ]]; then 
     read -e -i "$codeBaseDir" -p "Code Base Dir: " codeBaseDir

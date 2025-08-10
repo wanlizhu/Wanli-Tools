@@ -2,7 +2,7 @@
 set -uo pipefail
 
 rootDir=/media/wanliz/data/wanliz-sw-gpu-driver-home
-outputDir=/media/wanliz/data/wanliz-sw-gpu-driver-home/rel/gpu_drv/r580/r580_00/_out/Linux_amd64_develop
+outputDir=$rootDir/rel/gpu_drv/r580/r580_00/_out/Linux_amd64_develop
 buildScript=$HOME/WZhu/Scripts/NvMake.sh
 
 Cleanup-and-Restore() {
