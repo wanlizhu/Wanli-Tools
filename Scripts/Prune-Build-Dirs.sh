@@ -2,7 +2,7 @@
 set -uo pipefail
 
 rootDir=/media/wanliz/data/wanliz-sw-gpu-driver-home
-outputFile=/media/wanliz/data/wanliz-sw-gpu-driver-home/rel/gpu_drv/r580/r580_00/_out/Linux_amd64_develop/NVIDIA-Linux-x86_64-*-internal.run
+outputDir=/media/wanliz/data/wanliz-sw-gpu-driver-home/rel/gpu_drv/r580/r580_00/_out/Linux_amd64_develop
 buildScript=$HOME/WZhu/Scripts/NvMake.sh
 
 Cleanup-and-Restore() {
@@ -21,18 +21,22 @@ Hide-Dir-and-Test-Build() {
     fi
 
     export P4ROOT=$rootDir
-    sudo rm -rf "$outputFile"
+    sudo rm -rf "$outputDir"
     mv "$dirPath" "$dirPath-hide-and-checking"
     bash $buildScript sweep <<< "" 
     bash $buildScript <<< "" 
 
-    if [[ -f "$outputFile" ]]; then
+    echo "[$(date)] Testing $dirPath" >> prune.log
+    if [[ ! -z $(ls "$outputDir" | grep '-internal.run') ]]; then
+        echo "[$(date)] >> This folder is NOT needed" >> prune.log 
+        echo "$dirPath" >> not-needed.txt
         mv "$dirPath-hide-and-checking" "$dirPath-hide-and-checked"
-        echo "[Found] $dirPath" | tee -a hide-and-checked.txt
     else
+        echo "[$(date)] >> This folder is needed" >> prune.log 
         mv "$dirPath-hide-and-checking" "$dirPath"
         Process-Children-Dirs "$dirPath"
     fi
+    echo >> prune.log 
 }
 
 Process-Children-Dirs() {
@@ -49,9 +53,12 @@ Process-Children-Dirs() {
 
 echo "=== Starting Reduction ==="
 echo "Root Dir     : $rootDir"
-echo "Output File  : $outputFile"
+echo "Output Dir   : $outputDir"
 echo "Build Script : $buildScript"
 read -p "Press [Enter] to continue: "
 
-rm -rf hide-and-checked.txt
+rm -rf not-needed.txt prune.log 
 Process-Children-Dirs "$rootDir"
+
+echo -e "\n=== Folders Not Needed ==="
+cat not-needed.txt
