@@ -9,6 +9,7 @@ Cleanup-and-Restore() {
     echo "Cleanup and restore *-hide-and-checking dirs"
     find "$rootDir" -type d -name '*-hide-and-checking' \
         -exec bash -c 'for d; do mv "$d" "${d%-hide-and-checking}"; done' _ {} +
+    exit 
 }
 trap Cleanup-and-Restore EXIT INT TERM
 
