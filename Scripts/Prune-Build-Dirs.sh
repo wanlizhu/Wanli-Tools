@@ -28,7 +28,7 @@ Hide-Dir-and-Test-Build() {
     bash $buildScript <<< "" 
 
     echo "[$(date)] Testing $dirPath" >> prune.log
-    if [[ ! -z $(ls "$outputDir" | grep '-internal.run') ]]; then
+    if [[ ! -z $(ls "$outputDir" | grep 'internal.run') ]]; then
         echo "[$(date)] >> This folder is NOT needed" >> prune.log 
         mv "$dirPath-hide-and-checking" "$dirPath-hide-and-checked"
     else
