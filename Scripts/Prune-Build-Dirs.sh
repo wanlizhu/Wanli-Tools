@@ -29,7 +29,6 @@ Hide-Dir-and-Test-Build() {
     echo "[$(date)] Testing $dirPath" >> prune.log
     if [[ ! -z $(ls "$outputDir" | grep '-internal.run') ]]; then
         echo "[$(date)] >> This folder is NOT needed" >> prune.log 
-        echo "$dirPath" >> not-needed.txt
         mv "$dirPath-hide-and-checking" "$dirPath-hide-and-checked"
     else
         echo "[$(date)] >> This folder is needed" >> prune.log 
@@ -57,8 +56,6 @@ echo "Output Dir   : $outputDir"
 echo "Build Script : $buildScript"
 read -p "Press [Enter] to continue: "
 
-rm -rf not-needed.txt prune.log 
+rm -rf prune.log 
 Process-Children-Dirs "$rootDir"
 
-echo -e "\n=== Folders Not Needed ==="
-cat not-needed.txt
