@@ -30,7 +30,19 @@ if [[ $1 == driver || $1 == drivers ]]; then
         echo "export ${pair%%=*}=${pair#*=}"
         export ${pair%%=*}=${pair#*=}
     done 
-    
+
+    # Start a new shell with exported variables 
+    /bin/bash 
+elif [[ $1 == env ]]; then
+    echo "NVTEST_DRIVER           : $NVTEST_DRIVER"
+    echo "NVTEST_DRIVER_BRANCH    : $NVTEST_DRIVER_BRANCH"
+    echo "NVTEST_DRIVER_CHANGELIST: $NVTEST_DRIVER_CHANGELIST"
+    echo "NVTEST_DRIVER_DIR       : $NVTEST_DRIVER_DIR"
+elif [[ $1 == startx ]]; then 
+    screen -S nvtest-fake-display bash -c 'sudo su -c "NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd "sleep 2147483647""'
+    echo "Xorg PID: $(pidof Xorg)"
+    xrandr | grep current
+elif [[ $1 == n1x ]]; then 
     read -p "Unsandbag installed driver? (yes/no): " -e -i yes unsandbag
     if [[ $unsandbag == yes ]]; then 
         pushd /tmp >/dev/null 
@@ -61,18 +73,6 @@ if [[ $1 == driver || $1 == drivers ]]; then
         echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
         popd >/dev/null 
     fi 
-
-    # Start a new shell with exported variables 
-    /bin/bash 
-elif [[ $1 == env ]]; then
-    echo "NVTEST_DRIVER           : $NVTEST_DRIVER"
-    echo "NVTEST_DRIVER_BRANCH    : $NVTEST_DRIVER_BRANCH"
-    echo "NVTEST_DRIVER_CHANGELIST: $NVTEST_DRIVER_CHANGELIST"
-    echo "NVTEST_DRIVER_DIR       : $NVTEST_DRIVER_DIR"
-elif [[ $1 == startx ]]; then 
-    screen -S nvtest-fake-display bash -c 'sudo su -c "NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd "sleep 2147483647""'
-    echo "Xorg PID: $(pidof Xorg)"
-    xrandr | grep current
 else 
     sudo su -c "/mnt/linuxqa/nvt.sh $*"
 fi 
