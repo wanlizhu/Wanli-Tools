@@ -18,35 +18,40 @@ Hide-Dir-and-Test-Build() {
     if [[ "$dirPath" == *"_out"* || 
           "$dirPath" == *"-hide-and-checked"* ||
           "$dirPath" == *"-hide-and-checking"* ]]; then
-        return 0
-    fi
-
-    export P4ROOT=$rootDir
-    sudo rm -rf "$outputDir"
-    mv "$dirPath" "$dirPath-hide-and-checking"
-    bash $buildScript sweep <<< "" 
-    bash $buildScript <<< "" 
-
-    echo "[$(date)] Testing $dirPath" >> prune.log
-    if [[ ! -z $(ls "$outputDir" | grep 'internal.run') ]]; then
-        echo "[$(date)] >> This folder is NOT needed" >> prune.log 
-        mv "$dirPath-hide-and-checking" "$dirPath-hide-and-checked"
-    else
-        echo "[$(date)] >> This folder is needed" >> prune.log 
-        mv "$dirPath-hide-and-checking" "$dirPath"
+        echo "[$(date)] Ignoring $dirPath"
+    elif [[ -f "$dirPath/.nvmake.deps" ]]; then 
+        echo "[$(date)] $dirPath is a known dependency" >> prune.log 
         Process-Children-Dirs "$dirPath"
-    fi
-    echo >> prune.log 
+    elif (( $(du -sb "$dirPath" | cut -f1) < 1024 * 1024 * 10 )); then 
+        echo "[$(date)] $dirPath is too small (<10MB), ignoring"
+    else 
+        export P4ROOT=$rootDir
+        sudo rm -rf "$outputDir"
+
+        echo "[$(date)] Testing $dirPath" >> prune.log
+        mv "$dirPath" "$dirPath-hide-and-checking"
+        bash $buildScript sweep <<< "" 
+        bash $buildScript <<< "" 
+
+        if [[ ! -z $(ls "$outputDir" | grep 'internal.run') ]]; then
+            echo "[$(date)] >> This folder is NOT needed" >> prune.log 
+            mv "$dirPath-hide-and-checking" "$dirPath-hide-and-checked"
+        else
+            echo "[$(date)] >> This folder is needed" >> prune.log 
+            mv "$dirPath-hide-and-checking" "$dirPath"
+            echo 1 > "$dirPath/.nvmake.deps"
+            Process-Children-Dirs "$dirPath"
+        fi
+
+        echo "[$(date)] Testing Finished" >> prune.log 
+    fi 
 }
 
 Process-Children-Dirs() {
     shopt -s nullglob
     for child in $1/*/; do
         child="${child%/}"
-        [[ ! -d "$child" || 
-            $child == *"_out"* || 
-            $child == *"-hide-and-checked"* ||
-            $child == *"-hide-and-checking"* ]] && continue
+        [[ ! -d "$child" ]] && continue
         Hide-Dir-and-Test-Build "$child"
     done
 }
@@ -58,5 +63,13 @@ echo "Build Script : $buildScript"
 read -p "Press [Enter] to continue: "
 
 rm -rf prune.log 
+Process-Children-Dirs "$rootDir/tools"
+Process-Children-Dirs "$rootDir/sdk"
+Process-Children-Dirs "$rootDir/common"
+Process-Children-Dirs "$rootDir/compiler"
+Process-Children-Dirs "$rootDir/gpgpu"
+Process-Children-Dirs "$rootDir/resman"
+Process-Children-Dirs "$rootDir/rtcore"
+Process-Children-Dirs "$rootDir/xfree86"
 Process-Children-Dirs "$rootDir"
 
