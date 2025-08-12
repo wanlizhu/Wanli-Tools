@@ -25,13 +25,13 @@ echo "WorkDir: $codeBaseDir/$branchName/$moduleDir"
 echo "   Args: $moduleName linux $targetArch $targetConfig $builderThreads"
 read -p "Press [Enter] to continue or [c] to change: " userInput
 if [[ $userInput == c || $userInput == C ]]; then 
-    read -e -i "$codeBaseDir" -p "Code Base Dir: " codeBaseDir
-    read -e -i "$branchName" -p "Branch Name: " branchName
-    read -e -i "$moduleName" -p "Module Name: " moduleName
-    read -e -i "$moduleDir" -p "Module Dir: " moduleDir
-    read -e -i "$targetArch" -p "Target Arch: " targetArch
-    read -e -i "$targetConfig" -p "Target Config: " targetConfig
-    read -e -i "$builderThreads" -p "Builder Threads: " builderThreads
+    read -p "Code Base Dir  : " -e -i "$codeBaseDir" codeBaseDir
+    read -p "Branch Name    : " -e -i "$branchName" branchName
+    read -p "Module Name    : " -e -i "$moduleName" moduleName
+    read -p "Module Dir     : " -e -i "$moduleDir" moduleDir
+    read -p "Target Arch    : " -e -i "$targetArch" targetArch
+    read -p "Target Config  : " -e -i "$targetConfig" targetConfig
+    read -p "Builder Threads: " -e -i "$builderThreads" builderThreads
 fi 
 
 commandLine="cd $codeBaseDir/$branchName/$moduleDir && $codeBaseDir/tools/linux/unix-build/unix-build --tools $codeBaseDir/tools --devrel $codeBaseDir/devrel/SDK/inc/GL --unshare-namespaces nvmake NV_COLOR_OUTPUT=1 NV_GUARDWORD= NV_COMPRESS_THREADS=$(nproc) NV_FAST_PACKAGE_COMPRESSION=zstd NV_USE_FRAME_POINTER=1 NV_UNIX_LTO_ENABLED= NV_MANGLE_SYMBOLS= NV_TRACE_CODE=1 -time $moduleName linux $targetArch $targetConfig -j$builderThreads"

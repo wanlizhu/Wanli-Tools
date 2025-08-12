@@ -8,25 +8,12 @@ if [[ -z $1 ]]; then
     screen -S "startx" sudo X :0 +iglx
     xrandr --fb 3840x2160 && xrandr | grep current
     echo "Don't forget to unsandbag the driver"
-elif [[ $1 == -vnc ]]; then 
-    echo "[1] Create a virtual desktop"
-    echo "[2] Mirror the current screen"
-    read -e -i 1 -p "Select: " vncType
-
-    if [[ $vncType == 1 ]]; then 
-        echo '#!/bin/sh
-unset SESSION_MANAGER
-unset DBUS_SESSION_BUS_ADDRESS
-startxfce4' > ~/.vnc/xstartup 
-        [[ ! -e ~/.vnc/passwd ]] && x11vnc -storepasswd
-        screen -S vnc-virtual vncserver :1 -localhost no
-    elif [[ $vncType == 2 ]]; then 
-        [[ ! -e ~/.vnc/passwd ]] && x11vnc -storepasswd
-        screen -S startvnc-mirror x11vnc -display :0 -forever --loop -noxdamage -repeat -shared
-    fi 
-
+elif [[ $1 == vnc ]]; then 
+    [[ -z $(pidof Xorg) ]] && { echo "Xorg is not running"; exit 1; }
+    [[ ! -e ~/.vnc/passwd ]] && x11vnc -storepasswd
+    screen -S vnc-mirroring x11vnc -display :0 -forever --loop -noxdamage -repeat -shared
     sudo ss -tulpn | grep -E "5900|5901|5902"
-elif [[ $1 == -xauth ]]; then 
+elif [[ $1 == xauth ]]; then 
     xauthPath=$(ps aux | grep '[X]org' | grep -oP '(?<=-auth )[^ ]+')
     sudo cp -vf $xauthPath ~/.Xauthority
     sudo chown $USER:$(id -gn) ~/.Xauthority

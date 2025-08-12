@@ -24,12 +24,7 @@ export P4PORT=p4proxy-sc.nvidia.com:2006
 export P4USER=wanliz
 export P4CLIENT=wanliz-sw-gpu-driver-home
 export P4IGNORE=$HOME/.p4ignore
-
-function Load-Micro-Functions {
-    if [[ -f ~/WZhu/Scripts/Micro-Functions.sh ]]; then 
-        source ~/WZhu/Scripts/Micro-Functions.sh
-    fi 
-}' >> ~/.bashrc
+' >> ~/.bashrc
 fi 
 
 if [ ! -f ~/.p4ignore ]; then 
