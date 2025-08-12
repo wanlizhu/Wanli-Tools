@@ -48,15 +48,18 @@ if [[ $1 == driver || $1 == drivers ]]; then
 
     read -p "Lock iGPU clocks? (yes/no): " -e -i yes lock
     if [[ $lock == yes ]]; then
-        sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_loose   unset
-        sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_strict  unset
-        sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_loose   set pstateId P0
-        sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_strict  set dramclkkHz 8000000
-        sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_strict  set gpcclkkHz 1995000
-        sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_loose   set xbarclkkHz 2400000
-        sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_loose   set sysclkkHz 1800000
-        sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --force_regime ffr
+        pushd /mnt/linuxqa/wanliz/iGPU_vfmax_scripts >/dev/null 
+        echo -e "\n>> sudo ./perfdebug --lock_loose   set pstateId P0"        && sudo ./perfdebug --lock_loose   set pstateId P0 
+        echo -e "\n>> sudo ./perfdebug --lock_strict  set dramclkkHz 8000000" && sudo ./perfdebug --lock_strict  set dramclkkHz 8000000 
+        echo -e "\n>> sudo ./perfdebug --lock_strict  set gpcclkkHz 1995000"  && sudo ./perfdebug --lock_strict  set gpcclkkHz 1995000 
+        echo -e "\n>> sudo ./perfdebug --lock_loose   set xbarclkkHz 2400000" && sudo ./perfdebug --lock_loose   set xbarclkkHz 2400000 
+        echo -e "\n>> sudo ./perfdebug --lock_loose   set sysclkkHz 1800000"  && sudo ./perfdebug --lock_loose   set sysclkkHz 1800000 
+        echo -e "\n>> sudo ./perfdebug --force_regime ffr"                    && sudo ./perfdebug --force_regime ffr && echo "Force regime successful"
+        echo "" && sleep 3
         echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
+        echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
+        echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
+        popd >/dev/null 
     fi 
 
     # Start a new shell with exported variables 
