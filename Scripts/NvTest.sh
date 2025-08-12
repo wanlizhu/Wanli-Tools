@@ -23,7 +23,7 @@ if [[ ! -z $(ls /root/nvt 2>/dev/null) ]]; then
 fi 
 
 if [[ $1 == driver || $1 == drivers ]]; then 
-    sudo su -c " NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh driver $*" || exit 1
+    sudo su -c " NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh $*" || exit 1
 
     read -p "ENVVARS (Copy & Paste): " envvars
     for pair in $envvars; do 
