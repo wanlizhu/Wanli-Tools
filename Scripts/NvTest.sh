@@ -53,7 +53,7 @@ elif [[ $1 == maxclock ]]; then
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)" 
 elif [[ $1 == startx ]]; then 
-    screen -S nvtest-fake-display bash -c "sudo su -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd \"sleep 2147483647\"\""
+    sudo su -c "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'\""
     echo "Xorg PID: $(pidof Xorg)"
     xrandr | grep current
 else 
