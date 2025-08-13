@@ -19,11 +19,11 @@ fi
 
 if [[ ! -z $(ls /root/nvt 2>/dev/null) ]]; then
     sudo apt install -y python3 python3-pip libjpeg-dev 
-    sudo su -c "/mnt/linuxqa/nvt.sh sync" || exit 1
+    sudo -H bash -lc "/mnt/linuxqa/nvt.sh sync" || exit 1
 fi 
 
 if [[ $1 == driver || $1 == drivers ]]; then 
-    sudo su -c " NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh $*" || exit 1
+    sudo -H bash -lc " NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh $*" || exit 1
 
     read -p "ENVVARS (Copy & Paste): " envvars
     for pair in $envvars; do 
@@ -54,9 +54,15 @@ elif [[ $1 == maxclock ]]; then
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)" 
 elif [[ $1 == startx ]]; then 
-    sudo su -c "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'\""
+    sudo -H bash -lc "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'\""
     echo "Xorg PID: $(pidof Xorg)"
     xrandr | grep current
+elif [[ $1 == viewperf ]]; then 
+    [[ -z $2 ]] && { echo "viewset name is missing"; exit 1; }
+    commandLine="cd /root/nvt/tests/viewperf2020v3/viewperf2020 && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160"
+    echo -e "\n${commandLine}\n"
+    read -p "Press [Enter] to continue as root: "
+    sudo -H bash -lc "$commandLine"
 else 
-    sudo su -c "/mnt/linuxqa/nvt.sh $*"
+    sudo -H bash -lc "/mnt/linuxqa/nvt.sh $*"
 fi 
