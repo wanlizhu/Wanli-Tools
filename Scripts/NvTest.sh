@@ -59,7 +59,8 @@ elif [[ $1 == startx ]]; then
     xrandr | grep current
 elif [[ $1 == viewperf ]]; then 
     [[ -z $2 ]] && { echo "viewset name is missing"; exit 1; }
-    commandLine="cd /root/nvt/tests/viewperf2020v3/viewperf2020 && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160"
+    commandLine="cd /root/nvt/tests/viewperf2020v3/viewperf2020 && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/
+$2*/results.xml"
     echo -e "\n${commandLine}\n"
     read -p "Press [Enter] to continue as root: "
     sudo -H bash -lc "$commandLine"
