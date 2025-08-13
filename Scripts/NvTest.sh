@@ -38,15 +38,6 @@ elif [[ $1 == env ]]; then
     echo "NVTEST_DRIVER_BRANCH    : $NVTEST_DRIVER_BRANCH"
     echo "NVTEST_DRIVER_CHANGELIST: $NVTEST_DRIVER_CHANGELIST"
     echo "NVTEST_DRIVER_DIR       : $NVTEST_DRIVER_DIR"
-    if [[ $2 == -store ]]; then 
-        echo "export NVTEST_DRIVER=$NVTEST_DRIVER" > ~/.nvtest.env
-        echo "export NVTEST_DRIVER_BRANCH=$NVTEST_DRIVER_BRANCH" >> ~/.nvtest.env
-        echo "export NVTEST_DRIVER_CHANGELIST=$NVTEST_DRIVER_CHANGELIST" >> ~/.nvtest.env
-        echo "export NVTEST_DRIVER_DIR=$NVTEST_DRIVER_DIR" >> ~/.nvtest.env
-        echo "NvTest envvars stored in ~/.nvtest.env"
-    elif [[ $2 == -load ]]; then 
-        source ~/.nvtest.env
-    fi 
 elif [[ $1 == maxclock ]]; then 
     sudo /root/nvt/tests/system/sandbag-tool/sandbag-tool -unsandbag
     sudo /root/nvt/tests/system/sandbag-tool/sandbag-tool -print 
@@ -62,7 +53,7 @@ elif [[ $1 == maxclock ]]; then
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)" 
 elif [[ $1 == startx ]]; then 
-    screen -S nvtest-fake-display bash -c 'sudo su -c "NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd "sleep 2147483647""'
+    screen -S nvtest-fake-display bash -c "sudo su -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd \"sleep 2147483647\"\""
     echo "Xorg PID: $(pidof Xorg)"
     xrandr | grep current
 else 
