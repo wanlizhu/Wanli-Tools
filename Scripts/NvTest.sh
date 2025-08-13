@@ -60,7 +60,8 @@ elif [[ $1 == startx ]]; then
 elif [[ $1 == viewperf ]]; then 
     if [[ -z $2 ]]; then echo "viewset name is missing"; exit 1; fi 
     if [[ $WZHU_PI == 1 ]]; then 
-        commandLine="cd $(pwd) && $HOME/SinglePassCapture/pic-x --api=ogl --check_clocks=0 --sample=4800 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname) --startframe=100 --exe=./viewperf/bin/viewperf --arg=\"viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" --workdir=/root/nvt/tests/viewperf2020v3/viewperf2020"    
+        #commandLine="cd $(pwd) && $HOME/SinglePassCapture/pic-x --api=ogl --check_clocks=0 --sample=4800 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname) --startframe=100 --exe=./viewperf/bin/viewperf --arg=\"viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" --workdir=/root/nvt/tests/viewperf2020v3/viewperf2020"    
+        commandLine="cd $(pwd) && $HOME/SinglePassCapture/pic-x --api=ogl --check_clocks=0 --sample=2400 --aftbuffersize=1024 --name=viewperf-$2-subtest$3-on-$(hostname) --startframe=100 --exe=./viewperf/bin/viewperf --arg=\"viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" --workdir=/root/nvt/tests/viewperf2020v3/viewperf2020" 
     else
         commandLine="cd /root/nvt/tests/viewperf2020v3/viewperf2020 && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/$2*/results.xml"
     fi 
