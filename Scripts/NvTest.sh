@@ -38,6 +38,7 @@ elif [[ $1 == env ]]; then
     echo "NVTEST_DRIVER_BRANCH    : $NVTEST_DRIVER_BRANCH"
     echo "NVTEST_DRIVER_CHANGELIST: $NVTEST_DRIVER_CHANGELIST"
     echo "NVTEST_DRIVER_DIR       : $NVTEST_DRIVER_DIR"
+    echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
 elif [[ $1 == maxclock ]]; then 
     sudo /root/nvt/tests/system/sandbag-tool/sandbag-tool -unsandbag
     sudo /root/nvt/tests/system/sandbag-tool/sandbag-tool -print 
