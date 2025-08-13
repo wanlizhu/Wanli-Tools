@@ -9,7 +9,7 @@ declare -A hostsInLab=(
 if [[ ! -z "${hostsInLab[$1]+set}" ]]; then
     sshpass -p nvidia ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no nvidia@${hostsInLab[$1]}
 elif [[ $1 == proxy ]]; then 
-    [[ ! -f ~/.ssh/id_ed25519 ]] && echo "~/.ssh/id_ed25519 is missing, fall back to password" 
+    [[ ! -f ~/.ssh/id_ed25519 ]] && echo "Warning: ~/.ssh/id_ed25519 is missing, fall back to password" 
     ssh nvidia@10.176.11.106 
 elif [[ $1 == office ]]; then 
     ssh wanliz@172.16.179.143 
