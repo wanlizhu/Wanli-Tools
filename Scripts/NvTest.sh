@@ -38,41 +38,24 @@ elif [[ $1 == env ]]; then
     echo "NVTEST_DRIVER_BRANCH    : $NVTEST_DRIVER_BRANCH"
     echo "NVTEST_DRIVER_CHANGELIST: $NVTEST_DRIVER_CHANGELIST"
     echo "NVTEST_DRIVER_DIR       : $NVTEST_DRIVER_DIR"
+elif [[ $1 == setenv ]]; then 
+    sudo /root/nvt/tests/system/sandbag-tool/sandbag-tool -unsandbag
+    sudo /root/nvt/tests/system/sandbag-tool/sandbag-tool -print 
+
+    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_loose   set pstateId P0 && echo -e "set pstateId -> [OK]\n"
+    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_strict  set dramclkkHz 8000000 && echo -e "set dramclkkHz -> [OK]\n"
+    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_strict  set gpcclkkHz  1995000 && echo -e "set gpcclkkHz  -> [OK]\n"
+    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_loose   set xbarclkkHz 2400000 && echo -e "set xbarclkkHz -> [OK]\n"
+    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_loose   set sysclkkHz  1800000 && echo -e "set sysclkkHz  -> [OK]\n"
+    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --force_regime ffr && echo "Force regime successful"
+    echo "" && sleep 3
+    echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
+    echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
+    echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)" 
 elif [[ $1 == startx ]]; then 
     screen -S nvtest-fake-display bash -c 'sudo su -c "NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd "sleep 2147483647""'
     echo "Xorg PID: $(pidof Xorg)"
     xrandr | grep current
-elif [[ $1 == n1x ]]; then 
-    read -p "Unsandbag installed driver? (yes/no): " -e -i yes unsandbag
-    if [[ $unsandbag == yes ]]; then 
-        pushd /tmp >/dev/null 
-        sudo rm -rf /tmp/tests-Linux-$(uname -m)
-        if [[ "$NVTEST_DRIVER" == "http"* ]]; then 
-            /root/nvt/driver/$(basename "$NVTEST_DRIVER")
-        else
-            tar -xf $(dirname $NVTEST_DRIVER)/tests-Linux-$(uname -m).tar 
-        fi 
-        echo "(Nothing prints out if there is no GPU workload)"
-        ./tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool -unsandbag
-        ./tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool -print 
-        popd >/dev/null 
-    fi 
-
-    read -p "Lock iGPU clocks? (yes/no): " -e -i yes lock
-    if [[ $lock == yes ]]; then
-        pushd /mnt/linuxqa/wanliz/iGPU_vfmax_scripts >/dev/null 
-        echo -e "\n>> sudo ./perfdebug --lock_loose   set pstateId P0"        && sudo ./perfdebug --lock_loose   set pstateId P0 
-        echo -e "\n>> sudo ./perfdebug --lock_strict  set dramclkkHz 8000000" && sudo ./perfdebug --lock_strict  set dramclkkHz 8000000 
-        echo -e "\n>> sudo ./perfdebug --lock_strict  set gpcclkkHz 1995000"  && sudo ./perfdebug --lock_strict  set gpcclkkHz 1995000 
-        echo -e "\n>> sudo ./perfdebug --lock_loose   set xbarclkkHz 2400000" && sudo ./perfdebug --lock_loose   set xbarclkkHz 2400000 
-        echo -e "\n>> sudo ./perfdebug --lock_loose   set sysclkkHz 1800000"  && sudo ./perfdebug --lock_loose   set sysclkkHz 1800000 
-        echo -e "\n>> sudo ./perfdebug --force_regime ffr"                    && sudo ./perfdebug --force_regime ffr && echo "Force regime successful"
-        echo "" && sleep 3
-        echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
-        echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
-        echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
-        popd >/dev/null 
-    fi 
 else 
     sudo su -c "/mnt/linuxqa/nvt.sh $*"
 fi 
