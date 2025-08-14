@@ -82,16 +82,9 @@ elif [[ $1 == viewperf ]]; then
         commandLine="cd /root/nvt/tests/viewperf2020v3/viewperf2020 && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/$2*/results.xml"
     fi 
 
-    GL_ENV=$(env | grep '^__GL_' | paste -sd' ' -)
-    echo "ENVVARS: $GL_ENV"
     echo "${commandLine}"
     read -p "Press [Enter] to continue as root: "
-    sudo rm -rf /tmp/log  
-    sudo -H bash -lc "$GL_ENV $commandLine" > >(tee -a /tmp/log) 2> >(tee -a /tmp/log >&2)
-    echo "Generated: /tmp/log"
+    sudo -H bash -lc "$commandLine" 
 else 
-    GL_ENV=$(env | grep '^__GL_' | paste -sd' ' -)
-    sudo rm -rf /tmp/log  
-    sudo -H bash -lc "$GL_ENV /mnt/linuxqa/nvt.sh $*" > >(tee -a /tmp/log) 2> >(tee -a /tmp/log >&2)
-    echo "Generated: /tmp/log"
+    sudo -H bash -lc "/mnt/linuxqa/nvt.sh $*" 
 fi 
