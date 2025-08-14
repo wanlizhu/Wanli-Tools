@@ -86,8 +86,12 @@ elif [[ $1 == viewperf ]]; then
     echo "ENVVARS: $GL_ENV"
     echo "${commandLine}"
     read -p "Press [Enter] to continue as root: "
-    sudo -H bash -lc "$GL_ENV $commandLine"
+    sudo rm -rf /tmp/log  
+    sudo -H bash -lc "$GL_ENV $commandLine" > >(tee -a /tmp/log) 2> >(tee -a /tmp/log >&2)
+    echo "Generated: /tmp/log"
 else 
     GL_ENV=$(env | grep '^__GL_' | paste -sd' ' -)
-    sudo -H bash -lc "$GL_ENV /mnt/linuxqa/nvt.sh $*"
+    sudo rm -rf /tmp/log  
+    sudo -H bash -lc "$GL_ENV /mnt/linuxqa/nvt.sh $*" > >(tee -a /tmp/log) 2> >(tee -a /tmp/log >&2)
+    echo "Generated: /tmp/log"
 fi 
