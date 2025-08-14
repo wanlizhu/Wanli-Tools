@@ -67,7 +67,8 @@ elif [[ $1 == maxclock ]]; then
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)" 
 elif [[ $1 == startx ]]; then 
     if [[ -z $NVTEST_DRIVER ]]; then
-        sudo -H bash -lc "screen -S bare-xorg bash -c \"Xorg :0 +iglx\""
+        screen -S bare-xorg sudo X :0 +iglx
+        xrandr --fb 3840x2160  
     else
         sudo -H bash -lc "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'\""
     fi 
@@ -81,9 +82,12 @@ elif [[ $1 == viewperf ]]; then
         commandLine="cd /root/nvt/tests/viewperf2020v3/viewperf2020 && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/$2*/results.xml"
     fi 
 
-    echo -e "\n${commandLine}\n"
+    GL_ENV=$(env | grep '^__GL_' | paste -sd' ' -)
+    echo "ENVVARS: $GL_ENV"
+    echo "${commandLine}"
     read -p "Press [Enter] to continue as root: "
-    sudo -H bash -lc "$commandLine"
+    sudo -H bash -lc "$GL_ENV $commandLine"
 else 
-    sudo -H bash -lc "/mnt/linuxqa/nvt.sh $*"
+    GL_ENV=$(env | grep '^__GL_' | paste -sd' ' -)
+    sudo -H bash -lc "$GL_ENV /mnt/linuxqa/nvt.sh $*"
 fi 
