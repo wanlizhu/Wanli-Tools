@@ -23,15 +23,23 @@ if [[ ! -z $(ls /root/nvt 2>/dev/null) ]]; then
 fi 
 
 if [[ $1 == driver || $1 == drivers ]]; then 
-    sudo -H bash -lc " NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh $*" || exit 1
-
-    read -p "ENVVARS (Copy & Paste): " envvars
-    for pair in $envvars; do 
-        echo "export ${pair%%=*}=${pair#*=}"
-        export ${pair%%=*}=${pair#*=}
-    done 
-
-    # Start a new shell with exported variables 
+    if [[ $2 == rsync ]]; then 
+        config=$3
+        rsync -ah --progress wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/rel/gpu_drv/r580/r580_00/_out/Linux_$(uname -m)_${config:-develop}/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/rel/gpu_drv/r580/r580_00/_out/Linux_$(uname -m)_${config:-develop}/tests-Linux-$(uname -m).tar $HOME || exit 1
+        ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'  | sort -V 
+        read -p "Enter [version] to continue: " version
+        IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 sh $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run -s --no-kernel-module-source --skip-module-load || exit 1
+        tar -xf $HOME/tests-Linux-$(uname -m).tar -C $HOME 
+        sudo ln -sf $HOME/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool && echo "Updated: $HOME/sandbag-tool"
+    else
+        sudo -H bash -lc " NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh $*" || exit 1
+        read -p "ENVVARS (Copy & Paste): " envvars
+        for pair in $envvars; do 
+            echo "export ${pair%%=*}=${pair#*=}"
+            export ${pair%%=*}=${pair#*=}
+        done 
+        sudo ln -sf /root/nvt/tests/system/sandbag-tool/sandbag-tool $HOME/sandbag-tool && echo "Updated: $HOME/sandbag-tool"
+    fi 
     /bin/bash 
 elif [[ $1 == env ]]; then
     echo "NVTEST_DRIVER           : $NVTEST_DRIVER"
@@ -40,8 +48,8 @@ elif [[ $1 == env ]]; then
     echo "NVTEST_DRIVER_DIR       : $NVTEST_DRIVER_DIR"
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
 elif [[ $1 == maxclock ]]; then 
-    sudo /root/nvt/tests/system/sandbag-tool/sandbag-tool -unsandbag
-    sudo /root/nvt/tests/system/sandbag-tool/sandbag-tool -print 
+    sudo $HOME/sandbag-tool -unsandbag
+    sudo $HOME/sandbag-tool -print 
 
     sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_loose   set pstateId P0 && echo -e "set pstateId -> [OK]\n"
     sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_strict  set dramclkkHz 8000000 && echo -e "set dramclkkHz -> [OK]\n"
