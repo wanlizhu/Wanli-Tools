@@ -75,10 +75,6 @@ elif [[ $1 == startx ]]; then
     echo "Xorg PID: $(pidof Xorg)"
     xrandr | grep current
 else
-    while IFS='=' read -r k v; do
-        export "$k=$v"
-        echo "export $k=$v"
-    done < <(env | grep -E '^__GL_')
 
     if [[ $1 == viewperf ]]; then 
         if [[ -z $2 ]]; then echo "viewset name is missing"; exit 1; fi 
@@ -90,7 +86,7 @@ else
 
         echo "${commandLine}"
         read -p "Press [Enter] to continue as root: "
-        sudo -H bash -lc "$commandLine" 
+        sudo -H bash -lc "$(env | grep -E '^__GL_' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)  $commandLine" 
     else 
         sudo -H bash -lc "/mnt/linuxqa/nvt.sh $*" 
     fi 
