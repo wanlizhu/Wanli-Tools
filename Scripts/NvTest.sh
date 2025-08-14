@@ -26,9 +26,12 @@ if [[ $1 == driver || $1 == drivers ]]; then
     if [[ $2 == rsync ]]; then 
         config=$3
         rsync -ah --progress wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/rel/gpu_drv/r580/r580_00/_out/Linux_$(uname -m)_${config:-develop}/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/rel/gpu_drv/r580/r580_00/_out/Linux_$(uname -m)_${config:-develop}/tests-Linux-$(uname -m).tar $HOME || exit 1
+        
         ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'  | sort -V 
         read -p "Enter [version] to continue: " version
         IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 sh $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run -s --no-kernel-module-source --skip-module-load || exit 1
+
+        unset NVTEST_DRIVER NVTEST_DRIVER_BRANCH NVTEST_DRIVER_CHANGELIST NVTEST_DRIVER_DIR
         tar -xf $HOME/tests-Linux-$(uname -m).tar -C $HOME 
         sudo ln -sf $HOME/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool && echo "Updated: $HOME/sandbag-tool"
     else
@@ -51,12 +54,13 @@ elif [[ $1 == maxclock ]]; then
     sudo $HOME/sandbag-tool -unsandbag
     sudo $HOME/sandbag-tool -print 
 
-    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_loose   set pstateId P0 && echo -e "set pstateId -> [OK]\n"
-    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_strict  set dramclkkHz 8000000 && echo -e "set dramclkkHz -> [OK]\n"
-    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_strict  set gpcclkkHz  1995000 && echo -e "set gpcclkkHz  -> [OK]\n"
-    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_loose   set xbarclkkHz 2400000 && echo -e "set xbarclkkHz -> [OK]\n"
-    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --lock_loose   set sysclkkHz  1800000 && echo -e "set sysclkkHz  -> [OK]\n"
-    sudo /mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug --force_regime ffr && echo "Force regime successful"
+    perfdebug=/mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug
+    sudo $perfdebug --lock_loose   set pstateId P0 && echo -e "set pstateId -> [OK]\n"
+    sudo $perfdebug --lock_strict  set dramclkkHz 8000000 && echo -e "set dramclkkHz -> [OK]\n"
+    sudo $perfdebug --lock_strict  set gpcclkkHz  1995000 && echo -e "set gpcclkkHz  -> [OK]\n"
+    sudo $perfdebug --lock_loose   set xbarclkkHz 2400000 && echo -e "set xbarclkkHz -> [OK]\n"
+    sudo $perfdebug --lock_loose   set sysclkkHz  1800000 && echo -e "set sysclkkHz  -> [OK]\n"
+    sudo $perfdebug --force_regime ffr && echo "Force regime successful"
     echo "" && sleep 3
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
