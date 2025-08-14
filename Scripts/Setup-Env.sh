@@ -23,6 +23,7 @@ export PIP_BREAK_SYSTEM_PACKAGES=1
 export P4PORT=p4proxy-sc.nvidia.com:2006
 export P4USER=wanliz
 export P4CLIENT=wanliz-sw-gpu-driver-office
+export P4ROOT=/media/wanliz/data/$P4CLIENT
 export P4IGNORE=$HOME/.p4ignore
 ' >> ~/.bashrc
 fi 
