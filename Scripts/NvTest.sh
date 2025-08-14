@@ -26,10 +26,10 @@ if [[ $1 == driver || $1 == drivers ]]; then
     if [[ $2 == rsync ]]; then 
         config=$3
         rsync -ah --progress wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/rel/gpu_drv/r580/r580_00/_out/Linux_$(uname -m)_${config:-develop}/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/rel/gpu_drv/r580/r580_00/_out/Linux_$(uname -m)_${config:-develop}/tests-Linux-$(uname -m).tar $HOME || exit 1
-        
+
         ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'  | sort -V 
         read -p "Enter [version] to continue: " version
-        IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 sh $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run -s --no-kernel-module-source --skip-module-load || exit 1
+        sudo env IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run -s --no-kernel-module-source --skip-module-load || exit 1
 
         unset NVTEST_DRIVER NVTEST_DRIVER_BRANCH NVTEST_DRIVER_CHANGELIST NVTEST_DRIVER_DIR
         tar -xf $HOME/tests-Linux-$(uname -m).tar -C $HOME 
