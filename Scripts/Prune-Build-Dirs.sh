@@ -65,6 +65,7 @@ echo "=== Starting Reduction ==="
 echo "Root Dir     : $rootDir"
 echo "Output Dir   : $outputDir"
 echo "Build Script : $buildScript"
+echo -n "" >&1
 read -p "Press [Enter] to continue: "
 
 rm -rf prune.log 
