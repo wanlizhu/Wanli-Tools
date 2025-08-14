@@ -75,7 +75,7 @@ elif [[ $1 == startx ]]; then
     echo "Xorg PID: $(pidof Xorg)"
     xrandr | grep current
 elif [[ $1 == viewperf ]]; then 
-    GL_ENV=$(env | grep -E '^__GL_' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
+    GL_ENV=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
     if [[ $WZHU_PI == 1 ]]; then 
         commandLine="$GL_ENV cd $(pwd) && $HOME/SinglePassCapture/pic-x --api=ogl --check_clocks=0 --sample=24000 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname) --startframe=100 --exe=./viewperf/bin/viewperf --arg=\"viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" --workdir=/root/nvt/tests/viewperf2020v3/viewperf2020 | grep -v \"won't hook API\"" 
     else
@@ -86,6 +86,6 @@ elif [[ $1 == viewperf ]]; then
     read -p "Press [Enter] to continue as root: "
     sudo -H bash -lc "$commandLine" 
 else 
-    GL_ENV=$(env | grep -E '^__GL_' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
+    GL_ENV=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
     sudo -H bash -lc "$GL_ENV /mnt/linuxqa/nvt.sh $*" 
 fi 
