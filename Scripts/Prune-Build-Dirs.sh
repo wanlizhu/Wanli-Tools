@@ -27,8 +27,8 @@ Hide-Dir-and-Test-Build() {
     elif [[ -f "$dirPath/.nvmake.deps" ]]; then 
         echo "[$(date)] $dirPath is a known dependency" >> prune.log 
         Process-Children-Dirs "$dirPath"
-    elif (( $(du -sb "$dirPath" | cut -f1) < 1024 * 1024 * 10 )); then 
-        echo "[$(date)] $dirPath is too small (<10MB), ignoring"
+    elif (( $(du -sb "$dirPath" | cut -f1) < 1024 * 1024 * 100 )); then 
+        echo "[$(date)] $dirPath is smaller than threshold, ignoring"
     else 
         export P4ROOT=$rootDir
         sudo rm -rf "$outputDir"
@@ -54,7 +54,7 @@ Hide-Dir-and-Test-Build() {
 
 Process-Children-Dirs() {
     shopt -s nullglob
-    for child in $1/*/; do
+    for child in $(du -sb $1/* 2>/dev/null | sort -nr | cut -f2); do
         child="${child%/}"
         [[ ! -d "$child" ]] && continue
         Hide-Dir-and-Test-Build "$child"
