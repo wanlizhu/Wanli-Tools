@@ -54,18 +54,19 @@ elif [[ $1 == env ]]; then
 elif [[ $1 == maxclock ]]; then 
     sudo $HOME/sandbag-tool -unsandbag
     sudo $HOME/sandbag-tool -print 
-
-    perfdebug=/mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug
-    sudo $perfdebug --lock_loose   set pstateId P0 && echo -e "set pstateId -> [OK]\n"
-    sudo $perfdebug --lock_strict  set dramclkkHz 8000000 && echo -e "set dramclkkHz -> [OK]\n"
-    sudo $perfdebug --lock_strict  set gpcclkkHz  1995000 && echo -e "set gpcclkkHz  -> [OK]\n"
-    sudo $perfdebug --lock_loose   set xbarclkkHz 2400000 && echo -e "set xbarclkkHz -> [OK]\n"
-    sudo $perfdebug --lock_loose   set sysclkkHz  1800000 && echo -e "set sysclkkHz  -> [OK]\n"
-    sudo $perfdebug --force_regime ffr && echo "Force regime successful"
-    echo "" && sleep 3
-    echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
-    echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
-    echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)" 
+    if [[ $(uname -m) == aarch64 ]]; then 
+        perfdebug=/mnt/linuxqa/wanliz/iGPU_vfmax_scripts/perfdebug
+        sudo $perfdebug --lock_loose   set pstateId P0 && echo -e "set pstateId -> [OK]\n"
+        sudo $perfdebug --lock_strict  set dramclkkHz 8000000 && echo -e "set dramclkkHz -> [OK]\n"
+        sudo $perfdebug --lock_strict  set gpcclkkHz  1995000 && echo -e "set gpcclkkHz  -> [OK]\n"
+        sudo $perfdebug --lock_loose   set xbarclkkHz 2400000 && echo -e "set xbarclkkHz -> [OK]\n"
+        sudo $perfdebug --lock_loose   set sysclkkHz  1800000 && echo -e "set sysclkkHz  -> [OK]\n"
+        sudo $perfdebug --force_regime ffr && echo "Force regime successful"
+        echo "" && sleep 3
+        echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
+        echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
+        echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)" 
+    fi 
 elif [[ $1 == startx ]]; then 
     if [[ -z $NVTEST_DRIVER ]]; then
         screen -S bare-xorg sudo X :0 +iglx
