@@ -7,7 +7,7 @@ moduleDir=""
 targetArch=amd64 
 targetConfig=develop
 builderThreads=$(nproc)
-nvmakeMisc=
+compilecommands=
 
 while [[ $# -gt 0 ]]; do 
     case $1 in 
@@ -18,8 +18,9 @@ while [[ $# -gt 0 ]]; do
         opengl)  moduleName="opengl"; moduleDir="drivers/OpenGL" ;;
         amd64|aarch64) targetArch=$1 ;;
         debug|release|develop) targetConfig=$1 ;;
-        -r|-root) shift; nvsrcRoot="$1" ;;
-        -j|-jobs) shift; builderThreads=$1 ;; 
+        root) shift; nvsrcRoot="$1" ;;
+        jobs) shift; builderThreads=$1 ;; 
+        cc|compilecommands) compilecommands=1 ;;
     esac
     shift 
 done 
@@ -29,7 +30,7 @@ if [[ ! -d $nvsrcRoot/$branchName/$moduleDir ]]; then
     exit 1
 fi 
 
-if [[ ! -z $(grep compilecommands $nvsrcRoot/$branchName/drivers/common/build/build.cfg) ]]; then 
+if [[ $compilecommands == 1 && ! -z $(grep compilecommands $nvsrcRoot/$branchName/drivers/common/build/build.cfg) ]]; then 
     nvmakeMisc+=" compilecommands"
 fi 
 
