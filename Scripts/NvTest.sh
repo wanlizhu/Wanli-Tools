@@ -25,7 +25,7 @@ fi
 if [[ $1 == driver || $1 == drivers ]]; then 
     if [[ $2 == rsync ]]; then 
         config=$3
-        rsync -ah --progress wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/rel/gpu_drv/r580/r580_00/_out/Linux_$(uname -m)_${config:-develop}/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/rel/gpu_drv/r580/r580_00/_out/Linux_$(uname -m)_${config:-develop}/tests-Linux-$(uname -m).tar $HOME || exit 1
+        rsync -ah --progress wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/rel/gpu_drv/r580/r580_00/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_${config:-develop}/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/rel/gpu_drv/r580/r580_00/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_${config:-develop}/tests-Linux-$(uname -m).tar $HOME || exit 1
 
         ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'  | sort -V 
         read -p "Enter [version] to continue: " version
