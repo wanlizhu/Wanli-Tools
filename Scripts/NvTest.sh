@@ -29,14 +29,14 @@ if [[ $1 == driver || $1 == drivers ]]; then
 
         ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'  | sort -V 
         read -p "Enter [version] to continue: " version
-        sudo pkill Xorg 
-        sudo env IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run -s --no-kernel-module-source --skip-module-load || exit 1
+        for nvpid in $(sudo fuser -v /dev/nvidia* | grep -v 'COMMAND' | awk '{print $3}' | sort  | uniq); do sudo kill -9 $nvpid; done
+        sudo env IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run -s --no-kernel-module-source --skip-module-load || { cat /var/log/nvidia-installer.log; exit 1; }
 
         unset NVTEST_DRIVER NVTEST_DRIVER_BRANCH NVTEST_DRIVER_CHANGELIST NVTEST_DRIVER_DIR && echo "Unset NVTEST_* envvars -> OK"
         tar -xf $HOME/tests-Linux-$(uname -m).tar -C $HOME 
         sudo ln -sf $HOME/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool && echo "Updated: $HOME/sandbag-tool"
     else
-        sudo -H bash -lc " NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh $*" || exit 1
+        sudo -H bash -lc "NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh $*" || exit 1
         read -p "ENVVARS (Copy & Paste): " envvars
         for pair in $envvars; do 
             echo "export ${pair%%=*}=${pair#*=}"
