@@ -29,6 +29,7 @@ if [[ $1 == driver || $1 == drivers ]]; then
 
         ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'  | sort -V 
         read -p "Enter [version] to continue: " version
+        sudo pkill Xorg 
         sudo env IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run -s --no-kernel-module-source --skip-module-load || exit 1
 
         unset NVTEST_DRIVER NVTEST_DRIVER_BRANCH NVTEST_DRIVER_CHANGELIST NVTEST_DRIVER_DIR && echo "Unset NVTEST_* envvars -> OK"
