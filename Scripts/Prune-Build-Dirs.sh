@@ -5,7 +5,7 @@ rootDir=/media/wanliz/data/wanliz-sw-gpu-driver-home
 outputDir=$rootDir/rel/gpu_drv/r580/r580_00/_out/Linux_amd64_develop
 buildScript=$HOME/WZhu/Scripts/NvMake.sh
 
-if [[ $1 == print ]]; then 
+if [[ "$1" == print ]]; then 
     find "$rootDir" -type f -name ".nvmake.deps"
     find "$rootDir" -type d -name *-hide-and-checked | while read -r line; do  du -sh $line; done | sort -h
     exit 
