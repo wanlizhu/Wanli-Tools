@@ -19,8 +19,9 @@ The test renders a fullscreen triangle that generates random black/white pixels 
 ## Requirements
 
 - Linux system with X11
-- OpenGL 3.3+ compatible graphics driver
-- Development packages: libx11-dev, libgl1-mesa-dev, build-essential
+- OpenGL 3.3+ compatible graphics driver  
+- Development packages: build-essential, libx11-dev, libgl1-mesa-dev, mesa-common-dev, libglu1-mesa-dev
+- C/C++ compiler (gcc/g++)
 
 ## Building
 
@@ -33,24 +34,19 @@ make install-deps
 make
 ```
 
-### Red Hat/Fedora/CentOS
+### Manual build (if needed)
 ```bash
-# Install dependencies
-make install-deps-rpm
-
-# Build the project
-make
-```
-
-### Manual build
-```bash
-g++ -std=c++17 -O2 -Wall -Wextra -I/usr/include/X11 -o MSAAResolve-GLVK main.cpp -lX11 -lGL -lGLX
+# Create output directory and compile sources separately, then link
+mkdir -p _out
+gcc -O2 -Wall -Wextra -c glad.c -o _out/glad.o
+g++ -std=c++17 -O2 -Wall -Wextra -c main.cpp -o _out/main.o
+g++ -std=c++17 -O2 -Wall -Wextra -o _out/MSAAResolve-GLVK _out/main.o _out/glad.o -lX11 -lGL -ldl
 ```
 
 ## Running
 
 ```bash
-./MSAAResolve-GLVK
+./_out/MSAAResolve-GLVK
 ```
 
 Controls:
@@ -83,5 +79,62 @@ This OpenGL implementation maintains the same functionality as the DirectX 12 ve
 The main differences are in the API usage:
 - X11 instead of Win32 for windowing
 - OpenGL instead of DirectX 12 for graphics
-- GLX instead of DXGI for context creation
+- GLX instead of DXGI for context creation  
 - `glBlitFramebuffer` instead of `ResolveSubresource` for MSAA resolve
+- GLAD for dynamic OpenGL function loading
+
+## Project Structure
+
+```
+MSAAResolve-GLVK/
+├── main.cpp              # Main application with X11/OpenGL code
+├── glad.c/.h             # OpenGL function loader (included)
+├── vertex-shader.glsl    # GLSL vertex shader
+├── fragment-shader.glsl  # GLSL fragment shader  
+├── Makefile             # Build configuration
+├── README.md            # This file
+└── _out/                # Build output directory (created by make)
+    ├── main.o           # Compiled C++ object file
+    ├── glad.o           # Compiled C object file  
+    └── MSAAResolve-GLVK # Final executable
+```
+
+## Build Output
+
+After successful compilation, the `_out/` directory will contain:
+- `_out/MSAAResolve-GLVK`: Main executable
+- `_out/main.o`, `_out/glad.o`: Object files
+
+All build artifacts are contained in the `_out/` directory, which can be completely removed with `make clean`.
+
+The application creates a 4K window and renders animated random patterns using 8x MSAA, demonstrating OpenGL's multisampling capabilities equivalent to the DirectX 12 version.
+
+## Troubleshooting
+
+### Library Linking Errors
+If you get "cannot find X11/GL/dl" errors:
+```bash
+# Make sure development packages are installed
+make install-deps
+
+# On some distributions, you might need additional packages:
+sudo apt-get install libgl1-mesa-glx libx11-6
+```
+
+### Build Errors  
+```bash
+# Clean and rebuild
+make clean
+make
+
+# Check if all required files are present
+ls -la main.cpp glad.c glad.h vertex-shader.glsl fragment-shader.glsl
+
+# Check build output
+ls -la _out/
+```
+
+### Runtime Issues
+- Ensure you have X11 running (not Wayland-only)
+- Graphics drivers must support OpenGL 3.3+
+- For remote connections, make sure X11 forwarding is enabled
