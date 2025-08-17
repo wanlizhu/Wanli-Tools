@@ -2,7 +2,7 @@ CC = gcc
 CXX = g++
 CFLAGS = -O2 -Wall -Wextra
 CXXFLAGS = -std=c++17 -O2 -Wall -Wextra
-LIBS = -lX11 -lGL -ldl
+LIBS = -lglfw -lGL -ldl
 
 OUT_DIR = _out
 TARGET = $(OUT_DIR)/MSAAResolve-GLVK
@@ -31,6 +31,26 @@ clean:
 # Install dependencies (Ubuntu/Debian)
 install-deps:
 	sudo apt-get update
-	sudo apt-get install -y build-essential libx11-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev
+	sudo apt-get install -y build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev
 
-.PHONY: all clean install-deps
+# Run the application (always uses NVIDIA - throws exception if not available)
+run: $(TARGET)
+	@echo "Running NVIDIA-only OpenGL MSAA test..."
+	./$(TARGET)
+
+# Check GPU information
+gpu-info:
+	@echo "=== System GPU Information ==="
+	@echo "Available GPUs:"
+	@lspci | grep -E "(VGA|3D)" || echo "No GPU information available"
+	@echo
+	@echo "OpenGL with Mesa (default):"
+	@glxinfo | grep -E "(OpenGL vendor|OpenGL renderer|OpenGL version)" 2>/dev/null || echo "glxinfo not available (install mesa-utils)"
+	@echo
+	@echo "OpenGL with NVIDIA (forced by application):"
+	@__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia glxinfo | grep -E "(OpenGL vendor|OpenGL renderer|OpenGL version)" 2>/dev/null || echo "NVIDIA driver not available or not working"
+	@echo
+	@echo "GLFW version:"
+	@pkg-config --modversion glfw3 2>/dev/null || echo "GLFW not installed (install libglfw3-dev)"
+
+.PHONY: all clean install-deps run gpu-info

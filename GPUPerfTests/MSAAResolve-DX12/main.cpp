@@ -10,7 +10,7 @@
 template<typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
-class DX12MSAAResolve {
+class MSAAResolve_DX12 {
 private:
     static const UINT FRAME_COUNT = 2;
     static const UINT TEXTURE_WIDTH = 3840;
@@ -46,7 +46,7 @@ private:
     UINT m_rtvDescriptorSize;
 
 public:
-    DX12MSAAResolve() : m_frameIndex(0), m_fenceValue(0), m_pConstantBufferDataBegin(nullptr) {}
+    MSAAResolve_DX12() : m_frameIndex(0), m_fenceValue(0), m_pConstantBufferDataBegin(nullptr) {}
 
     bool Initialize(HWND hwnd) {
         // Enable the D3D12 debug layer
@@ -602,7 +602,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     ShowWindow(hWnd, nCmdShow);
 
     // Initialize DirectX 12
-    DX12MSAAResolve dx12App;
+    MSAAResolve_DX12 dx12App;
     if (!dx12App.Initialize(hWnd)) {
         std::cerr << "Failed to initialize DirectX 12" << std::endl;
         return -1;
