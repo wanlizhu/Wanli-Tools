@@ -2,7 +2,7 @@
 #include "glad/gl.h"
 #include "glad/glx.h" // X11
 #include "glad/egl.h" // Wayland
-#include "glad/vulkan.h"
+#include "vulkan/vulkan.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <vector>
@@ -17,12 +17,8 @@
 #include <filesystem>
 #include <unordered_map>
 
-#define INCBIN_PREFIX g_
-#define INCBIN_STYLE  INCBIN_STYLE_SNAKE
-#include "incbin.h"
-
 // Global embedded files
-extern std::unordered_map<std::string, std::string> g_files;
+extern std::unordered_map<std::string, std::vector<uint8_t>> g_files;
 
 class MSAAResolve_API {
 public:
@@ -78,7 +74,6 @@ private:
     void CreateDescriptorSetLayout();
     void CreateGraphicsPipeline();
     void CreateMSAAFramebuffers();
-    void CreateVertexInput();
     void CreateDescriptorSet();
     void CreateCommandBuffer();
     void CreateSyncObjects();
@@ -97,4 +92,40 @@ private:
     VkExtent2D m_swapchainImageExtent = {};
     std::vector<VkImage> m_swapchainImages = {};
     std::vector<VkImageView> m_swapchainImageViews = {};
+    
+    // MSAA resources
+    VkImage m_msaaColorImage = VK_NULL_HANDLE;
+    VkDeviceMemory m_msaaColorImageMemory = VK_NULL_HANDLE;
+    VkImageView m_msaaColorImageView = VK_NULL_HANDLE;
+    VkImage m_resolveImage = VK_NULL_HANDLE;
+    VkDeviceMemory m_resolveImageMemory = VK_NULL_HANDLE;
+    VkImageView m_resolveImageView = VK_NULL_HANDLE;
+    
+    // Render pass and framebuffers
+    VkRenderPass m_renderPass = VK_NULL_HANDLE;
+    std::vector<VkFramebuffer> m_framebuffers = {};
+    
+    // Pipeline
+    VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
+    VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
+    VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
+    
+    // Descriptor set and uniform buffer
+    VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
+    VkDescriptorSet m_descriptorSet = VK_NULL_HANDLE;
+    VkBuffer m_uniformBuffer = VK_NULL_HANDLE;
+    VkDeviceMemory m_uniformBufferMemory = VK_NULL_HANDLE;
+    void* m_uniformBufferMapped = nullptr;
+    
+    // Command buffer
+    VkCommandPool m_commandPool = VK_NULL_HANDLE;
+    VkCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
+    
+    // Synchronization
+    VkSemaphore m_imageAvailableSemaphore = VK_NULL_HANDLE;
+    VkSemaphore m_renderFinishedSemaphore = VK_NULL_HANDLE;
+    VkFence m_inFlightFence = VK_NULL_HANDLE;
+    
+    // Frame count for animation
+    uint32_t m_frameCount = 0;
 };

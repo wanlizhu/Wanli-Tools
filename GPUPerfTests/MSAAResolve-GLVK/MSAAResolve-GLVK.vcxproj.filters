@@ -2,11 +2,11 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MSAAResolve_GL.cpp" />
+    <ClCompile Include="MSAAResolve_VK.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment-shader.glsl" />
-    <None Include="Makefile" />
-    <None Include="README.md" />
     <None Include="vertex-shader.glsl" />
   </ItemGroup>
   <ItemGroup>
@@ -24,12 +24,10 @@
     <ClInclude Include="glad\glx.h">
       <Filter>glad</Filter>
     </ClInclude>
-    <ClInclude Include="glad\vulkan.h">
-      <Filter>glad</Filter>
-    </ClInclude>
     <ClInclude Include="glad\wgl.h">
       <Filter>glad</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanWindow.h" />
+    <ClInclude Include="incbin.h" />
+    <ClInclude Include="MSAAResolve_GLVK.h" />
   </ItemGroup>
 </Project>

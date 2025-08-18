@@ -107,16 +107,12 @@
     <ClInclude Include="glad\egl.h" />
     <ClInclude Include="glad\gl.h" />
     <ClInclude Include="glad\glx.h" />
-    <ClInclude Include="glad\vulkan.h" />
     <ClInclude Include="glad\wgl.h" />
     <ClInclude Include="incbin.h" />
     <ClInclude Include="MSAAResolve_GLVK.h" />
-    <ClInclude Include="VulkanWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment-shader.glsl" />
-    <None Include="Makefile" />
-    <None Include="README.md" />
     <None Include="vertex-shader.glsl">
       <FileType>Document</FileType>
     </None>
@@ -127,12 +123,12 @@
       <CppLanguageStandard>c++17</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>-ldl;-lX11;-lGL;-lglfw;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-ldl;-lX11;-lGL;-lvulkan;-lglfw;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>echo "Check package dependencies"
-for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools; do \
+for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools vulkan-validationlayers vulkan-tools; do \
     dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg
 done
 
@@ -154,12 +150,12 @@ glslangValidator -V --auto-map-locations --auto-map-bindings -e main -S frag fra
       <CppLanguageStandard>c++17</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>-ldl;-lX11;-lGL;-lglfw;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-ldl;-lX11;-lGL;-lvulkan;-lglfw;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>echo "Check package dependencies"
-for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools; do \
+for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools vulkan-validationlayers vulkan-tools; do \
     dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg
 done
 
@@ -181,12 +177,12 @@ glslangValidator -V --auto-map-locations --auto-map-bindings -e main -S frag fra
       <CppLanguageStandard>c++17</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>-ldl;-lX11;-lGL;-lglfw;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-ldl;-lX11;-lGL;-lvulkan;-lglfw;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>echo "Check package dependencies"
-for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools; do \
+for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools vulkan-validationlayers vulkan-tools; do \
     dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg
 done
 
@@ -208,12 +204,12 @@ glslangValidator -V --auto-map-locations --auto-map-bindings -e main -S frag fra
       <CppLanguageStandard>c++17</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>-ldl;-lX11;-lGL;-lglfw;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-ldl;-lX11;-lGL;-lvulkan;-lglfw;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
       <Command>echo "Check package dependencies"
-for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools; do \
+for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools vulkan-validationlayers vulkan-tools; do \
     dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg
 done
 

@@ -54,12 +54,12 @@ void MSAAResolve_GL::Cleanup() {
     std::cout << "Cleanup Finished" << std::endl;
 }
 
-static void GLFW_ErrorCallback(int error, const char* description) {
+void GLFW_ErrorCallback_GL(int error, const char* description) {
     std::cerr << "GLFW Error " << error << ": " << description << std::endl;
 }
 
 void MSAAResolve_GL::InitializeGLFW() {
-    glfwSetErrorCallback(GLFW_ErrorCallback);
+    glfwSetErrorCallback(GLFW_ErrorCallback_GL);
     if (!glfwInit()) {
         throw std::runtime_error("Failed to initialize GLFW");
     }
@@ -163,7 +163,7 @@ void MSAAResolve_GL::CreateMSAAFramebuffers() {
     std::cout << "MSAA framebuffer created" << std::endl;
 }
 
-static GLuint CompileShader(GLenum type, const std::string& filename) {
+GLuint CompileShader(GLenum type, const std::string& filename) {
     const char* source = nullptr;
     if (std::filesystem::exists(filename)) {
         std::cout << "Load shader source from file: " << filename << std::endl;
@@ -180,7 +180,7 @@ static GLuint CompileShader(GLenum type, const std::string& filename) {
     }
     else {
         std::cout << "Load shader source from embedded string: " << filename << std::endl;
-        source = g_files.at(filename).c_str();
+        source = (const char*)g_files.at(filename).data();
     }
 
     GLuint shader = glCreateShader(type);

@@ -2,6 +2,7 @@
 #if defined(VULKAN)
 layout(std140) uniform params_t {
     uint frameCount;
+    uint padding[3];  
 };
 #else
 uniform uint frameCount;
