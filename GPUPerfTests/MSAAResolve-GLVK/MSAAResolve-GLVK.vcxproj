@@ -99,13 +99,19 @@
     <LocalRemoteCopySources>true</LocalRemoteCopySources>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MSAAResolve_GL.cpp" />
+    <ClCompile Include="MSAAResolve_VK.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="glad.h" />
+    <ClInclude Include="glad\egl.h" />
+    <ClInclude Include="glad\gl.h" />
+    <ClInclude Include="glad\glx.h" />
+    <ClInclude Include="glad\vulkan.h" />
+    <ClInclude Include="glad\wgl.h" />
     <ClInclude Include="incbin.h" />
-    <ClInclude Include="khrplatform.h" />
+    <ClInclude Include="MSAAResolve_GLVK.h" />
+    <ClInclude Include="VulkanWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment-shader.glsl" />
@@ -117,7 +123,7 @@
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(projectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CppLanguageStandard>c++17</CppLanguageStandard>
     </ClCompile>
     <Link>
@@ -125,13 +131,26 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
-      <Command>for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev; do dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg; done
+      <Command>echo "Check package dependencies"
+for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools; do \
+    dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg
+done
+
+echo "Compile GLSL to SPIR-V shaders"
+cd $(RemoteRootDir)/$(ProjectName)
+rm -f *.glsl.spv
+glslangValidator -V --auto-map-locations --auto-map-bindings -e main -S vert vertex-shader.glsl -o vertex-shader.glsl.spv
+glslangValidator -V --auto-map-locations --auto-map-bindings -e main -S frag fragment-shader.glsl -o fragment-shader.glsl.spv
 </Command>
+      <Message>Install package dependencies and compile SPIR-V shaders</Message>
     </RemotePreBuildEvent>
+    <CustomBuildStep>
+      <Message />
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(projectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CppLanguageStandard>c++17</CppLanguageStandard>
     </ClCompile>
     <Link>
@@ -139,13 +158,26 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
-      <Command>for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev; do dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg; done
+      <Command>echo "Check package dependencies"
+for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools; do \
+    dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg
+done
+
+echo "Compile GLSL to SPIR-V shaders"
+cd $(RemoteRootDir)/$(ProjectName)
+rm -f *.glsl.spv
+glslangValidator -V --auto-map-locations --auto-map-bindings -e main -S vert vertex-shader.glsl -o vertex-shader.glsl.spv
+glslangValidator -V --auto-map-locations --auto-map-bindings -e main -S frag fragment-shader.glsl -o fragment-shader.glsl.spv
 </Command>
+      <Message>Install package dependencies and compile SPIR-V shaders</Message>
     </RemotePreBuildEvent>
+    <CustomBuildStep>
+      <Message />
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(projectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CppLanguageStandard>c++17</CppLanguageStandard>
     </ClCompile>
     <Link>
@@ -153,13 +185,26 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
-      <Command>for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev; do dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg; done
+      <Command>echo "Check package dependencies"
+for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools; do \
+    dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg
+done
+
+echo "Compile GLSL to SPIR-V shaders"
+cd $(RemoteRootDir)/$(ProjectName)
+rm -f *.glsl.spv
+glslangValidator -V --auto-map-locations --auto-map-bindings -e main -S vert vertex-shader.glsl -o vertex-shader.glsl.spv
+glslangValidator -V --auto-map-locations --auto-map-bindings -e main -S frag fragment-shader.glsl -o fragment-shader.glsl.spv
 </Command>
+      <Message>Install package dependencies and compile SPIR-V shaders</Message>
     </RemotePreBuildEvent>
+    <CustomBuildStep>
+      <Message />
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(projectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CppLanguageStandard>c++17</CppLanguageStandard>
     </ClCompile>
     <Link>
@@ -167,9 +212,22 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <RemotePreBuildEvent>
-      <Command>for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev; do dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg; done
+      <Command>echo "Check package dependencies"
+for pkg in build-essential libglfw3-dev libgl1-mesa-dev mesa-common-dev libglu1-mesa-dev glslang-tools; do \
+    dpkg -s $pkg &amp;&gt;/dev/null || sudo apt install -y $pkg
+done
+
+echo "Compile GLSL to SPIR-V shaders"
+cd $(RemoteRootDir)/$(ProjectName)
+rm -f *.glsl.spv
+glslangValidator -V --auto-map-locations --auto-map-bindings -e main -S vert vertex-shader.glsl -o vertex-shader.glsl.spv
+glslangValidator -V --auto-map-locations --auto-map-bindings -e main -S frag fragment-shader.glsl -o fragment-shader.glsl.spv
 </Command>
+      <Message>Install package dependencies and compile SPIR-V shaders</Message>
     </RemotePreBuildEvent>
+    <CustomBuildStep>
+      <Message />
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

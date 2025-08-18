@@ -1,6 +1,11 @@
 #version 330 core
-
+#if defined(VULKAN)
+layout(std140) uniform params_t {
+    uint frameCount;
+};
+#else
 uniform uint frameCount;
+#endif 
 
 in vec2 uv;
 out vec4 fragColor;

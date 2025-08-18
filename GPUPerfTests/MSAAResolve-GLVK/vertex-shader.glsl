@@ -1,4 +1,7 @@
 #version 330 core
+#if defined(VULKAN)
+#define gl_VertexID gl_VertexIndex
+#endif
 
 out vec2 uv;
 
