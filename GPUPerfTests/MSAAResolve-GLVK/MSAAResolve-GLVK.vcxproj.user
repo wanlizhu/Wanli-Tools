@@ -6,7 +6,7 @@
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
     <PreLaunchCommand>
     </PreLaunchCommand>
-    <RemoteTarget>471617064;horizon6 (username=, port=22, authentication=Password)</RemoteTarget>
+    <RemoteTarget>-1151610713;office (username=, port=22, authentication=Password)</RemoteTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <RemoteDebuggerCommand>
@@ -14,7 +14,7 @@
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
     <PreLaunchCommand>
     </PreLaunchCommand>
-    <RemoteTarget>471617064;horizon6 (username=, port=22, authentication=Password)</RemoteTarget>
+    <RemoteTarget>-1151610713;office (username=, port=22, authentication=Password)</RemoteTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <RemoteDebuggerCommand>
@@ -22,7 +22,7 @@
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
     <PreLaunchCommand>
     </PreLaunchCommand>
-    <RemoteTarget>471617064;horizon6 (username=, port=22, authentication=Password)</RemoteTarget>
+    <RemoteTarget>-1151610713;office (username=, port=22, authentication=Password)</RemoteTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <RemoteDebuggerCommand>
@@ -30,6 +30,6 @@
     <DebuggerFlavor>LinuxDebugger</DebuggerFlavor>
     <PreLaunchCommand>
     </PreLaunchCommand>
-    <RemoteTarget>471617064;horizon6 (username=, port=22, authentication=Password)</RemoteTarget>
+    <RemoteTarget>-1151610713;office (username=, port=22, authentication=Password)</RemoteTarget>
   </PropertyGroup>
 </Project>
