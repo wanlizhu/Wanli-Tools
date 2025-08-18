@@ -119,6 +119,7 @@ void MSAAResolve_VK::Cleanup() {
         glfwDestroyWindow(m_window);
     }
     glfwTerminate();
+    std::cout << "Cleanup Finished" << std::endl;
 }
 
 void GLFW_ErrorCallback_VK(int error, const char* description) {
@@ -262,17 +263,30 @@ VkPhysicalDevice FindBestPhysicalDevice(VkInstance instance) {
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
-    for (const auto& device : devices) {
+    uint32_t deviceIndex = UINT32_MAX;
+    for (int i = 0; i < (int)deviceCount; i++) {
         VkPhysicalDeviceProperties props = {};
-        vkGetPhysicalDeviceProperties(device, &props);
-        if (props.vendorID == 0x10DE) { // NVIDIA GPU
-            std::cout << "Select physical device: " << props.deviceName << 
-                "(API Version: " << VK_VERSION_MAJOR(props.apiVersion) << "." << VK_VERSION_MINOR(props.apiVersion) << "." << VK_VERSION_PATCH(props.apiVersion) << ")" << std::endl;
-            return device;
+        vkGetPhysicalDeviceProperties(devices[i], &props);
+
+        std::cout << "Physical device " << i << ": " << props.deviceName <<
+            " (API Version: " << VK_VERSION_MAJOR(props.apiVersion) 
+            << "." << VK_VERSION_MINOR(props.apiVersion) 
+            << "." << VK_VERSION_PATCH(props.apiVersion) << ")" << std::endl;
+
+        if (deviceIndex == UINT32_MAX) {
+            if (props.vendorID == 0x10DE) { // NVIDIA GPU
+                deviceIndex = i;
+            }
         }
     }
 
-    throw std::runtime_error("Failed to find a suitable GPU");
+    if (deviceIndex == UINT32_MAX) {
+        throw std::runtime_error("Failed to find a suitable GPU");
+    } else {
+        std::cout << "Select physical device: " << deviceIndex << std::endl;
+    }
+
+    return devices[deviceIndex];
 }
 
 uint32_t FindBestQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) {
@@ -282,18 +296,32 @@ uint32_t FindBestQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkSurfaceKHR 
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
 
-    for (int i = 0; i < queueFamilyCount; i++) {
-        if (queueFamilies[i].queueFlags & (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_TRANSFER_BIT | VK_QUEUE_COMPUTE_BIT)) {
-            VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
-            if (presentSupport) {
-                std::cout << "Select queue family index: " << i << std::endl;
-                return i;
+    uint32_t bestIndex = UINT32_MAX;
+    for (int i = 0; i < (int)queueFamilyCount; i++) {
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
+        std::cout << "Queue family index " << i << ": " 
+            << ((queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) ? "G" : ".") 
+            << ((queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT) ? "T" : ".")
+            << ((queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT) ? "C" : ".")
+            << (presentSupport ? "P " : ".") << std::endl;
+
+        if (bestIndex == UINT32_MAX) {
+            if (queueFamilies[i].queueFlags & (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_TRANSFER_BIT | VK_QUEUE_COMPUTE_BIT)) {
+                if (presentSupport) {
+                    bestIndex = i;
+                }
             }
         }
     }
 
-    throw std::runtime_error("Failed to find an All-in-One queue family index");
+    if (bestIndex == UINT32_MAX) {
+        throw std::runtime_error("Failed to find an All-in-One queue family index");
+    } else {
+        std::cout << "Select queue family index: " << bestIndex << std::endl;
+    }
+
+    return bestIndex;
 }
 
 void MSAAResolve_VK::CreateLogicalDevice() {
@@ -393,6 +421,7 @@ void MSAAResolve_VK::CreateSwapchain() {
             availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM) {
             createInfo.imageFormat = availableFormat.format;
             createInfo.imageColorSpace = availableFormat.colorSpace;
+            break;
         }
     }
     if (createInfo.imageFormat == VK_FORMAT_UNDEFINED) {
@@ -422,7 +451,7 @@ void MSAAResolve_VK::CreateSwapchain() {
     vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, m_swapchainImages.data());
 
     m_swapchainImageViews.resize(imageCount);
-    for (int i = 0; i < m_swapchainImages.size(); i++) {
+    for (int i = 0; i < (int)m_swapchainImages.size(); i++) {
         m_swapchainImageViews[i] = CreateImageView(m_device, m_swapchainImages[i], m_swapchainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
