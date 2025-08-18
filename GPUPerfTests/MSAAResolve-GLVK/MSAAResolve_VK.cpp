@@ -382,19 +382,30 @@ VkImageView CreateImageView(VkDevice device, VkImage image, VkFormat format, VkI
 }
 
 void MSAAResolve_VK::CreateSwapchain() {
+    VkSurfaceCapabilitiesKHR capabilities {};
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, m_surface, &capabilities);
+
     VkSwapchainCreateInfoKHR createInfo {};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     createInfo.surface = m_surface;
-    createInfo.minImageCount = 2;
+    
+    // Respect the surface capabilities for image count
+    uint32_t imageCount = capabilities.minImageCount;
+    if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
+        imageCount = capabilities.maxImageCount;
+    }
+    createInfo.minImageCount = imageCount;
+    
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     createInfo.clipped = VK_TRUE;
-
-    VkSurfaceCapabilitiesKHR capabilities {};
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, m_surface, &capabilities);
     createInfo.preTransform = capabilities.currentTransform;
+    
+    std::cout << "Surface capabilities: minImageCount=" << capabilities.minImageCount 
+              << ", maxImageCount=" << capabilities.maxImageCount 
+              << ", using imageCount=" << imageCount << std::endl;
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         createInfo.imageExtent = capabilities.currentExtent;
     } else {
@@ -445,7 +456,7 @@ void MSAAResolve_VK::CreateSwapchain() {
     m_swapchainImageFormat = createInfo.imageFormat;
     m_swapchainImageExtent = createInfo.imageExtent;
 
-    uint32_t imageCount = 0;
+    imageCount = 0;
     vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, nullptr);
     m_swapchainImages.resize(imageCount);
     vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, m_swapchainImages.data());
@@ -709,8 +720,8 @@ void MSAAResolve_VK::CreateMSAAFramebuffers() {
     VkImageCreateInfo msaaImageInfo{};
     msaaImageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     msaaImageInfo.imageType = VK_IMAGE_TYPE_2D;
-    msaaImageInfo.extent.width = TEXTURE_WIDTH;
-    msaaImageInfo.extent.height = TEXTURE_HEIGHT;
+    msaaImageInfo.extent.width = m_swapchainImageExtent.width;
+    msaaImageInfo.extent.height = m_swapchainImageExtent.height;
     msaaImageInfo.extent.depth = 1;
     msaaImageInfo.mipLevels = 1;
     msaaImageInfo.arrayLayers = 1;
@@ -776,8 +787,8 @@ void MSAAResolve_VK::CreateMSAAFramebuffers() {
         framebufferInfo.renderPass = m_renderPass;
         framebufferInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
         framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = TEXTURE_WIDTH;
-        framebufferInfo.height = TEXTURE_HEIGHT;
+        framebufferInfo.width = m_swapchainImageExtent.width;
+        framebufferInfo.height = m_swapchainImageExtent.height;
         framebufferInfo.layers = 1;
 
         if (vkCreateFramebuffer(m_device, &framebufferInfo, nullptr, &m_framebuffers[i]) != VK_SUCCESS) {
@@ -899,19 +910,25 @@ void MSAAResolve_VK::CreateSyncObjects() {
 }
 
 void MSAAResolve_VK::Render() {
+    // Wait for the previous frame to finish
     vkWaitForFences(m_device, 1, &m_inFlightFence, VK_TRUE, UINT64_MAX);
-    vkResetFences(m_device, 1, &m_inFlightFence);
-
+    
+    // Acquire next swapchain image
     uint32_t imageIndex;
     VkResult result = vkAcquireNextImageKHR(m_device, m_swapchain, UINT64_MAX, m_imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
     if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("Failed to acquire swapchain image");
     }
 
+    // Now it's safe to reset the fence since we've waited for it
+    vkResetFences(m_device, 1, &m_inFlightFence);
+
+    // Update uniform buffer with frame count
     m_frameCount++;
     uint32_t uniformData[4] = { m_frameCount, 0, 0, 0 }; // frameCount + padding
     memcpy(m_uniformBufferMapped, uniformData, sizeof(uniformData));
 
+    // Reset command buffer after waiting for fence
     vkResetCommandBuffer(m_commandBuffer, 0);
 
     VkCommandBufferBeginInfo beginInfo{};
@@ -926,7 +943,7 @@ void MSAAResolve_VK::Render() {
     renderPassInfo.renderPass = m_renderPass;
     renderPassInfo.framebuffer = m_framebuffers[imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = {TEXTURE_WIDTH, TEXTURE_HEIGHT};
+    renderPassInfo.renderArea.extent = m_swapchainImageExtent;
 
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}}; // Clear to black 
     renderPassInfo.clearValueCount = 1;
@@ -969,7 +986,7 @@ void MSAAResolve_VK::Render() {
     copyRegion.dstSubresource.baseArrayLayer = 0;
     copyRegion.dstSubresource.layerCount = 1;
     copyRegion.dstOffset = {0, 0, 0};
-    copyRegion.extent = {TEXTURE_WIDTH, TEXTURE_HEIGHT, 1};
+    copyRegion.extent = {m_swapchainImageExtent.width, m_swapchainImageExtent.height, 1};
 
     vkCmdCopyImage(m_commandBuffer, m_resolveImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_swapchainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
 
