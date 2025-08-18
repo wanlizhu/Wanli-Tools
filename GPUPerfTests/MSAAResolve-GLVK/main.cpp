@@ -25,11 +25,13 @@ std::unordered_map<std::string, std::vector<uint8_t>> g_files = {
 int main(int argc, char** argv) {
     try {
         MSAAResolve_API* app = nullptr;
-        /*if (argc > 1 && strcmp(argv[1], "-vk") == 0) {
+        if (argc > 1 && (strcmp(argv[1], "-vulkan") == 0 || 
+                        strcmp(argv[1], "-vk") == 0 || 
+                        strcmp(argv[1], "-v") == 0)) {
             app = new MSAAResolve_VK();
         } else {
             app = new MSAAResolve_GL();
-        }*/app = new MSAAResolve_VK();
+        }
 
         if (app->Initialize()) {
             app->Run();
