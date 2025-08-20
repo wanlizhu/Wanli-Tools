@@ -22,6 +22,18 @@ if [[ ! -z $(ls /root/nvt 2>/dev/null) ]]; then
     sudo -H bash -lc "/mnt/linuxqa/nvt.sh sync" || exit 1
 fi 
 
+function Check-PIC-Env {
+    if [[ ! -f ~/SinglePassCapture/pic-x ]]; then 
+        echo "~/SinglePassCapture/pic-x is missing"
+        exit 1
+    fi 
+    if [[ ! -f ~/.gtl_api_key ]]; then 
+        echo 'U2FsdGVkX18BU0ZpoGynLWZBV16VNV2x85CjdpJfF+JF4HhpClt/vTyr6gs6GAq0lDVWvNk7L7s7eTFcJRhEnU4IpABfxIhfktMypWw85PuJCcDXOyZm396F02KjBRwunVfNkhfuinb5y2L6YR9wYbmrGDn1+DjodSWzt1NgoWotCEyYUz0xAIstEV6lF5zedcGwSzHDdFhj3hh5YxQFANL96BFhK9aSUs4Iqs9nQIT9evjinEh5ZKNq5aJsll91czHS2oOi++7mJ9v29sU/QjaqeSWDlneZj4nPYXhZRCw=' | openssl enc -d -aes-256-cbc -pbkdf2 -a > ~/.gtl_api_key 
+        chmod 500 ~/.gtl_api_key 
+    fi 
+    export PIP_BREAK_SYSTEM_PACKAGES=1
+}
+
 if [[ $1 == driver || $1 == drivers ]]; then 
     if [[ $2 == rsync ]]; then
         branch=rel/gpu_drv/r580/r580_00
@@ -97,6 +109,7 @@ elif [[ $1 == startx ]]; then
 elif [[ $1 == viewperf ]]; then 
     GL_ENV=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
     if [[ $WZHU_PI == 1 ]]; then 
+        Check-PIC-Env
         commandLine="$GL_ENV cd $(pwd) && $HOME/SinglePassCapture/pic-x --api=ogl --check_clocks=0 --sample=24000 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX --startframe=100 --exe=./viewperf/bin/viewperf --arg=\"viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" --workdir=/root/nvt/tests/viewperf2020v3/viewperf2020 | grep -v \"won't hook API\"" && NVM_GTLAPI_USER=wanliz $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX/upload_report.sh 
     else
         commandLine="$GL_ENV cd /root/nvt/tests/viewperf2020v3/viewperf2020 && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/$2*/results.xml"
