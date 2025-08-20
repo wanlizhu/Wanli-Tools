@@ -1,4 +1,4 @@
-# Set up ENVVARS
+# Set up test ENVVARS
 ```bash
 export PATH="$PATH:$HOME/WZhu/Scripts"
 export __GL_SYNC_TO_VBLANK=0
