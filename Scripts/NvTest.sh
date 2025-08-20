@@ -95,6 +95,11 @@ elif [[ $1 == startx ]]; then
     echo "Xorg PID: $(pidof Xorg)"
     xrandr | grep current || ls -al /tmp/.X11-unix/
 elif [[ $1 == viewperf ]]; then 
+    if [[ -z $(sudo ls /root/nvt/tests/viewperf2020v3/viewperf2020 2>/dev/null) ]]; then 
+        echo "Test folder missing: /root/nvt/tests/viewperf2020v3/viewperf2020"
+        exit 1
+    fi 
+
     GL_ENV=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
     if [[ $WZHU_PI == 1 ]]; then 
         commandLine="$GL_ENV cd $(pwd) && $HOME/SinglePassCapture/pic-x --api=ogl --check_clocks=0 --sample=24000 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX --startframe=100 --exe=./viewperf/bin/viewperf --arg=\"viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" --workdir=/root/nvt/tests/viewperf2020v3/viewperf2020 | grep -v \"won't hook API\"" && NVM_GTLAPI_USER=wanliz $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX/upload_report.sh 
