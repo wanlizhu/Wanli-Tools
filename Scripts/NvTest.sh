@@ -93,7 +93,7 @@ elif [[ $1 == startx ]]; then
         sudo -H bash -lc "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'  || read -p 'Press [Enter] to exit: '\""
     fi 
     echo "Xorg PID: $(pidof Xorg)"
-    xrandr | grep current
+    xrandr | grep current || ls -al /tmp/.X11-unix/
 elif [[ $1 == viewperf ]]; then 
     GL_ENV=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
     if [[ $WZHU_PI == 1 ]]; then 
