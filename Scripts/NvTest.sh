@@ -86,10 +86,10 @@ elif [[ $1 == maxclock ]]; then
     fi 
 elif [[ $1 == startx ]]; then 
     if [[ -z $NVTEST_DRIVER ]]; then
-        screen -S bare-xorg sudo X :0 +iglx
+        screen -S bare-xorg bash -c "sudo X :0 +iglx || read -p 'Press [Enter] to exit: '"
         xrandr --fb 3840x2160  
     else
-        sudo -H bash -lc "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'\""
+        sudo -H bash -lc "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'  || read -p 'Press [Enter] to exit: '\""
     fi 
     echo "Xorg PID: $(pidof Xorg)"
     xrandr | grep current
