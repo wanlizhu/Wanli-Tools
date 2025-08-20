@@ -1,10 +1,6 @@
 #!/bin/bash
 
-descriptor=$(find /tmp/.X11-unix -maxdepth 1 -type s -name 'X*' -printf '%f\n' 2>/dev/null | sed 's/^X//' | sort -n | head -1) 
-if [[ ! -z $descriptor ]]; then 
-    export DISPLAY=":$descriptor"
-    echo "export DISPLAY=:$descriptor"
-fi 
+[[ -z $DISPLAY ]] && export DISPLAY=:0
 
 if [[ $1 == vnc ]]; then 
     [[ -z $(pidof Xorg) ]] && { echo "Xorg is not running"; exit 1; }
