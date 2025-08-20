@@ -1,5 +1,15 @@
 #!/bin/bash
 
+if ! dpkg --print-foreign-architectures | grep -q '^i386$'; then
+    echo "Enabling i386 architecture"
+    sudo dpkg --add-architecture i386
+    sudo apt update 
+    sudo apt install -y libc6:i386 libncurses6:i386 libstdc++6:i386
+fi
+for pkg in libelf-dev elfutils; do 
+    dpkg -s $pkg &>/dev/null || sudo apt install -y $pkg 
+done 
+
 nvsrcRoot=$P4ROOT 
 branchName=rel/gpu_drv/r580/r580_00
 moduleName="drivers dist"
