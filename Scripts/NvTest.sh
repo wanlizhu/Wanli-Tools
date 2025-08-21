@@ -54,7 +54,7 @@ if [[ $1 == driver || $1 == drivers ]]; then
                 tar -xf $(dirname $3)/tests-Linux-$(uname -m).tar -C $HOME 
                 sudo ln -sf $HOME/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool && echo "Updated: $HOME/sandbag-tool"
             fi 
-        elif [[ $3 == *".so" ]]
+        elif [[ $3 == *".so" ]]; then 
             version=$(ls /usr/lib/*-linux-gnu/$(basename $3).*  | awk -F '.so.' '{print $2}' | head -1)
             sudo cp -vf --remove-destination $3 /usr/lib/$(uname -m)-linux-gnu/$(basename $3).$version 
         fi 
