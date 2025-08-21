@@ -47,7 +47,9 @@ if [[ $1 == driver || $1 == drivers ]]; then
         fi 
     elif [[ $2 == local ]]; then
         if [[ $3 == *".run" ]]; then 
-            for nvpid in $(sudo fuser -v /dev/nvidia* 2>/dev/null | grep -v 'COMMAND' | awk '{print $3}' | sort  | uniq); do sudo kill -9 $nvpid; done
+            for nvpid in $(sudo fuser -v /dev/nvidia* 2>/dev/null | grep -v 'COMMAND' | awk '{print $3}' | sort  | uniq); do 
+                sudo kill -9 $nvpid && echo "Killed $nvpid"
+            done
             sudo env IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 $3 -s --no-kernel-module-source --skip-module-load || { cat /var/log/nvidia-installer.log; exit 1; }
             unset NVTEST_DRIVER NVTEST_DRIVER_BRANCH NVTEST_DRIVER_CHANGELIST NVTEST_DRIVER_DIR && echo "Unset NVTEST_* envvars -> OK"
             if [[ -f $(dirname $3)/tests-Linux-$(uname -m).tar ]]; then 
