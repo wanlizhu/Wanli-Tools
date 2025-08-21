@@ -47,7 +47,7 @@ fi
 nvsrcVersion=$(grep '^#define NV_VERSION_STRING' $nvsrcRoot/$branchName/drivers/common/inc/nvUnixVersion.h | awk '{print $3}' | sed 's/"//g')
 echo -e "Driver code version: $nvsrcVersion\n"
 
-commandLine="cd $nvsrcRoot/$branchName/$moduleDir && $nvsrcRoot/tools/linux/unix-build/unix-build --tools $nvsrcRoot/tools --devrel $nvsrcRoot/devrel/SDK/inc/GL --unshare-namespaces nvmake NV_COLOR_OUTPUT=1 NV_GUARDWORD= NV_COMPRESS_THREADS=$(nproc) NV_FAST_PACKAGE_COMPRESSION=zstd NV_USE_FRAME_POINTER=1 NV_UNIX_LTO_ENABLED= NV_MANGLE_SYMBOLS= NV_TRACE_CODE=1 -time $moduleName linux $targetArch $targetConfig -j$builderThreads $nvmakeMisc"
+commandLine="cd $nvsrcRoot/$branchName/$moduleDir && $nvsrcRoot/tools/linux/unix-build/unix-build --tools $nvsrcRoot/tools --devrel $nvsrcRoot/devrel/SDK/inc/GL --unshare-namespaces nvmake NV_COLOR_OUTPUT=1 NV_GUARDWORD= NV_COMPRESS_THREADS=$(nproc) NV_FAST_PACKAGE_COMPRESSION=zstd NV_USE_FRAME_POINTER=1 NV_UNIX_LTO_ENABLED= NV_MANGLE_SYMBOLS= NV_TRACE_CODE=1 -time $moduleName linux $targetArch $targetConfig -j$builderThreads $nvmakeMisc > >(tee /tmp/nvmake.stdout) 2> >(tee /tmp/nvmake.stderr >&2)"
 
 echo "${commandLine}"
 read -p "Press [Enter] to continue: "
