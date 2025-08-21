@@ -14,12 +14,16 @@ mapfile -t files_in_new < <(p4 -Ztag -F "%depotFile%" describe -S "$CL_new" 2>/d
 CL_diff_file="$HOME/CL_diff_${CL_new}_vs_${CL_old}"
 : > $CL_diff_file.patch
 for file in "${files_in_old[@]}"; do
-  p4 diff2 -du $([[ -z $branch_spec ]] && echo || echo "-b $branch_spec") "$file@=$CL_old" "@=$CL_new" >> $CL_diff_file.patch || :
+    echo "$file@=$CL_old vs @=$CL_new"
+    p4 diff2 -du $([[ -z $branch_spec ]] && echo || echo "-b $branch_spec") "$file@=$CL_old" "@=$CL_new" >> $CL_diff_file.patch || :
 done
 readarray -t files_in_new_add < <( comm -13 <(printf "%s\n" "${files_in_old[@]}") <(printf "%s\n" "${files_in_new[@]}") )
-for new_add in "${files_in_new_add[@]}"; do 
-    p4 diff2 -du $([[ -z $branch_spec ]] && echo || echo "-b $branch_spec") -r "$new_add@=$CL_new" "@=$CL_old" >> $CL_diff_file.patch || :
-done
+if ((${#files_in_new_add[@]})); then
+    for new_add in "${files_in_new_add[@]}"; do 
+        echo "$new_add@=$CL_new vs @=$CL_old"
+        p4 diff2 -du $([[ -z $branch_spec ]] && echo || echo "-b $branch_spec") -r "$new_add@=$CL_new" "@=$CL_old" >> $CL_diff_file.patch || :
+    done
+fi
 [[ -z $(which diff2html) ]] && sudo apt install -y nodejs npm && sudo npm i -g diff2html-cli 
 npx -y diff2html-cli -i file -s side -F $CL_diff_file.html -- $CL_diff_file.patch && echo "Generated $CL_diff_file.html"
 ```
