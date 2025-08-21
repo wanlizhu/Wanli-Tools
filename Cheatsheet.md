@@ -9,7 +9,7 @@ export PIP_BREAK_SYSTEM_PACKAGES=1
 [[ -z $DISPLAY ]] && export DISPLAY=:0
 ```
 
-# Set up P4 ENVVARS
+# Set up perforce ENVVARS
 ```bash
 export P4PORT=p4proxy-sc.nvidia.com:2006
 export P4USER=wanliz
@@ -108,4 +108,8 @@ screen -S vnc-mirroring x11vnc -display $DISPLAY -auth ~/.Xauthority -noshm -for
 sudo ss -tulpn | grep -E "5900|5901|5902"
 ```
 
-# 
+# Perforce cherry-pick from bfm to r580
+```bash
+read -p "Cherry-pick CL: " CL
+P4CLIENT=wanliz-sw-gpu-driver-office p4 unshelve -s $CL -b bfm_r580
+```
