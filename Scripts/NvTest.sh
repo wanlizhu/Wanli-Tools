@@ -113,7 +113,7 @@ elif [[ $1 == viewperf ]]; then
         else
             commandLine="$GL_ENV cd /root/nvt/tests/viewperf2020v3/viewperf2020"
             for viewset in catia creo energy maya medical snx sw; do 
-                commandLine+="  ; ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/$viewset*/results.xml"
+                commandLine+="  ; ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/${viewset//sw/solidworks}*/results.xml"
             done 
         fi 
     fi 
