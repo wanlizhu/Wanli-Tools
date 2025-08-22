@@ -202,15 +202,16 @@ elif [[ $1 == startx ]]; then
 elif [[ $1 == viewperf ]]; then 
     # $2: viewset, $3: subtest, [$4: optional pic-x args]
     GL_ENV=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
+    [[ -z $WZHU_VP_ROOT ]] && WZHU_VP_ROOT=/root/nvt/tests/viewperf2020v3/viewperf2020
     if [[ $WZHU_PI == 1 ]]; then 
-        commandLine="$GL_ENV cd $(pwd) && rm -rf $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX && $HOME/SinglePassCapture/pic-x $4 --api=ogl --check_clocks=0 --sample=24000 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX --startframe=100 --exe=./viewperf/bin/viewperf --arg=\"viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" --workdir=/root/nvt/tests/viewperf2020v3/viewperf2020 | grep -v \"won't hook API\" && sudo -u $USER -H bash -lc \"source $HOME/SinglePassCapture/PerfInspector/Python-venv/bin/activate && NVM_GTLAPI_USER=wanliz $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX/upload_report.sh\"" 
+        commandLine="$GL_ENV cd $(pwd) && rm -rf $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX && $HOME/SinglePassCapture/pic-x $4 --api=ogl --check_clocks=0 --sample=24000 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX --startframe=100 --exe=./viewperf/bin/viewperf --arg=\"viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" --workdir=$WZHU_VP_ROOT | grep -v \"won't hook API\" && sudo -u $USER -H bash -lc \"source $HOME/SinglePassCapture/PerfInspector/Python-venv/bin/activate && NVM_GTLAPI_USER=wanliz $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX/upload_report.sh\"" 
     else
         if [[ ! -z $2 ]]; then 
-            commandLine="$GL_ENV cd /root/nvt/tests/viewperf2020v3/viewperf2020 && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/$2*/results.xml"
+            commandLine="$GL_ENV cd $WZHU_VP_ROOT && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat $WZHU_VP_ROOT/results/$2*/results.xml"
         else
-            commandLine="$GL_ENV cd /root/nvt/tests/viewperf2020v3/viewperf2020; rm -rf /tmp/viewperf"
+            commandLine="$GL_ENV cd $WZHU_VP_ROOT; rm -rf /tmp/viewperf"
             for viewset in catia creo energy maya medical snx sw; do 
-                commandLine+="  ; ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/${viewset//sw/solidworks}*/results.xml >> /tmp/viewperf"
+                commandLine+="  ; ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml -resolution 3840x2160 && cat $WZHU_VP_ROOT/results/${viewset//sw/solidworks}*/results.xml >> /tmp/viewperf"
             done 
             commandLine+=" ; python3 Visualize-Viewperf-Results.py /tmp/viewperf"
         fi 
