@@ -104,6 +104,18 @@ elif [[ $1 == env ]]; then
             [[ -z $silent ]] && echo "Setting up NoPasswd sudo for $USER"
             echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers >/dev/null 
         fi  
+        if [[ -f ~/WZhu/Scripts/hosts ]]; then 
+            while read -r ip host _; do 
+                [[ -z $ip || -z $host ]] && continue 
+                if grep -qw "$host" /etc/hosts; then
+                    if ! grep -qE "^[[:space:]]*$ip[[:space:]].*\b$host\b" /etc/hosts; then
+                        sudo sed -i -E "/(^|[[:space:]])$host([[:space:]]|$)/{ s|^[[:space:]]*[0-9A-Fa-f:.]+|$ip| }" /etc/hosts
+                    fi
+                else
+                    echo "$ip $host" | sudo tee -a /etc/hosts >/dev/null 
+                fi 
+            done < ~/WZhu/Scripts/hosts
+        fi 
         if [[ -z $silent ]]; then 
             if ! ls /etc/ssl/certs/certnew*.pem &>/dev/null; then
                 if [[ ! -z $(ls /mnt/linuxqa 2>/dev/null) ]]; then
