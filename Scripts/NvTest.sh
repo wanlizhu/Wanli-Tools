@@ -174,7 +174,9 @@ elif [[ $1 == startx ]]; then
     else
         sudo -H bash -lc "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'  || read -p 'Press [Enter] to exit: '\""
     fi 
-    
+
+    $0 xauth 
+elif [[ $1 == xauth ]]; then 
     echo "Xorg PID: $(pidof Xorg)"
     ( set -o pipefail; xrandr | grep current ) || { 
         echo "Trying to reconfig Xauthority for $USER in SSH session"
