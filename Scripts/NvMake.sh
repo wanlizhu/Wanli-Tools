@@ -53,5 +53,5 @@ echo "${commandLine}"
 read -p "Press [Enter] to continue: "
 
 pushd . >/dev/null || exit 1
-eval "$commandLine"
+eval "$commandLine" 
 popd >/dev/null   
