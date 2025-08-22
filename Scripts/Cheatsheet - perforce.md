@@ -25,6 +25,6 @@ if [[ ! -s $CL_diff_file.patch ]]; then
     echo "No diffs between shelved $CL_old and $CL_new"
 else
     [[ -z $(which diff2html) ]] && sudo apt install -y nodejs npm && sudo npm i -g diff2html-cli 
-    npx -y diff2html-cli -i file -s side -F $CL_diff_file.html -- $CL_diff_file.patch && echo "Generated $CL_diff_file.html"
+    npx -y diff2html-cli -i file -s side -F $CL_diff_file.html -- $CL_diff_file.patch && sed -i "s|<h1>.*</h1>|<h1>${CL_new} (new) vs ${CL_old} (old)</h1>|" $CL_diff_file.html && echo "Generated $CL_diff_file.html"
 fi
 ```
