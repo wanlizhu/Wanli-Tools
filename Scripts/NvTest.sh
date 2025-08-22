@@ -71,13 +71,14 @@ if [[ $1 == driver || $1 == drivers ]]; then
     fi 
     /bin/bash 
 elif [[ $1 == env ]]; then
-    echo "NVTEST_DRIVER           : $NVTEST_DRIVER"
-    echo "NVTEST_DRIVER_BRANCH    : $NVTEST_DRIVER_BRANCH"
-    echo "NVTEST_DRIVER_CHANGELIST: $NVTEST_DRIVER_CHANGELIST"
-    echo "NVTEST_DRIVER_DIR       : $NVTEST_DRIVER_DIR"
-    echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
-
-    if [[ $2 == setup ]]; then 
+    if [[ -z $2 ]]; then 
+        echo "NVTEST_DRIVER           : $NVTEST_DRIVER"
+        echo "NVTEST_DRIVER_BRANCH    : $NVTEST_DRIVER_BRANCH"
+        echo "NVTEST_DRIVER_CHANGELIST: $NVTEST_DRIVER_CHANGELIST"
+        echo "NVTEST_DRIVER_DIR       : $NVTEST_DRIVER_DIR"
+        echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
+    elif [[ $2 == setup ]]; then 
+        silent=$([[ $3 == silent ]] && echo 1 || echo)
         export PATH="$PATH:$HOME/WZhu/Scripts"
         export __GL_SYNC_TO_VBLANK=0
         export vblank_mode=0
@@ -97,35 +98,37 @@ elif [[ $1 == env ]]; then
                 .cursorignore
                 .clangd
                 *.code-workspace" | sed 's/^[[:space:]]*//' > ~/.p4ignore
-            echo "Setting up perforce envvars for $P4CLIENT"
+            [[ -z $silent ]] && echo "Setting up perforce envvars for $P4CLIENT"
         }
         if [[ $UID -ne 0 ]] && ! sudo grep -q "$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoers; then
-            echo "Setting up NoPasswd sudo for $USER"
-            echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+            [[ -z $silent ]] && echo "Setting up NoPasswd sudo for $USER"
+            echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers >/dev/null 
         fi  
-        if ! ls /etc/ssl/certs/certnew*.pem &>/dev/null; then
-            if [[ ! -z $(ls /mnt/linuxqa 2>/dev/null) ]]; then
-                sudo apt install -y nfs-common
-                sudo mkdir -p /mnt/linuxqa
-                sudo mount linuxqa.nvidia.com:/storage/people /mnt/linuxqa 
+        if [[ -z $silent ]]; then 
+            if ! ls /etc/ssl/certs/certnew*.pem &>/dev/null; then
+                if [[ ! -z $(ls /mnt/linuxqa 2>/dev/null) ]]; then
+                    sudo apt install -y nfs-common
+                    sudo mkdir -p /mnt/linuxqa
+                    sudo mount linuxqa.nvidia.com:/storage/people /mnt/linuxqa 
+                fi 
+                if mountpoint -q /mnt/linuxqa; then
+                    echo "Installing nvidia root certificate"
+                    sudo cp /mnt/linuxqa/wanliz/certnew.crt /usr/local/share/ca-certificates/
+                    sudo update-ca-certificates
+                fi 
+            fi
+            if [[ ! -f ~/.gtl_api_key ]]; then 
+                echo "Setting up ~/.gtl_api_key"
+                echo 'U2FsdGVkX18BU0ZpoGynLWZBV16VNV2x85CjdpJfF+JF4HhpClt/vTyr6gs6GAq0lDVWvNk7L7s7eTFcJRhEnU4IpABfxIhfktMypWw85PuJCcDXOyZm396F02KjBRwunVfNkhfuinb5y2L6YR9wYbmrGDn1+DjodSWzt1NgoWotCEyYUz0xAIstEV6lF5zedcGwSzHDdFhj3hh5YxQFANL96BFhK9aSUs4Iqs9nQIT9evjinEh5ZKNq5aJsll91czHS2oOi++7mJ9v29sU/QjaqeSWDlneZj4nPYXhZRCw=' | openssl enc -d -aes-256-cbc -pbkdf2 -a > ~/.gtl_api_key 
+                chmod 500 ~/.gtl_api_key 
             fi 
-            if mountpoint -q /mnt/linuxqa; then
-                echo "Installing nvidia root certificate"
-                sudo cp /mnt/linuxqa/wanliz/certnew.crt /usr/local/share/ca-certificates/
-                sudo update-ca-certificates
+            if [[ ! -f ~/.ssh/id_ed25519 ]]; then 
+                echo "Setting up SSH key"
+                echo 'U2FsdGVkX1/M3Vl9RSvWt6Nkq+VfxD/N9C4jr96qvbXsbPfxWmVSfIMGg80m6g946QCdnxBxrNRs0i9M0mijcmJzCCSgjRRgE5sd2I9Buo1Xn6D0p8LWOpBu8ITqMv0rNutj31DKnF5kWv52E1K4MJdW035RHoZVCEefGXC46NxMo88qzerpdShuzLG8e66IId0kEBMRtWucvhGatebqKFppGJtZDKW/W1KteoXC3kcAnry90H70x2fBhtWnnK5QWFZCuoC16z+RQxp8p1apGHbXRx8JStX/om4xZuhl9pSPY47nYoCAOzTfgYLFanrdK10Jp/huf40Z0WkNYBEOH4fSTD7oikLugaP8pcY7/iO0vD7GN4RFwcB413noWEW389smYdU+yZsM6VNntXsWPWBSRTPaIEjaJ0vtq/4pIGaEn61Tt8ZMGe8kKFYVAPYTZg/0bai1ghdA9CHwO9+XKwf0aL2WalWd8Amb6FFQh+TlkqML/guFILv8J/zov70Jxz/v9mReZXSpDGnLKBpc1K1466FnlLJ89buyx/dh/VXJb+15RLQYUkSZou0S2zxo' | openssl enc -d -aes-256-cbc -pbkdf2 -a > ~/.ssh/id_ed25519
+                chmod 600 ~/.ssh/id_ed25519
+                echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHx7hz8+bJjBioa3Rlvmaib8pMSd0XTmRwXwaxrT3hFL wanliz@Enzo-MacBook' > ~/.ssh/id_ed25519.pub 
+                chmod 644 ~/.ssh/id_ed25519.pub
             fi 
-        fi
-        if [[ ! -f ~/.gtl_api_key ]]; then 
-            echo "Setting up ~/.gtl_api_key"
-            echo 'U2FsdGVkX18BU0ZpoGynLWZBV16VNV2x85CjdpJfF+JF4HhpClt/vTyr6gs6GAq0lDVWvNk7L7s7eTFcJRhEnU4IpABfxIhfktMypWw85PuJCcDXOyZm396F02KjBRwunVfNkhfuinb5y2L6YR9wYbmrGDn1+DjodSWzt1NgoWotCEyYUz0xAIstEV6lF5zedcGwSzHDdFhj3hh5YxQFANL96BFhK9aSUs4Iqs9nQIT9evjinEh5ZKNq5aJsll91czHS2oOi++7mJ9v29sU/QjaqeSWDlneZj4nPYXhZRCw=' | openssl enc -d -aes-256-cbc -pbkdf2 -a > ~/.gtl_api_key 
-            chmod 500 ~/.gtl_api_key 
-        fi 
-        if [[ ! -f ~/.ssh/id_ed25519 ]]; then 
-            echo "Setting up SSH key"
-            echo 'U2FsdGVkX1/M3Vl9RSvWt6Nkq+VfxD/N9C4jr96qvbXsbPfxWmVSfIMGg80m6g946QCdnxBxrNRs0i9M0mijcmJzCCSgjRRgE5sd2I9Buo1Xn6D0p8LWOpBu8ITqMv0rNutj31DKnF5kWv52E1K4MJdW035RHoZVCEefGXC46NxMo88qzerpdShuzLG8e66IId0kEBMRtWucvhGatebqKFppGJtZDKW/W1KteoXC3kcAnry90H70x2fBhtWnnK5QWFZCuoC16z+RQxp8p1apGHbXRx8JStX/om4xZuhl9pSPY47nYoCAOzTfgYLFanrdK10Jp/huf40Z0WkNYBEOH4fSTD7oikLugaP8pcY7/iO0vD7GN4RFwcB413noWEW389smYdU+yZsM6VNntXsWPWBSRTPaIEjaJ0vtq/4pIGaEn61Tt8ZMGe8kKFYVAPYTZg/0bai1ghdA9CHwO9+XKwf0aL2WalWd8Amb6FFQh+TlkqML/guFILv8J/zov70Jxz/v9mReZXSpDGnLKBpc1K1466FnlLJ89buyx/dh/VXJb+15RLQYUkSZou0S2zxo' | openssl enc -d -aes-256-cbc -pbkdf2 -a > ~/.ssh/id_ed25519
-            chmod 600 ~/.ssh/id_ed25519
-            echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHx7hz8+bJjBioa3Rlvmaib8pMSd0XTmRwXwaxrT3hFL wanliz@Enzo-MacBook' > ~/.ssh/id_ed25519.pub 
-            chmod 644 ~/.ssh/id_ed25519.pub
         fi 
     fi 
 elif [[ $1 == maxclock ]]; then 
