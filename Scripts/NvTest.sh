@@ -208,10 +208,11 @@ elif [[ $1 == viewperf ]]; then
         if [[ ! -z $2 ]]; then 
             commandLine="$GL_ENV cd /root/nvt/tests/viewperf2020v3/viewperf2020 && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/$2*/results.xml"
         else
-            commandLine="$GL_ENV cd /root/nvt/tests/viewperf2020v3/viewperf2020"
+            commandLine="$GL_ENV cd /root/nvt/tests/viewperf2020v3/viewperf2020; rm -rf /tmp/viewperf"
             for viewset in catia creo energy maya medical snx sw; do 
-                commandLine+="  ; ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/${viewset//sw/solidworks}*/results.xml"
+                commandLine+="  ; ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml -resolution 3840x2160 && cat /root/nvt/tests/viewperf2020v3/viewperf2020/results/${viewset//sw/solidworks}*/results.xml >> /tmp/viewperf"
             done 
+            commandLine+=" ; python3 Visualize-Viewperf-Results.py /tmp/viewperf"
         fi 
     fi 
 

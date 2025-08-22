@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import argparse
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -35,23 +36,30 @@ def convert_results_to_data(path_str):
 
 
 def main():
-    recent_file = Path("/tmp/viewperf_recent.json")
-    recent = json.load(open(recent_file)) if recent_file.exists() else ["", ""]
-    result1_input = input(f"The 1st result path (required) [{recent[0]}]: ").strip() or recent[0]
-    result2_input = input(f"The 2nd result path for comparison [{recent[1]}]: ").strip() or recent[1]
-    json.dump([result1_input, result2_input], open(recent_file, "w"))
-    
-    result1_data = convert_results_to_data(result1_input)
-    result2_data = convert_results_to_data(result2_input)
-
-    if result2_data is None:
-        print(f"\nFIRST RESULT: {Path(result1_input).name}")
-        print(result1_data.to_string(index=False))
+    if len(sys.argv) > 1:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("input1", type=str, default="")
+        parser.add_argument("input2", type=str, default="")
+        args = parser.parse_args()
+        input1 = args.input1 
+        input2 = args.input2 
     else:
-        merged = result1_data.merge(result2_data, on=['Viewset', 'Subtest'], suffixes=('_old', '_new'))
+        recent_file = Path("/tmp/viewperf_recent.json")
+        recent = json.load(open(recent_file)) if recent_file.exists() else ["", ""]
+        input1 = input(f"The 1st input path (required) [{recent[0]}]: ").strip() or recent[0]
+        input2 = input(f"The 2nd input path for comparison [{recent[1]}]: ").strip() or recent[1]
+        json.dump([input1, input2], open(recent_file, "w"))
+
+    input1_data = convert_results_to_data(input1)
+    input2_data = convert_results_to_data(input2)
+    if input2_data is None:
+        print(f"\nFIRST RESULT: {Path(input1).name}")
+        print(input1_data.to_string(index=False))
+    else:
+        merged = input1_data.merge(input2_data, on=['Viewset', 'Subtest'], suffixes=('_old', '_new'))
         merged['FPS_ratio_%'] = (merged['FPS_new'] / merged['FPS_old'] * 100).round(1).astype(str) + '%'
         comparison = merged[['Viewset', 'Subtest', 'FPS_old', 'FPS_new', 'FPS_ratio_%']].copy()
-        print(f"\nCOMPARISON: {Path(result2_input).name}(new) vs {Path(result1_input).name}(old)")
+        print(f"\nCOMPARISON: {Path(input2).name}(new) vs {Path(input1).name}(old)")
         print(comparison.to_string(index=False)) 
 
 if __name__ == '__main__':
