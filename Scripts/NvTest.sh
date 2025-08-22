@@ -76,6 +76,53 @@ elif [[ $1 == env ]]; then
     echo "NVTEST_DRIVER_CHANGELIST: $NVTEST_DRIVER_CHANGELIST"
     echo "NVTEST_DRIVER_DIR       : $NVTEST_DRIVER_DIR"
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
+
+    if [[ $2 == setup ]]; then 
+        export PATH="$PATH:$HOME/WZhu/Scripts"
+        export __GL_SYNC_TO_VBLANK=0
+        export vblank_mode=0
+        export __GL_DEBUG_BYPASS_ASSERT=c 
+        export PIP_BREAK_SYSTEM_PACKAGES=1
+        [[ -z $SSL_CERT_DIR ]] && export SSL_CERT_DIR=/etc/ssl/certs
+        [[ -z $DISPLAY ]] && export DISPLAY=:0
+        export P4PORT=p4proxy-sc.nvidia.com:2006
+        export P4USER=wanliz
+        export P4CLIENT=wanliz-sw-gpu-driver-office
+        export P4ROOT=/media/wanliz/data/$P4CLIENT
+        export P4IGNORE=$HOME/.p4ignore
+        [[ ! -f ~/.p4ignore ]] && echo "_out
+        .git
+        .vscode
+        .cursorignore
+        .clangd
+        *.code-workspace" > ~/.p4ignore
+        if [[ $UID -ne 0 ]] && ! sudo grep -q "$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoers; then
+            echo "Setting up NoPasswd sudo for $USER"
+            echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+        fi  
+        if ! ls /etc/ssl/certs/certnew*.pem &>/dev/null; then
+            if [[ ! -z $(ls /mnt/linuxqa 2>/dev/null) ]]; then
+                sudo apt install -y nfs-common
+                sudo mkdir -p /mnt/linuxqa
+                sudo mount linuxqa.nvidia.com:/storage/people /mnt/linuxqa 
+            fi 
+            if mountpoint -q /mnt/linuxqa; then
+                echo "Installing root certificate"
+                sudo cp /mnt/linuxqa/wanliz/certnew.crt /usr/local/share/ca-certificates/
+                sudo update-ca-certificates
+            fi 
+        fi
+        if [[ ! -f ~/.gtl_api_key ]]; then 
+            echo 'U2FsdGVkX18BU0ZpoGynLWZBV16VNV2x85CjdpJfF+JF4HhpClt/vTyr6gs6GAq0lDVWvNk7L7s7eTFcJRhEnU4IpABfxIhfktMypWw85PuJCcDXOyZm396F02KjBRwunVfNkhfuinb5y2L6YR9wYbmrGDn1+DjodSWzt1NgoWotCEyYUz0xAIstEV6lF5zedcGwSzHDdFhj3hh5YxQFANL96BFhK9aSUs4Iqs9nQIT9evjinEh5ZKNq5aJsll91czHS2oOi++7mJ9v29sU/QjaqeSWDlneZj4nPYXhZRCw=' | openssl enc -d -aes-256-cbc -pbkdf2 -a > ~/.gtl_api_key 
+            chmod 500 ~/.gtl_api_key 
+        fi 
+        if [[ ! -f ~/.ssh/id_ed25519 ]]; then 
+            echo 'U2FsdGVkX1/M3Vl9RSvWt6Nkq+VfxD/N9C4jr96qvbXsbPfxWmVSfIMGg80m6g946QCdnxBxrNRs0i9M0mijcmJzCCSgjRRgE5sd2I9Buo1Xn6D0p8LWOpBu8ITqMv0rNutj31DKnF5kWv52E1K4MJdW035RHoZVCEefGXC46NxMo88qzerpdShuzLG8e66IId0kEBMRtWucvhGatebqKFppGJtZDKW/W1KteoXC3kcAnry90H70x2fBhtWnnK5QWFZCuoC16z+RQxp8p1apGHbXRx8JStX/om4xZuhl9pSPY47nYoCAOzTfgYLFanrdK10Jp/huf40Z0WkNYBEOH4fSTD7oikLugaP8pcY7/iO0vD7GN4RFwcB413noWEW389smYdU+yZsM6VNntXsWPWBSRTPaIEjaJ0vtq/4pIGaEn61Tt8ZMGe8kKFYVAPYTZg/0bai1ghdA9CHwO9+XKwf0aL2WalWd8Amb6FFQh+TlkqML/guFILv8J/zov70Jxz/v9mReZXSpDGnLKBpc1K1466FnlLJ89buyx/dh/VXJb+15RLQYUkSZou0S2zxo' | openssl enc -d -aes-256-cbc -pbkdf2 -a > ~/.ssh/id_ed25519
+            chmod 600 ~/.ssh/id_ed25519
+            echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHx7hz8+bJjBioa3Rlvmaib8pMSd0XTmRwXwaxrT3hFL wanliz@Enzo-MacBook' > ~/.ssh/id_ed25519.pub 
+            chmod 644 ~/.ssh/id_ed25519.pub
+        fi 
+    fi 
 elif [[ $1 == maxclock ]]; then 
     sudo $HOME/sandbag-tool -unsandbag
     sudo $HOME/sandbag-tool -print 
@@ -93,6 +140,13 @@ elif [[ $1 == maxclock ]]; then
         echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)" 
     fi 
 elif [[ $1 == startx ]]; then 
+    enableVNC=
+    while [[ $# -gt 1 ]]; do 
+        case $2 in 
+            vnc) enableVNC=1 ;; 
+        esac
+        shift 
+    done 
     [[ -z $DISPLAY ]] && export DISPLAY=:0
     if [[ -z $NVTEST_DRIVER ]]; then
         screen -S bare-xorg bash -c "sudo X $DISPLAY +iglx || read -p 'Press [Enter] to exit: '"
@@ -100,8 +154,31 @@ elif [[ $1 == startx ]]; then
     else
         sudo -H bash -lc "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'  || read -p 'Press [Enter] to exit: '\""
     fi 
+    
     echo "Xorg PID: $(pidof Xorg)"
-    xrandr | grep current || ls -al /tmp/.X11-unix/
+    ( set -o pipefail; xrandr | grep current ) || { 
+        echo "Trying to reconfig Xauthority for $USER in SSH session"
+        xauthPath=$(ps aux | grep '[X]org' | grep -oP '(?<=-auth )[^ ]+')
+        sudo cp -vf $xauthPath ~/.Xauthority
+        sudo chown $USER:$(id -gn) ~/.Xauthority
+        chmod 600 ~/.Xauthority
+        export XAUTHORITY=~/.Xauthority
+        sudo cp -vf $xauthPath /root/.Xauthority
+        sudo chown root:root /root/.Xauthority
+        sudo chmod 600 /root/.Xauthority
+        ( set -o pipefail; xrandr | grep current ) || { 
+            ls -al /tmp/.X11-unix/
+            exit 1
+        }
+    }
+
+    if [[ $enableVNC == 1 ]]; then
+        [[ -z $(pidof Xorg) ]] && { echo "Xorg is not running"; exit 1; }
+        [[ ! -e ~/.vnc/passwd ]] && x11vnc -storepasswd
+        screen -S vnc-mirroring x11vnc -display $DISPLAY -auth ~/.Xauthority -noshm -forever --loop -noxdamage -repeat -shared
+        sleep 2
+        sudo ss -tulpn | grep -E "5900|5901|5902"
+    fi 
 elif [[ $1 == viewperf ]]; then 
     # $2: viewset, $3: subtest, [$4: optional pic-x args]
     GL_ENV=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
