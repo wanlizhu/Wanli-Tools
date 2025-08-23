@@ -37,8 +37,7 @@ if [[ $1 == driver || $1 == drivers ]]; then
         done 
         if [[ $module == drivers ]]; then 
             rsync -ah --progress wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/tests-Linux-$(uname -m).tar $HOME && echo || exit 1
-
-            ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'  | sort -V 
+            ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run 2>/dev/null | awk -F/ '{print $NF}' | sort -V 
             read -p "Enter [version] to continue: " version
             $0 driver local $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run
         elif [[ $module == opengl ]]; then 
@@ -46,7 +45,13 @@ if [[ $1 == driver || $1 == drivers ]]; then
             $0 driver local $HOME/libnvidia-glcore.so
         fi 
     elif [[ $2 == local ]]; then
-        if [[ $3 == *".run" ]]; then 
+        if [[ -d "$3" ]]; then 
+            ls $3/NVIDIA-Linux-$(uname -m)-*-internal.run 2>/dev/null | awk -F/ '{print $NF}' | sort -V | tee /tmp/drivers
+            if [[ -s /tmp/drivers ]]; then 
+                read -p "Enter [version] to continue: " version
+                $0 driver local $3/NVIDIA-Linux-$(uname -m)-$version-internal.run
+            fi 
+        elif [[ $3 == *".run" ]]; then 
             sudo fuser -v /dev/nvidia* 2>/dev/null | grep -v 'COMMAND' | awk '{print $3}' | sort | uniq | tee > /tmp/nvidia
             for nvpid in $(cat /tmp/nvidia); do 
                 echo -n "Killing $nvpid "
@@ -80,7 +85,6 @@ elif [[ $1 == env ]]; then
         echo "NVTEST_DRIVER_DIR       : $NVTEST_DRIVER_DIR"
         echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
     elif [[ $2 == setup ]]; then 
-        silent=$([[ $3 == silent ]] && echo 1 || echo)
         export PATH="$PATH:$HOME/WZhu/Scripts"
         export __GL_SYNC_TO_VBLANK=0
         export vblank_mode=0
@@ -100,14 +104,14 @@ elif [[ $1 == env ]]; then
                 .cursorignore
                 .clangd
                 *.code-workspace" | sed 's/^[[:space:]]*//' > ~/.p4ignore
-            [[ -z $silent ]] && echo "Setting up perforce envvars for $P4CLIENT"
+            [[ -z $3 ]] && echo "Setting up perforce envvars for $P4CLIENT"
         }
         if [[ $UID -ne 0 ]] && ! sudo grep -q "$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoers; then
-            [[ -z $silent ]] && echo "Setting up NoPasswd sudo for $USER"
+            [[ -z $3 ]] && echo "Setting up NoPasswd sudo for $USER"
             echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers >/dev/null 
         fi  
         if [[ -f ~/WZhu/Scripts/hosts ]]; then 
-            while read -r ip host _; do 
+            while read -r ip host || [ -n "$ip" ]; do 
                 [[ -z $ip || -z $host ]] && continue 
                 if grep -qw "$host" /etc/hosts; then
                     if ! grep -qE "^[[:space:]]*$ip[[:space:]].*\b$host\b" /etc/hosts; then
@@ -118,7 +122,7 @@ elif [[ $1 == env ]]; then
                 fi 
             done < ~/WZhu/Scripts/hosts
         fi 
-        if [[ -z $silent ]]; then 
+        if [[ -z $3 ]]; then 
             if ! ls /etc/ssl/certs/certnew*.pem &>/dev/null; then
                 if [[ ! -z $(ls /mnt/linuxqa 2>/dev/null) ]]; then
                     sudo apt install -y nfs-common
