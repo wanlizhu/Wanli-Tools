@@ -201,20 +201,24 @@ elif [[ $1 == xauth ]]; then
     ( set -o pipefail; xrandr | grep current ) || { 
         echo "Trying to reconfig Xauthority for $USER in SSH session"
         xauthPath=$(ps aux | grep '[X]org' | grep -oP '(?<=-auth )[^ ]+')
-        sudo cp -vf $xauthPath ~/.Xauthority
-        sudo chown $USER:$(id -gn) ~/.Xauthority
-        chmod 600 ~/.Xauthority
-        export XAUTHORITY=~/.Xauthority
-        sudo cp -vf $xauthPath /root/.Xauthority
-        sudo chown root:root /root/.Xauthority
-        sudo chmod 600 /root/.Xauthority
+        if [[ -f $xauthPath ]]; then 
+            sudo cp -vf $xauthPath ~/.Xauthority
+            sudo chown $USER:$(id -gn) ~/.Xauthority
+            chmod 600 ~/.Xauthority
+            export XAUTHORITY=~/.Xauthority
+            sudo cp -vf $xauthPath /root/.Xauthority
+            sudo chown root:root /root/.Xauthority
+            sudo chmod 600 /root/.Xauthority
+        else
+            echo "The current Xorg was launched without -auth option"
+        fi 
         ( set -o pipefail; xrandr | grep current ) || { 
             ls -al /tmp/.X11-unix/
             exit 1
         }
     }
     if [[ $UID != 0 ]]; then 
-        sudo -H bash -lc "echo '[Running as root]'; $0 xauth"
+        sudo -H bash -lc "echo '[Running as root]'; cp -vf $HOME/.Xauthority /root/"
     fi 
 elif [[ $1 == viewperf ]]; then 
     # $2: viewset, $3: subtest, [$4: optional pic-x args]
