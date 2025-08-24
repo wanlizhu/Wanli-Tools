@@ -2,7 +2,7 @@
 set -uo pipefail
 
 rootDir=/media/wanliz/data/wanliz-sw-gpu-driver-home
-outputDir=$rootDir/rel/gpu_drv/r580/r580_00/_out/Linux_amd64_develop
+outputDir=$rootDir/rel/gpu_drv/r580/r580_00/drivers/OpenGL/_out/Linux_amd64_develop
 buildScript=$HOME/WZhu/Scripts/NvMake.sh
 
 Cleanup-and-Restore() {
@@ -30,9 +30,9 @@ Hide-Dir-and-Test-Build() {
         echo "[$(date)] Testing $dirPath" >> prune.log
         mv "$dirPath" "$dirPath-hide-and-checking"
         bash $buildScript sweep <<< "" 
-        bash $buildScript <<< "" 
+        bash $buildScript opengl <<< "" 
 
-        if [[ ! -z $(ls "$outputDir" | grep 'internal.run') ]]; then
+        if [[ ! -z $(ls "$outputDir" | grep 'libnvidia-glcore.so') ]]; then
             echo "[$(date)] >> This folder is NOT needed" >> prune.log 
             mv "$dirPath-hide-and-checking" "$dirPath-hide-and-checked"
         else
