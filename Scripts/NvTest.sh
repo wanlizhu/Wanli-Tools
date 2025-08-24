@@ -229,7 +229,7 @@ elif [[ $1 == viewperf ]]; then
     else
         if [[ ! -z $2 ]]; then 
             if [[ $WZHU_GDB == 1 ]]; then 
-                commandLine="$GL_ENV cd $WZHU_VP_ROOT && gdb -ex 'set pagination off' -ex 'set confirm off' -ex 'set debuginfod enabled on' -ex 'set breakpoint pending on' -ex 'file ./viewperf/bin/viewperf' -ex \"set args viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" -ex run"
+                commandLine="$GL_ENV cd $WZHU_VP_ROOT && gdb -ex 'set pagination off' -ex 'set confirm off' -ex 'set debuginfod enabled on' -ex 'set breakpoint pending on' -ex 'file ./viewperf/bin/viewperf' -ex \"set args viewsets/$2/config/$2.xml $3 -resolution 3840x2160\""
             else
                 commandLine="$GL_ENV cd $WZHU_VP_ROOT && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat $WZHU_VP_ROOT/results/$2*/results.xml"
             fi 
