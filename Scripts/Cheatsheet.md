@@ -1,3 +1,17 @@
+# Download internal version of Nsight
+Nsight graphics: https://ngfx/builds-nightly/Grfx/ or https://ngfx/builds-prerel/Grfx/ (No L4T version)
+Nsight systems : https://urm.nvidia.com/artifactory/swdt-nsys-generic/ctk/ 
+```bash
+read -p "Nsight graphics .tar.gz URL: " URL
+wget --no-check-certificate -P $HOME $URL && tar -zxf $HOME/$(basename "$URL") -C $HOME && {
+    if [[ "$URL" == *"EmbeddedLinux"* ]]; then 
+        sudo ln -sfv $HOME/nvidia-nomad-internal-EmbeddedLinux.*/host/linux-*-nomad-*/ngfx-ui /usr/bin/ngfx-ui-for-embeddedlinux-internal
+    else
+        sudo ln -sfv $HOME/nvidia-nomad-internal-Linux.linux/host/linux-desktop-nomad-*/ngfx-ui /usr/bin/ngfx-ui-for-linux-internal
+    fi
+}
+```
+
 # Download file from GTL 
 ```bash
 if [[ -z $(which gtlfs) ]]; then 
