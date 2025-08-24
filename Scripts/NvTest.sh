@@ -213,7 +213,9 @@ elif [[ $1 == xauth ]]; then
             exit 1
         }
     }
-    sudo -H bash -lc "echo '[Running as root]'; $0 xauth"
+    if [[ $UID != 0 ]]; then 
+        sudo -H bash -lc "echo '[Running as root]'; $0 xauth"
+    fi 
 elif [[ $1 == viewperf ]]; then 
     # $2: viewset, $3: subtest, [$4: optional pic-x args]
     GL_ENV=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
