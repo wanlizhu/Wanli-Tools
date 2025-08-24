@@ -64,6 +64,10 @@ if [[ $1 == driver || $1 == drivers ]]; then
                 tar -xf $(dirname $3)/tests-Linux-$(uname -m).tar -C $HOME 
                 sudo ln -sf $HOME/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool && echo "Updated: $HOME/sandbag-tool"
             fi 
+            read -p "Press [Enter] to start X server: "
+            $0 startx || exit 1
+            read -p "Press [Enter] to unsandbag and lock clocks: "
+            $0 maxclock
         elif [[ $3 == *".so" ]]; then 
             version=$(ls /usr/lib/*-linux-gnu/$(basename $3).*  | awk -F '.so.' '{print $2}' | head -1)
             sudo cp -vf --remove-destination $3 /usr/lib/$(uname -m)-linux-gnu/$(basename $3).$version 
@@ -174,6 +178,7 @@ elif [[ $1 == startx ]]; then
         esac
         shift 
     done 
+
     [[ -z $DISPLAY ]] && export DISPLAY=:0
     if [[ -z $NVTEST_DRIVER ]]; then
         screen -S bare-xorg bash -c "sudo X $DISPLAY +iglx || read -p 'Press [Enter] to exit: '"
@@ -183,6 +188,14 @@ elif [[ $1 == startx ]]; then
     fi 
 
     $0 xauth 
+
+    if [[ $enableVNC == 1 ]]; then
+        [[ -z $(pidof Xorg) ]] && { echo "Xorg is not running"; exit 1; }
+        [[ ! -e ~/.vnc/passwd ]] && x11vnc -storepasswd
+        screen -S vnc-mirroring x11vnc -display $DISPLAY -auth ~/.Xauthority -noshm -forever --loop -noxdamage -repeat -shared
+        sleep 2
+        sudo ss -tulpn | grep -E "5900|5901|5902"
+    fi 
 elif [[ $1 == xauth ]]; then 
     echo "Xorg PID: $(pidof Xorg)"
     ( set -o pipefail; xrandr | grep current ) || { 
@@ -200,14 +213,7 @@ elif [[ $1 == xauth ]]; then
             exit 1
         }
     }
-
-    if [[ $enableVNC == 1 ]]; then
-        [[ -z $(pidof Xorg) ]] && { echo "Xorg is not running"; exit 1; }
-        [[ ! -e ~/.vnc/passwd ]] && x11vnc -storepasswd
-        screen -S vnc-mirroring x11vnc -display $DISPLAY -auth ~/.Xauthority -noshm -forever --loop -noxdamage -repeat -shared
-        sleep 2
-        sudo ss -tulpn | grep -E "5900|5901|5902"
-    fi 
+    sudo -H bash -lc "echo "[Running as root]"; $0 xauth"
 elif [[ $1 == viewperf ]]; then 
     # $2: viewset, $3: subtest, [$4: optional pic-x args]
     GL_ENV=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
