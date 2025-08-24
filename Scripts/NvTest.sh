@@ -216,7 +216,11 @@ elif [[ $1 == viewperf ]]; then
         commandLine="$GL_ENV cd $(pwd) && rm -rf $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX && $HOME/SinglePassCapture/pic-x $4 --api=ogl --check_clocks=0 --sample=24000 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX --startframe=100 --exe=./viewperf/bin/viewperf --arg=\"viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" --workdir=$WZHU_VP_ROOT | grep -v \"won't hook API\" && sudo -u $USER -H bash -lc \"source $HOME/SinglePassCapture/PerfInspector/Python-venv/bin/activate && NVM_GTLAPI_USER=wanliz $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX/upload_report.sh\"" 
     else
         if [[ ! -z $2 ]]; then 
-            commandLine="$GL_ENV cd $WZHU_VP_ROOT && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat $WZHU_VP_ROOT/results/$2*/results.xml"
+            if [[ $WZHU_GDB == 1 ]]; then 
+                commandLine="$GL_ENV cd $WZHU_VP_ROOT && gdb -ex run --args ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160"
+            else
+                commandLine="$GL_ENV cd $WZHU_VP_ROOT && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat $WZHU_VP_ROOT/results/$2*/results.xml"
+            fi 
         else
             commandLine="$GL_ENV cd $WZHU_VP_ROOT; rm -rf /tmp/viewperf"
             for viewset in catia creo energy maya medical snx sw; do 
