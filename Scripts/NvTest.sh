@@ -36,12 +36,22 @@ if [[ $1 == driver || $1 == drivers ]]; then
             shift 
         done 
         if [[ $module == drivers ]]; then 
+            ssh wanliz@office "ls /sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'" | tee /tmp/list
             rsync -ah --progress wanliz@office:/sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/tests-Linux-$(uname -m).tar $HOME && echo || exit 1
-            ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run 2>/dev/null | awk -F/ '{print $NF}' | sort -V 
-            read -p "Enter [version] to continue: " version
+            
+            if [[ "$(wc -l < /tmp/list)" -gt 1 ]]; then
+                echo && ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run 2>/dev/null | awk -F/ '{print $NF}' | sort -V 
+                read -p "Enter [version] to continue: " version
+            elif [[ "$(wc -l < /tmp/list)" == 1 ]]; then 
+                version=$(cat /tmp/list | head -1 | awk -F- '{print $4}' | sed 's/\.run$//')
+            else
+                echo "The remote folder has no driver package"; exit 1
+            fi 
+
             $0 driver local $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run
-            read -p "Press [Enter] to mount remote source: "
-            if [[ -z $(ls /sw 2>/dev/null) ]]; then
+
+            if [[ $config != release && -z $(ls /sw 2>/dev/null) ]]; then
+                read -p "Press [Enter] to mount remote source: "
                 [[ ! -d /sw ]] && sudo mkdir /sw && sudo chmod 777 /sw && sudo chown $USER /sw
                 sudo apt install -y nfs-common &>/dev/null 
                 sudo mount -t nfs office:/sw /sw
@@ -64,7 +74,9 @@ if [[ $1 == driver || $1 == drivers ]]; then
                 sudo kill -9 $nvpid && echo "-> OK" || echo "-> Failed"
             done
             sudo rmmod -f nvidia_uvm nvidia_drm nvidia_modeset nvidia 2>/dev/null 
+
             sudo env IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 $3 -s --no-kernel-module-source --skip-module-load || { cat /var/log/nvidia-installer.log; exit 1; }
+
             unset NVTEST_DRIVER NVTEST_DRIVER_BRANCH NVTEST_DRIVER_CHANGELIST NVTEST_DRIVER_DIR && echo "Unset NVTEST_* envvars -> OK"
             if [[ -f $(dirname $3)/tests-Linux-$(uname -m).tar ]]; then 
                 tar -xf $(dirname $3)/tests-Linux-$(uname -m).tar -C $HOME 
