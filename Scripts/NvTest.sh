@@ -51,7 +51,7 @@ if [[ $1 == driver || $1 == drivers ]]; then
             $0 driver local $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run
 
             if [[ $config != release && -z $(ls /sw 2>/dev/null) ]]; then
-                read -p "Press [Enter] to mount remote source: "
+                echo "Mounting remote source at /sw"
                 [[ ! -d /sw ]] && sudo mkdir /sw && sudo chmod 777 /sw && sudo chown $USER /sw
                 sudo apt install -y nfs-common &>/dev/null 
                 sudo mount -t nfs office:/sw /sw
@@ -82,10 +82,8 @@ if [[ $1 == driver || $1 == drivers ]]; then
                 tar -xf $(dirname $3)/tests-Linux-$(uname -m).tar -C $HOME 
                 sudo ln -sf $HOME/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool && echo "Updated: $HOME/sandbag-tool"
             fi 
-            read -p "Press [Enter] to start X server: "
-            $0 startx || exit 1
-            read -p "Press [Enter] to unsandbag and lock clocks: "
-            $0 maxclock
+            read -p "Press [Enter] to run Xorg, unsandbag and lock clocks: "
+            $0 startx && $0 maxclock
         elif [[ $3 == *".so" ]]; then 
             version=$(ls /usr/lib/*-linux-gnu/$(basename $3).*  | awk -F '.so.' '{print $2}' | head -1)
             sudo cp -vf --remove-destination $3 /usr/lib/$(uname -m)-linux-gnu/$(basename $3).$version 
