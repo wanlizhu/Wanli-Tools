@@ -41,6 +41,7 @@ if [[ $1 == driver || $1 == drivers ]]; then
                 exit 1
             }
 
+            echo "Remote folder: /sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config"
             rsync -ah --progress wanliz@office:/sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/tests-Linux-$(uname -m).tar $HOME && echo || exit 1
             
             if [[ "$(wc -l < /tmp/list)" -gt 1 ]]; then
@@ -59,6 +60,7 @@ if [[ $1 == driver || $1 == drivers ]]; then
                 sudo mount -t nfs office:/sw /sw
             fi 
         elif [[ $module == opengl ]]; then 
+            echo "Remote folder: /sw/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config"
             rsync -ah --progress wanliz@office:/sw/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so $HOME || exit 1
             $0 driver local $HOME/libnvidia-glcore.so
         fi 
@@ -102,6 +104,9 @@ if [[ $1 == driver || $1 == drivers ]]; then
             export ${pair%%=*}=${pair#*=}
         done 
         sudo ln -sf /root/nvt/tests/system/sandbag-tool/sandbag-tool $HOME/sandbag-tool && echo "Updated: $HOME/sandbag-tool"
+        
+        read -p "Press [Enter] to run Xorg, unsandbag and lock clocks: "
+        $0 startx && $0 maxclock && echo -e "\nDriver Installed!"
     fi 
     /bin/bash 
 elif [[ $1 == env ]]; then
