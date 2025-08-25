@@ -36,19 +36,21 @@ if [[ $1 == driver || $1 == drivers ]]; then
             shift 
         done 
         if [[ $module == drivers ]]; then 
-            ssh wanliz@office "ls /sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'" | tee /tmp/list
+            ( set -o pipefail; ssh wanliz@office "ls /sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'" | tee /tmp/list ) || { 
+                echo "Failed to list compiled versions on remote"
+                exit 1
+            }
+
             rsync -ah --progress wanliz@office:/sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/tests-Linux-$(uname -m).tar $HOME && echo || exit 1
             
             if [[ "$(wc -l < /tmp/list)" -gt 1 ]]; then
-                echo && ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run 2>/dev/null | awk -F/ '{print $NF}' | sort -V 
-                read -p "Enter [version] to continue: " version
+                $0 driver local $HOME 
             elif [[ "$(wc -l < /tmp/list)" == 1 ]]; then 
                 version=$(cat /tmp/list | head -1 | awk -F- '{print $4}' | sed 's/\.run$//')
+                $0 driver local $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run
             else
                 echo "The remote folder has no driver package"; exit 1
             fi 
-
-            $0 driver local $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run
 
             if [[ $config != release && -z $(ls /sw 2>/dev/null) ]]; then
                 echo "Mounting remote source at /sw"
@@ -62,16 +64,19 @@ if [[ $1 == driver || $1 == drivers ]]; then
         fi 
     elif [[ $2 == local ]]; then
         if [[ -d "$3" ]]; then 
-            ls $3/NVIDIA-Linux-$(uname -m)-*-internal.run 2>/dev/null | awk -F/ '{print $NF}' | sort -V | tee /tmp/drivers
+            echo && ls $3/NVIDIA-Linux-$(uname -m)-*-internal.run 2>/dev/null | awk -F/ '{print $NF}' | sort -V | tee /tmp/drivers | sed -E 's/([0-9]+\.[0-9]+)/\x1b[31m\1\x1b[0m/'
             if [[ -s /tmp/drivers ]]; then 
                 read -p "Enter [version] to continue: " version
                 $0 driver local $3/NVIDIA-Linux-$(uname -m)-$version-internal.run
+            else
+                echo "Found no driver package in $3"; exit 1 
             fi 
         elif [[ $3 == *".run" ]]; then 
             sudo fuser -v /dev/nvidia* 2>/dev/null | grep -v 'COMMAND' | awk '{print $3}' | sort | uniq | tee > /tmp/nvidia
             for nvpid in $(cat /tmp/nvidia); do 
                 echo -n "Killing $nvpid "
                 sudo kill -9 $nvpid && echo "-> OK" || echo "-> Failed"
+                sleep 1
             done
             sudo rmmod -f nvidia_uvm nvidia_drm nvidia_modeset nvidia 2>/dev/null 
 
@@ -82,8 +87,9 @@ if [[ $1 == driver || $1 == drivers ]]; then
                 tar -xf $(dirname $3)/tests-Linux-$(uname -m).tar -C $HOME 
                 sudo ln -sf $HOME/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool && echo "Updated: $HOME/sandbag-tool"
             fi 
+
             read -p "Press [Enter] to run Xorg, unsandbag and lock clocks: "
-            $0 startx && $0 maxclock
+            $0 startx && $0 maxclock && echo -e "\nDriver Installed!"
         elif [[ $3 == *".so" ]]; then 
             version=$(ls /usr/lib/*-linux-gnu/$(basename $3).*  | awk -F '.so.' '{print $2}' | head -1)
             sudo cp -vf --remove-destination $3 /usr/lib/$(uname -m)-linux-gnu/$(basename $3).$version 
