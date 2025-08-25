@@ -166,7 +166,6 @@ elif [[ $1 == env ]]; then
                 chmod 644 ~/.ssh/id_ed25519.pub
             fi 
         fi 
-        bash # With ENVVARS just exported
     fi 
 elif [[ $1 == maxclock ]]; then 
     sudo $HOME/sandbag-tool -unsandbag
