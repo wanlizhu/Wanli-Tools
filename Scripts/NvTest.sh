@@ -36,12 +36,12 @@ if [[ $1 == driver || $1 == drivers ]]; then
             shift 
         done 
         if [[ $module == drivers ]]; then 
-            rsync -ah --progress wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/tests-Linux-$(uname -m).tar $HOME && echo || exit 1
+            rsync -ah --progress wanliz@office:/sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/tests-Linux-$(uname -m).tar $HOME && echo || exit 1
             ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run 2>/dev/null | awk -F/ '{print $NF}' | sort -V 
             read -p "Enter [version] to continue: " version
             $0 driver local $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run
         elif [[ $module == opengl ]]; then 
-            rsync -ah --progress wanliz@office:/media/wanliz/data/wanliz-sw-gpu-driver-office/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so $HOME || exit 1
+            rsync -ah --progress wanliz@office:/sw/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so $HOME || exit 1
             $0 driver local $HOME/libnvidia-glcore.so
         fi 
     elif [[ $2 == local ]]; then
