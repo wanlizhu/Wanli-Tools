@@ -110,7 +110,7 @@ elif [[ $1 == env ]]; then
         export PIP_BREAK_SYSTEM_PACKAGES=1
         [[ -z $SSL_CERT_DIR ]] && export SSL_CERT_DIR=/etc/ssl/certs
         [[ -z $DISPLAY ]] && export DISPLAY=:0
-        [[ -z $P4CLIENT && $USER == wanliz ]] && {
+        [[ $USER == wanliz ]] && {
             export P4PORT=p4proxy-sc.nvidia.com:2006
             export P4USER=wanliz
             export P4CLIENT=wanliz-sw-gpu-driver-office
