@@ -40,6 +40,12 @@ if [[ $1 == driver || $1 == drivers ]]; then
             ls $HOME/NVIDIA-Linux-$(uname -m)-*-internal.run 2>/dev/null | awk -F/ '{print $NF}' | sort -V 
             read -p "Enter [version] to continue: " version
             $0 driver local $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run
+            read -p "Press [Enter] to mount remote source: "
+            if [[ -z $(ls /sw 2>/dev/null) ]]; then
+                [[ ! -d /sw ]] && sudo mkdir /sw && sudo chmod 777 /sw && sudo chown $USER /sw
+                sudo apt install -y nfs-common &>/dev/null 
+                sudo mount -t nfs office:/sw /sw
+            fi 
         elif [[ $module == opengl ]]; then 
             rsync -ah --progress wanliz@office:/sw/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so $HOME || exit 1
             $0 driver local $HOME/libnvidia-glcore.so
@@ -101,7 +107,7 @@ elif [[ $1 == env ]]; then
             export P4PORT=p4proxy-sc.nvidia.com:2006
             export P4USER=wanliz
             export P4CLIENT=wanliz-sw-gpu-driver-office
-            export P4ROOT=/media/wanliz/data/$P4CLIENT
+            export P4ROOT=/sw
             export P4IGNORE=$HOME/.p4ignore
             [[ ! -f ~/.p4ignore ]] && echo "_out
                 .git
