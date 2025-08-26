@@ -91,7 +91,7 @@ nvmakeArgs=(
     NV_UNIX_CHECK_DEBUG_INFO=0
     NV_MANGLE_SYMBOLS= 
     NV_TRACE_CODE=1
-    NV_EXCLUDE_BUILD_MODULES="${excludeModules[*]}"
+    NV_EXCLUDE_BUILD_MODULES="${excludeModules[@]}"
     "$moduleName" 
     linux 
     "$targetArch" 
