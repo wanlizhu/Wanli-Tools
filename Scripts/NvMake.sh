@@ -10,54 +10,52 @@ for pkg in libelf-dev elfutils; do
     dpkg -s $pkg &>/dev/null || sudo apt install -y $pkg 
 done 
 
-nvsrcRoot=$P4ROOT 
-branchName=rel/gpu_drv/r580/r580_00
-moduleName="drivers dist"
-moduleDir=""  
-targetArch=amd64 
-targetConfig=develop
-builderThreads=$(nproc)
-compileCommands=
-fullBuild=
+branch=rel/gpu_drv/r580/r580_00
+module="drivers dist"
+arch=amd64 
+config=develop
+jobs=$(nproc)
+comcmd=
+fullbuild=
 others=
 
 while [[ $# -gt 0 ]]; do 
     case $1 in 
-        bfm)  branchName=dev/gpu_drv/bugfix_main ;;
-        r580) branchName=rel/gpu_drv/r580/r580_00 ;;
-        sweep)   moduleName="sweep"; moduleDir="" ;;
-        drivers) moduleName="drivers dist"; moduleDir="" ;;
-        opengl)  moduleName="opengl"; moduleDir="drivers/OpenGL" ;;
-        amd64|aarch64) targetArch=$1 ;;
-        debug|release|develop) targetConfig=$1 ;;
-        root) shift; nvsrcRoot="$1" ;;
-        jobs) shift; builderThreads=$1 ;; 
-        cc|compileCommands) compileCommands=1 ;;
-        full|fullbuild) fullBuild=1 ;;
+        bfm)  branch=dev/gpu_drv/bugfix_main ;;
+        r580) branch=rel/gpu_drv/r580/r580_00 ;;
+        sweep)   module="sweep" ;;
+        drivers) module="drivers dist" ;;
+        opengl)  module="opengl" ;;
+        amd64|aarch64) arch=$1 ;;
+        debug|release|develop) config=$1 ;;
+        root) shift; export P4ROOT="$1" ;;
+        jobs) shift; jobs=$1 ;; 
+        cc|comcmd) comcmd=1 ;;
+        full|fullbuild) fullbuild=1 ;;
         *) others+=" $1" ;;
     esac
     shift 
 done 
 
-if [[ ! -d $nvsrcRoot/$branchName/$moduleDir ]]; then 
-    echo "Error: source folder not found: $nvsrcRoot/$branchName/$moduleDir"
+if [[ ! -d $P4ROOT/$branch ]]; then 
+    echo "Error: source folder not found: $P4ROOT/$branch"
     exit 1
 fi 
 
-if [[ $compileCommands == 1 && ! -z $(grep compileCommands $nvsrcRoot/$branchName/drivers/common/build/build.cfg) ]]; then 
-    nvmakeMisc+=" compileCommands"
+if [[ $comcmd == 1 && ! -z $(grep compilecommands $P4ROOT/$branch/drivers/common/build/build.cfg) ]]; then 
+    nvmakeMisc+=" compilecommands"
 fi 
 
-nvsrcVersion=$(grep '^#define NV_VERSION_STRING' $nvsrcRoot/$branchName/drivers/common/inc/nvUnixVersion.h | awk '{print $3}' | sed 's/"//g')
-echo "Driver code version: $nvsrcVersion"
+version=$(grep '^#define NV_VERSION_STRING' $P4ROOT/$branch/drivers/common/inc/nvUnixVersion.h | awk '{print $3}' | sed 's/"//g')
+echo "Driver code version: $version"
 
 unixBuildArgs=(
     --unshare-namespaces
-    --tools  $nvsrcRoot/tools 
-    --devrel $nvsrcRoot/devrel/SDK/inc/GL
+    --tools  $P4ROOT/tools 
+    --devrel $P4ROOT/devrel/SDK/inc/GL
 )
 
-if [[ $fullBuild == 1 ]]; then 
+if [[ $fullbuild == 1 ]]; then 
     excludeModules=()
 else
     excludeModules=(
@@ -95,18 +93,18 @@ nvmakeArgs=(
     NV_LTCG=
     NV_UNIX_CHECK_DEBUG_INFO=0
     NV_MANGLE_SYMBOLS= 
-    NV_TRACE_CODE=$([[ $targetConfig != release ]] && echo 1 || echo)
+    NV_TRACE_CODE=1
     NV_EXCLUDE_BUILD_MODULES="\"${excludeModules[@]}\""
-    "$moduleName" 
+    "$module" 
     linux 
-    "$targetArch" 
-    "$targetConfig" 
-    "-j$builderThreads" 
-    "$compileCommands"
+    "$arch" 
+    "$config" 
+    "-j$jobs" 
+    "$comcmd"
     "$others"
 )
 
-commandLine="cd $nvsrcRoot/$branchName/$moduleDir && $nvsrcRoot/tools/linux/unix-build/unix-build ${unixBuildArgs[@]} nvmake ${nvmakeArgs[@]} > >(tee /tmp/nvmake.stdout) 2> >(tee /tmp/nvmake.stderr >&2)"
+commandLine="cd $P4ROOT/$branch && $P4ROOT/tools/linux/unix-build/unix-build ${unixBuildArgs[@]} nvmake ${nvmakeArgs[@]} > >(tee /tmp/nvmake.stdout) 2> >(tee /tmp/nvmake.stderr >&2)"
 
 echo "${commandLine}"
 if [[ $WZHU_YES != 1 ]]; then 
