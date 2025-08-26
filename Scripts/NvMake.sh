@@ -53,7 +53,6 @@ unixBuildArgs=(
     --unshare-namespaces
     --tools  $nvsrcRoot/tools 
     --devrel $nvsrcRoot/devrel/SDK/inc/GL
-    --read-only-source
 )
 
 excludeModules=(
