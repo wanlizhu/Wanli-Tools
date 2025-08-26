@@ -17,7 +17,8 @@ moduleDir=""
 targetArch=amd64 
 targetConfig=develop
 builderThreads=$(nproc)
-compilecommands=
+compileCommands=
+fullBuild=
 others=
 
 while [[ $# -gt 0 ]]; do 
@@ -31,7 +32,8 @@ while [[ $# -gt 0 ]]; do
         debug|release|develop) targetConfig=$1 ;;
         root) shift; nvsrcRoot="$1" ;;
         jobs) shift; builderThreads=$1 ;; 
-        cc|compilecommands) compilecommands=1 ;;
+        cc|compileCommands) compileCommands=1 ;;
+        full|fullbuild) fullBuild=1 ;;
         *) others+=" $1" ;;
     esac
     shift 
@@ -42,8 +44,8 @@ if [[ ! -d $nvsrcRoot/$branchName/$moduleDir ]]; then
     exit 1
 fi 
 
-if [[ $compilecommands == 1 && ! -z $(grep compilecommands $nvsrcRoot/$branchName/drivers/common/build/build.cfg) ]]; then 
-    nvmakeMisc+=" compilecommands"
+if [[ $compileCommands == 1 && ! -z $(grep compileCommands $nvsrcRoot/$branchName/drivers/common/build/build.cfg) ]]; then 
+    nvmakeMisc+=" compileCommands"
 fi 
 
 nvsrcVersion=$(grep '^#define NV_VERSION_STRING' $nvsrcRoot/$branchName/drivers/common/inc/nvUnixVersion.h | awk '{print $3}' | sed 's/"//g')
@@ -55,29 +57,33 @@ unixBuildArgs=(
     --devrel $nvsrcRoot/devrel/SDK/inc/GL
 )
 
-excludeModules=(
-    vgpu # GPU virtualization
-    gpgpu # CUDA driver
-    gpgpucomp # CUDA compiler (used by CUDA and raytracing)
-    compiler # OpenCL 
-    gpgpudbg # CUDA debugger
-    uvm # Unified Virtual Memory (used by CUDA) 
-    raytracing # Vulkan raytracing (depends on gpgpu, gpgpucomp and uvm)
-    optix # Optix raytracing API (depends on gpgpu, gpgpucomp and uvm)
-    nvapi # Linux re-impl of NVAPI
-    nvtopps # Notebook power management 
-    testutils # UVM tests, lock-to-rated-tdp
-    vdpau # VDPAU video acceleration driver
-    ngx # Neural Graphics Experience
-    nvfbc # Nvidia framebuffer capture
-    nvcuvid # CUDA based video driver
-    encodeapi # Video encode API
-    opticalflow # Opticalflow video driver 
-    fabricmanager # Fabric manager 
-    nvlibpkcs11 # PKCS11 cryptograph (used in confidential compute)
-    vulkansc # VulkanSC driver 
-    pcc # VulkanSC PCC
-)
+if [[ $fullBuild == 1 ]]; then 
+    excludeModules=()
+else
+    excludeModules=(
+        vgpu # GPU virtualization
+        gpgpu # CUDA driver
+        gpgpucomp # CUDA compiler (used by CUDA and raytracing)
+        compiler # OpenCL 
+        gpgpudbg # CUDA debugger
+        uvm # Unified Virtual Memory (used by CUDA) 
+        raytracing # Vulkan raytracing (depends on gpgpu, gpgpucomp and uvm)
+        optix # Optix raytracing API (depends on gpgpu, gpgpucomp and uvm)
+        nvapi # Linux re-impl of NVAPI
+        nvtopps # Notebook power management 
+        testutils # UVM tests, lock-to-rated-tdp
+        vdpau # VDPAU video acceleration driver
+        ngx # Neural Graphics Experience
+        nvfbc # Nvidia framebuffer capture
+        nvcuvid # CUDA based video driver
+        encodeapi # Video encode API
+        opticalflow # Opticalflow video driver 
+        fabricmanager # Fabric manager 
+        nvlibpkcs11 # PKCS11 cryptograph (used in confidential compute)
+        vulkansc # VulkanSC driver 
+        pcc # VulkanSC PCC
+    )
+fi 
 
 nvmakeArgs=(
     NV_COLOR_OUTPUT=1 
@@ -90,17 +96,17 @@ nvmakeArgs=(
     NV_UNIX_CHECK_DEBUG_INFO=0
     NV_MANGLE_SYMBOLS= 
     NV_TRACE_CODE=1
-    NV_EXCLUDE_BUILD_MODULES="\"${excludeModules[*]}\""
+    NV_EXCLUDE_BUILD_MODULES="\"${excludeModules[@]}\""
     "$moduleName" 
     linux 
     "$targetArch" 
     "$targetConfig" 
     "-j$builderThreads" 
-    "$compilecommands"
+    "$compileCommands"
     "$others"
 )
 
-commandLine="cd $nvsrcRoot/$branchName/$moduleDir && $nvsrcRoot/tools/linux/unix-build/unix-build ${unixBuildArgs[*]} nvmake ${nvmakeArgs[*]} > >(tee /tmp/nvmake.stdout) 2> >(tee /tmp/nvmake.stderr >&2)"
+commandLine="cd $nvsrcRoot/$branchName/$moduleDir && $nvsrcRoot/tools/linux/unix-build/unix-build ${unixBuildArgs[@]} nvmake ${nvmakeArgs[@]} > >(tee /tmp/nvmake.stdout) 2> >(tee /tmp/nvmake.stderr >&2)"
 
 echo "${commandLine}"
 if [[ $WZHU_YES != 1 ]]; then 
