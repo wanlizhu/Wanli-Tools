@@ -95,7 +95,7 @@ nvmakeArgs=(
     NV_LTCG=
     NV_UNIX_CHECK_DEBUG_INFO=0
     NV_MANGLE_SYMBOLS= 
-    NV_TRACE_CODE=$([[ $cofnig != release ]] && echo 1 || echo)
+    NV_TRACE_CODE=$([[ $targetConfig != release ]] && echo 1 || echo)
     NV_EXCLUDE_BUILD_MODULES="\"${excludeModules[@]}\""
     "$moduleName" 
     linux 
