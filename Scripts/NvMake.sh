@@ -18,6 +18,7 @@ targetArch=amd64
 targetConfig=develop
 builderThreads=$(nproc)
 compilecommands=
+others=
 
 while [[ $# -gt 0 ]]; do 
     case $1 in 
@@ -31,6 +32,7 @@ while [[ $# -gt 0 ]]; do
         root) shift; nvsrcRoot="$1" ;;
         jobs) shift; builderThreads=$1 ;; 
         cc|compilecommands) compilecommands=1 ;;
+        *) others+=" $1" ;;
     esac
     shift 
 done 
@@ -47,7 +49,59 @@ fi
 nvsrcVersion=$(grep '^#define NV_VERSION_STRING' $nvsrcRoot/$branchName/drivers/common/inc/nvUnixVersion.h | awk '{print $3}' | sed 's/"//g')
 echo "Driver code version: $nvsrcVersion"
 
-commandLine="cd $nvsrcRoot/$branchName/$moduleDir && $nvsrcRoot/tools/linux/unix-build/unix-build --tools $nvsrcRoot/tools --devrel $nvsrcRoot/devrel/SDK/inc/GL --unshare-namespaces nvmake NV_COLOR_OUTPUT=1 NV_GUARDWORD= NV_COMPRESS_THREADS=$(nproc) NV_FAST_PACKAGE_COMPRESSION=zstd NV_USE_FRAME_POINTER=1 NV_UNIX_LTO_ENABLED= NV_MANGLE_SYMBOLS= NV_TRACE_CODE=1 -time $moduleName linux $targetArch $targetConfig -j$builderThreads $nvmakeMisc > >(tee /tmp/nvmake.stdout) 2> >(tee /tmp/nvmake.stderr >&2)"
+unixBuildArgs=(
+    --unshare-namespaces
+    --tools  $nvsrcRoot/tools 
+    --devrel $nvsrcRoot/devrel/SDK/inc/GL
+    --read-only-source
+)
+
+excludeModules=(
+    vgpu # GPU virtualization
+    gpgpu # CUDA driver
+    gpgpucomp # CUDA compiler (used by CUDA and raytracing)
+    compiler # OpenCL 
+    gpgpudbg # CUDA debugger
+    uvm # Unified Virtual Memory (used by CUDA) 
+    raytracing # Vulkan raytracing (depends on gpgpu, gpgpucomp and uvm)
+    optix # Optix raytracing API (depends on gpgpu, gpgpucomp and uvm)
+    nvapi # Linux re-impl of NVAPI
+    nvtopps # Notebook power management 
+    testutils # UVM tests, lock-to-rated-tdp
+    vdpau # VDPAU video acceleration driver
+    ngx # Neural Graphics Experience
+    nvfbc # Nvidia framebuffer capture
+    nvcuvid # CUDA based video driver
+    encodeapi # Video encode API
+    opticalflow # Opticalflow video driver 
+    fabricmanager # Fabric manager 
+    nvlibpkcs11 # PKCS11 cryptograph (used in confidential compute)
+    vulkansc # VulkanSC driver 
+    pcc # VulkanSC PCC
+)
+
+nvmakeArgs=(
+    NV_COLOR_OUTPUT=1 
+    NV_GUARDWORD= 
+    NV_COMPRESS_THREADS=$(nproc)
+    NV_FAST_PACKAGE_COMPRESSION=zstd 
+    NV_USE_FRAME_POINTER=1
+    NV_UNIX_LTO_ENABLED= 
+    NV_LTCG=
+    NV_UNIX_CHECK_DEBUG_INFO=0
+    NV_MANGLE_SYMBOLS= 
+    NV_TRACE_CODE=1
+    NV_EXCLUDE_BUILD_MODULES="${excludeModules[*]}"
+    "$moduleName" 
+    linux 
+    "$targetArch" 
+    "$targetConfig" 
+    "-j$builderThreads" 
+    "$compilecommands"
+    "$others"
+)
+
+commandLine="cd $nvsrcRoot/$branchName/$moduleDir && $nvsrcRoot/tools/linux/unix-build/unix-build ${unixBuildArgs[*]} nvmake ${nvmakeArgs[*]} > >(tee /tmp/nvmake.stdout) 2> >(tee /tmp/nvmake.stderr >&2)"
 
 echo "${commandLine}"
 if [[ $WZHU_YES != 1 ]]; then 
