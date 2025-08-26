@@ -255,25 +255,32 @@ elif [[ $1 == xauth ]]; then
         sudo -H bash -lc "echo '[Running as root]'; cp -vf $HOME/.Xauthority /root/"
     fi 
 elif [[ $1 == viewperf ]]; then 
-    # $2: viewset, $3: subtest, [$4: optional pic-x args]
-    GL_ENV=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
     [[ -z $WZHU_VP_ROOT ]] && WZHU_VP_ROOT=/root/nvt/tests/viewperf2020v3/viewperf2020
+    exe="./viewperf/bin/viewperf"
+    arg="viewsets/$2/config/$2.xml $3 -resolution 3840x2160"
+    dir="$WZHU_VP_ROOT"
+    
+    exportEnvs=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
+    if [[ $WZHU_PUSHBUF == 1 ]]; then 
+        exportEnvs+=" export __GL_ac12fede=3; export __GL_ac12fedf=/tmp/pushbuffer-%02d.txt; "
+    fi 
+
     if [[ $WZHU_PI == 1 ]]; then 
-        commandLine="$GL_ENV cd $(pwd) && rm -rf $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX && $HOME/SinglePassCapture/pic-x $4 --api=ogl --check_clocks=0 --sample=24000 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX --startframe=100 --exe=./viewperf/bin/viewperf --arg=\"viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" --workdir=$WZHU_VP_ROOT | grep -v \"won't hook API\" && sudo -u $USER -H bash -lc \"source $HOME/SinglePassCapture/PerfInspector/Python-venv/bin/activate && NVM_GTLAPI_USER=wanliz $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX/upload_report.sh\"" 
+        commandLine="$exportEnvs cd $(pwd) && rm -rf $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX && $HOME/SinglePassCapture/pic-x $4 --api=ogl --check_clocks=0 --sample=24000 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX --startframe=100 --exe=$exe --arg=\"$arg\" --workdir=$dir | grep -v \"won't hook API\" && sudo -u $USER -H bash -lc \"source $HOME/SinglePassCapture/PerfInspector/Python-venv/bin/activate && NVM_GTLAPI_USER=wanliz $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX/upload_report.sh\"" 
     else
         if [[ ! -z $2 ]]; then 
             if [[ $WZHU_GDB == 1 ]]; then 
                 [[ -z $(which cgdb) ]] && sudo apt install -y cgdb
-                commandLine="$GL_ENV cd $WZHU_VP_ROOT && cgdb -ex 'set trace-commands on' -ex 'set pagination off' -ex 'set confirm off' -ex 'set debuginfod enabled on' -ex 'set breakpoint pending on' -ex 'file ./viewperf/bin/viewperf' -ex \"set args viewsets/$2/config/$2.xml $3 -resolution 3840x2160\" -ex 'set trace-commands off'"
+                commandLine="$exportEnvs cd $dir && cgdb -ex 'set trace-commands on' -ex 'set pagination off' -ex 'set confirm off' -ex 'set debuginfod enabled on' -ex 'set breakpoint pending on' -ex \"file $exe\" -ex \"set args $arg\" -ex 'set trace-commands off'"
             else
-                commandLine="$GL_ENV cd $WZHU_VP_ROOT && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat $WZHU_VP_ROOT/results/$2*/results.xml"
+                commandLine="$exportEnvs cd $WZHU_VP_ROOT && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat $WZHU_VP_ROOT/results/$2*/results.xml"
             fi 
         else
-            commandLine="$GL_ENV cd $WZHU_VP_ROOT; rm -rf /tmp/viewperf"
+            commandLine="$exportEnvs cd $dir; rm -rf /tmp/viewperf"
             for viewset in catia creo energy maya medical snx sw; do 
-                commandLine+="  ; ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml -resolution 3840x2160 && cat $WZHU_VP_ROOT/results/${viewset//sw/solidworks}*/results.xml >> /tmp/viewperf"
+                commandLine+="  ; $exe viewsets/$viewset/config/$viewset.xml -resolution 3840x2160 && cat $WZHU_VP_ROOT/results/${viewset//sw/solidworks}*/results.xml >> /tmp/viewperf"
             done 
-            commandLine+=" ; python3 Visualize-Viewperf-Results.py /tmp/viewperf"
+            commandLine+=" ; Visualize-Viewperf-Results.py /tmp/viewperf"
         fi 
     fi 
 
@@ -281,6 +288,6 @@ elif [[ $1 == viewperf ]]; then
     read -p "Press [Enter] to continue as root: "
     sudo -H bash -lc "$commandLine" 
 else 
-    GL_ENV=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
-    sudo -H bash -lc "$GL_ENV /mnt/linuxqa/nvt.sh $*" 
+    exportEnvs=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
+    sudo -H bash -lc "$exportEnvs /mnt/linuxqa/nvt.sh $*" 
 fi 
