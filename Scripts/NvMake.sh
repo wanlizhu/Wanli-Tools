@@ -11,6 +11,7 @@ for pkg in libelf-dev elfutils; do
 done 
 
 branch=rel/gpu_drv/r580/r580_00
+subdir=
 module="drivers dist"
 arch=amd64 
 config=develop
@@ -47,9 +48,9 @@ while [[ $# -gt 0 ]]; do
         sweep|drivers|opengl) module=$1; if [[ $1 == drivers ]]; then 
             module+=" dist"
         fi ;;
+        d3dreg) module= ; subdir="ddraw/tools/D3DRegKeys/d3dreg" ;;  
         amd64|aarch64) arch=$1 ;;
         debug|release|develop) config=$1 ;;
-        root) shift; export P4ROOT="$1" ;;
         j|jobs) shift; jobs=$1 ;; 
         cc|comcmd) if [[ ! -z $(grep compilecommands $P4ROOT/$branch/drivers/common/build/build.cfg) ]]; then 
             others+=" compilecommands"
@@ -60,8 +61,9 @@ while [[ $# -gt 0 ]]; do
     shift 
 done 
 
-if [[ ! -d $P4ROOT/$branch ]]; then 
-    echo "Error: source folder not found: $P4ROOT/$branch"
+workdir=$P4ROOT/$branch/$subdir
+if [[ ! -d $workdir ]]; then 
+    echo "Error: source folder not found: $workdir"
     exit 1
 fi 
 
@@ -94,7 +96,7 @@ nvmakeArgs=(
     "$others"
 )
 
-commandLine="cd $P4ROOT/$branch && $P4ROOT/tools/linux/unix-build/unix-build ${unixBuildArgs[@]} nvmake ${nvmakeArgs[@]} > >(tee /tmp/nvmake.stdout) 2> >(tee /tmp/nvmake.stderr >&2)"
+commandLine="cd $workdir && $P4ROOT/tools/linux/unix-build/unix-build ${unixBuildArgs[@]} nvmake ${nvmakeArgs[@]} > >(tee /tmp/nvmake.stdout) 2> >(tee /tmp/nvmake.stderr >&2)"
 
 echo "${commandLine}"
 if [[ $WZHU_YES != 1 ]]; then 
