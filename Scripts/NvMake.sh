@@ -25,7 +25,7 @@ excludeModules=(
     uvm # Unified Virtual Memory (used by CUDA) 
     raytracing # Vulkan raytracing (depends on gpgpu, gpgpucomp and uvm)
     optix # Optix raytracing API (depends on gpgpu, gpgpucomp and uvm)
-    nvapi # Linux re-impl of NVAPI
+    #nvapi # Linux re-impl of NVAPI (used by iGPU_vfmax_scripts/perfdebug)
     nvtopps # Notebook power management 
     testutils # UVM tests, lock-to-rated-tdp
     vdpau # VDPAU video acceleration driver
