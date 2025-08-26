@@ -262,7 +262,7 @@ elif [[ $1 == viewperf ]]; then
     
     exportEnvs=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
     if [[ $WZHU_PUSHBUF == 1 ]]; then 
-        exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_ac12fedf=/tmp/pushbuffer-viewperf-$2-subtest$3-on-$(hostname)-%02d.txt; "
+        exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_ac12fedf=/tmp/pushbuffer-viewperf-$2-subtest$3-on-$(hostname)-%d.txt; "
     fi 
 
     if [[ $WZHU_PI == 1 ]]; then 
