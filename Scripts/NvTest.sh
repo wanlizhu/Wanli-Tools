@@ -309,6 +309,10 @@ elif [[ $1 == viewperf ]]; then
     postproc=
     
     if [[ $WZHU_PUSHBUF == 1 ]]; then 
+        if [[ -z $2 || -z $3 ]]; then 
+            echo "Viewset and subtest are required to dump pushbuffer"
+            exit 1
+        fi 
         wzhu-enable-pushbuffer-dump || exit 1
         postproc="sed -i '1{/<\/FRAME>/d}' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml && sed -i '$ { /<\/FRAME>/! s/$/\n<\/FRAME>/ }' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml"
     fi 
