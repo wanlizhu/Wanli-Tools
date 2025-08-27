@@ -184,6 +184,8 @@ elif [[ $1 == driver || $1 == drivers ]]; then
                 echo "Found no driver package in $3"; exit 1 
             fi 
         elif [[ $3 == *".run" ]]; then 
+            echo "Kill all graphics apps and install $3"
+            read -p "Press [Enter] to continue: "
             sudo fuser -v /dev/nvidia* 2>/dev/null | grep -v 'COMMAND' | awk '{print $3}' | sort | uniq | tee > /tmp/nvidia
             for nvpid in $(cat /tmp/nvidia); do 
                 echo -n "Killing $nvpid "
