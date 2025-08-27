@@ -114,11 +114,12 @@ if [[ $1 == env ]]; then
         }
         export -f wzhu-add-keys
         function wzhu-enable-pushbuffer-dump {
+            [[ -z $1 ]] && { echo "Dump file path is missing"; return 1; }
             read -p "Frame index to dump pushbuffer at: " -e -i 100 index
             export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 ))
             export __GL_8FCB2E8=$index
             export __GL_6635F0C4=$index
-            [[ ! -z $1 ]] && export __GL_ac12fedf=$1
+            export __GL_ac12fedf=$1
             echo "Load ENVVARS to enable pushbuffer dump -> OK"
         }
         export -f wzhu-enable-pushbuffer-dump
