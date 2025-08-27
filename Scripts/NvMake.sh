@@ -108,18 +108,22 @@ fi
 pushd . >/dev/null || exit 1
 eval "$commandLine" && {
     if [[ $install == 1 ]]; then 
-        case "$module" in 
-            opengl) 
-                read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so: "
-                version=$(ls /usr/lib/*-linux-gnu/libnvidia-glcore.so.*  | awk -F '.so.' '{print $2}' | head -1)
-                sudo cp -vf --remove-destination $P4ROOT/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so /usr/lib/$(uname -m)-linux-gnu/libnvidia-glcore.so.$version  ;;
-            d3dreg|nvreg) 
-                read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/nvreg: "
-                sudo cp -vf $P4ROOT/$branch/drivers/ddraw/tools/D3DRegKeys/d3dreg/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/nvreg /usr/bin/ ;;
-            libsass3|libsass|sass) 
-                read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libsass3.so: "
-                sudo cp -vf $P4ROOT/$branch/drivers/common/HW/sass3lib/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libsass3.so /usr/lib/$(uname -m)-linux-gnu/ ;;
-        esac 
+        if [[ $(uname -m) == $arch ]]; then 
+            case "$module" in 
+                opengl) 
+                    read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so: "
+                    version=$(ls /usr/lib/*-linux-gnu/libnvidia-glcore.so.*  | awk -F '.so.' '{print $2}' | head -1)
+                    sudo cp -vf --remove-destination $P4ROOT/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so /usr/lib/$(uname -m)-linux-gnu/libnvidia-glcore.so.$version  ;;
+                d3dreg|nvreg) 
+                    read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/nvreg: "
+                    sudo cp -vf $P4ROOT/$branch/drivers/ddraw/tools/D3DRegKeys/d3dreg/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/nvreg /usr/bin/ ;;
+                libsass3|libsass|sass) 
+                    read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libsass3.so: "
+                    sudo cp -vf $P4ROOT/$branch/drivers/common/HW/sass3lib/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libsass3.so /usr/lib/$(uname -m)-linux-gnu/ ;;
+            esac 
+        else
+            echo "Can't install $arch on $(uname -m) host"
+        fi 
     fi 
 }
 popd >/dev/null   
