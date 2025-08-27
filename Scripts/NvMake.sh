@@ -48,7 +48,7 @@ while [[ $# -gt 0 ]]; do
         sweep|drivers|opengl) module=$1; if [[ $1 == drivers ]]; then 
             module+=" dist"
         fi ;;
-        d3dreg) module= ; subdir="drivers/ddraw/tools/D3DRegKeys/d3dreg" ;;  
+        d3dreg|nvreg) module= ; subdir="drivers/ddraw/tools/D3DRegKeys/d3dreg" ;;  
         amd64|aarch64) arch=$1 ;;
         debug|release|develop) config=$1 ;;
         j|jobs) shift; jobs=$1 ;; 
