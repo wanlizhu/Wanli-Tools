@@ -114,12 +114,12 @@ if [[ $1 == env ]]; then
         }
         export -f wzhu-add-keys
         function wzhu-enable-pushbuffer-dump {
-            [[ -z $1 ]] && { echo "Dump file path is missing"; return 1; }
-            read -p "Frame index to dump pushbuffer at: " -e -i 100 index
+            [[ -z $1 ]] && { echo "Frame index is missing"; return 1; }
+            [[ -z $2 ]] && { echo "File path is missing"; return 1; }
             export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 ))
-            export __GL_8FCB2E8=$index
-            export __GL_6635F0C4=$index
-            export __GL_ac12fedf=$1
+            export __GL_8FCB2E8=$1
+            export __GL_6635F0C4=$1
+            export __GL_ac12fedf=$2
             echo "Load ENVVARS to enable pushbuffer dump -> OK"
         }
         export -f wzhu-enable-pushbuffer-dump
@@ -310,7 +310,8 @@ elif [[ $1 == viewperf ]]; then
     postproc=
     
     if [[ $WZHU_PUSHBUF == 1 ]]; then 
-        wzhu-enable-pushbuffer-dump $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml || exit 1
+        read -p "Frame index to dump pushbuffer at: " -e -i 100 index
+        wzhu-enable-pushbuffer-dump $index $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml || exit 1
         postproc="sed -i '1{/<\/FRAME>/d}' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml && sed -i '$ { /<\/FRAME>/! s/$/\n<\/FRAME>/ }' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml"
     fi 
 
