@@ -107,9 +107,11 @@ if [[ $1 == env ]]; then
             pushd ~/WZhu && git add . && git commit -m draft && git push && popd 
         }
         function wzhu-rsync-to-windows {
-            read -p "Windows Host IP: " -e -i "$(cat /tmp/windows-host-ip)" host
-            cat "$host" > /tmp/windows-host-ip
-            sshpass -p "$(echo 'U2FsdGVkX1+UnE9oAYZ8DjyHzGqQ3wxZbhrJanHFw9u7ypNWEkG2dOJQShrj5dlT' | openssl enc -d -aes-256-cbc -pbkdf2 -a)" rsync -ah --info=progress2 -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" $@ WanliZhu@$host:'C:\Users\WanliZhu\Desktop\'
+            if [[ ! -z $1 ]]; then 
+                read -p "Windows Host IP: " -e -i "$(cat /tmp/windows-host-ip)" host
+                cat "$host" > /tmp/windows-host-ip
+                sshpass -p "$(echo 'U2FsdGVkX1+UnE9oAYZ8DjyHzGqQ3wxZbhrJanHFw9u7ypNWEkG2dOJQShrj5dlT' | openssl enc -d -aes-256-cbc -pbkdf2 -a)" rsync -ah --info=progress2 -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" $@ WanliZhu@$host:'C:\Users\WanliZhu\Desktop\'
+            fi 
         }
     fi 
 elif [[ $1 == driver || $1 == drivers ]]; then 
