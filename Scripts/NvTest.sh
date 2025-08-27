@@ -108,8 +108,8 @@ if [[ $1 == env ]]; then
         }
         function wzhu-scp-to-windows {
             if [[ ! -z $1 ]]; then 
-                read -p "Windows Host IP: " -e -i "$(cat /tmp/windows-host-ip 2>/dev/null)" host
-                echo "$host" > /tmp/windows-host-ip
+                read -p "Windows Host IP: " -e -i "$(cat $HOME/.windows-host-ip 2>/dev/null)" host
+                echo "$host" > $HOME/.windows-host-ip
                 [[ -z $(which sshpass) ]] && sudo apt install -y sshpass
                 sshpass -p "$(echo 'U2FsdGVkX1+UnE9oAYZ8DjyHzGqQ3wxZbhrJanHFw9u7ypNWEkG2dOJQShrj5dlT' | openssl enc -d -aes-256-cbc -pbkdf2 -a)" scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $@ WanliZhu@$host:'C:\Users\WanliZhu\Desktop\'
             fi 
@@ -293,8 +293,8 @@ elif [[ $1 == viewperf ]]; then
     exportEnvs=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
     if [[ $WZHU_PUSHBUF == 1 ]]; then 
         read -p "Frame index to dump pushbuffer at: " -e -i 100 index
-        exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_8FCB2E8=$index; export __GL_6635F0C4=$index; export __GL_ac12fedf=/tmp/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml; "
-        postproc="sed -i '1{/<\/FRAME>/d}' /tmp/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml && sed -i '$ { /<\/FRAME>$/! s/$/\n<\/FRAME>/ }' /tmp/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml"
+        exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_8FCB2E8=$index; export __GL_6635F0C4=$index; export __GL_ac12fedf=$HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml; "
+        postproc="sed -i '1{/<\/FRAME>/d}' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml && sed -i '$ { /<\/FRAME>$/! s/$/\n<\/FRAME>/ }' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml"
     fi 
 
     if [[ $WZHU_PI == 1 ]]; then # Capture PI report
