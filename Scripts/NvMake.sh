@@ -108,7 +108,7 @@ fi
 pushd . >/dev/null || exit 1
 eval "$commandLine" && {
     if [[ $install == 1 ]]; then 
-        if [[ $(uname -m) == $arch ]]; then 
+        if [[ $(uname -m | sed 's/^x86_64$/amd64/') == $arch ]]; then 
             case "$module" in 
                 opengl) 
                     read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so: "
