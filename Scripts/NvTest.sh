@@ -81,7 +81,17 @@ if [[ $1 == driver || $1 == drivers ]]; then
                 sudo kill -9 $nvpid && echo "-> OK" || echo "-> Failed"
                 sleep 1
             done
-            sudo rmmod -f nvidia_uvm nvidia_drm nvidia_modeset nvidia  
+            #sudo rmmod -f nvidia_uvm nvidia_drm nvidia_modeset nvidia_fs nvidia  
+            while :; do
+                removed=0
+                for m in $(lsmod | awk '/^nvidia/ {print $1}'); do
+                    if [ ! -d "/sys/module/$m/holders" ] || [ -z "$(ls -A /sys/module/$m/holders 2>/dev/null)" ]; then
+                        sudo rmmod -f "$m" && removed=1
+                        echo "Remove kernel module $m -> OK"
+                    fi
+                done
+                [ "$removed" -eq 0 ] && break
+            done
 
             sudo env IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 $3 -s --no-kernel-module-source --skip-module-load || { 
                 cat /var/log/nvidia-installer.log
