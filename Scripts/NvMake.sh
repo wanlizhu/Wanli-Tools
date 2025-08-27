@@ -48,7 +48,7 @@ while [[ $# -gt 0 ]]; do
         bfm)  branch=dev/gpu_drv/bugfix_main ;;
         r580) branch=rel/gpu_drv/r580/r580_00 ;;
         drivers) module="drivers dist"; module2=drivers ;;
-        sweep|opengl) module=$1; module2=$1 ;;
+        sweep|opengl|resman) module=$1; module2=$1 ;;
         d3dreg|nvreg) module= ; module2=$1; subdir="drivers/ddraw/tools/D3DRegKeys/d3dreg" ;;  
         libsass3|libsass|sass) module= ; module2=$1; subdir="drivers/common/HW/sass3lib"; others+=" SASS3LIB_BUILD_DLL=0 BLACKWELLSASS=1 EXTERNAL_SASSLIB=0" ;;
         amd64|aarch64) arch=$1 ;;
