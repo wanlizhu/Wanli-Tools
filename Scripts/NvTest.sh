@@ -118,7 +118,7 @@ if [[ $1 == env ]]; then
             export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 ))
             export __GL_8FCB2E8=$index
             export __GL_6635F0C4=$index
-            export __GL_ac12fedf=$HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml
+            [[ ! -z $1 ]] && export __GL_ac12fedf=$1
             echo "Load ENVVARS to enable pushbuffer dump -> OK"
         }
         export -f wzhu-enable-pushbuffer-dump
@@ -309,11 +309,7 @@ elif [[ $1 == viewperf ]]; then
     postproc=
     
     if [[ $WZHU_PUSHBUF == 1 ]]; then 
-        if [[ -z $2 || -z $3 ]]; then 
-            echo "Viewset and subtest are required to dump pushbuffer"
-            exit 1
-        fi 
-        wzhu-enable-pushbuffer-dump || exit 1
+        wzhu-enable-pushbuffer-dump $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml || exit 1
         postproc="sed -i '1{/<\/FRAME>/d}' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml && sed -i '$ { /<\/FRAME>/! s/$/\n<\/FRAME>/ }' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml"
     fi 
 
