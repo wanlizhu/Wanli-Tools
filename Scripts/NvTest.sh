@@ -106,7 +106,7 @@ if [[ $1 == env ]]; then
         function wzhu-push {
             pushd ~/WZhu && git add . && git commit -m draft && git push && popd 
         }
-        function wzhu-rsync-to-windows {
+        function wzhu-scp-to-windows {
             if [[ ! -z $1 ]]; then 
                 read -p "Windows Host IP: " -e -i "$(cat /tmp/windows-host-ip 2>/dev/null)" host
                 echo "$host" > /tmp/windows-host-ip
