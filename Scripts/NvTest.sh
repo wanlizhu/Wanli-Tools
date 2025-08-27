@@ -101,7 +101,7 @@ if [[ $1 == env ]]; then
             fi 
         fi 
         function wzhu-pull {
-            pushd ~/WZhu && git pull && popd 
+            pushd ~/WZhu && git pull && source ~/WZhu/Scripts/NvTest.sh env setup && popd 
         }
         function wzhu-push {
             pushd ~/WZhu && git add . && git commit -m draft && git push && popd 
