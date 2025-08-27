@@ -45,12 +45,13 @@ if [[ $1 == driver || $1 == drivers ]]; then
             rsync -ah --progress wanliz@office:/sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/tests-Linux-$(uname -m).tar $HOME && echo || exit 1
             
             if [[ "$(wc -l < /tmp/list)" -gt 1 ]]; then
-                $0 driver local $HOME 
+                $0 driver local $HOME || exit 1
             elif [[ "$(wc -l < /tmp/list)" == 1 ]]; then 
                 version=$(cat /tmp/list | head -1 | awk -F- '{print $4}' | sed 's/\.run$//')
-                $0 driver local $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run
+                $0 driver local $HOME/NVIDIA-Linux-$(uname -m)-$version-internal.run || exit 1
             else
-                echo "The remote folder has no driver package"; exit 1
+                echo "The remote folder has no driver package"
+                exit 1
             fi 
 
             if [[ $config != release && -z $(ls /sw 2>/dev/null) ]]; then
@@ -80,9 +81,13 @@ if [[ $1 == driver || $1 == drivers ]]; then
                 sudo kill -9 $nvpid && echo "-> OK" || echo "-> Failed"
                 sleep 1
             done
-            sudo rmmod -f nvidia_uvm nvidia_drm nvidia_modeset nvidia 2>/dev/null 
+            sudo rmmod -f nvidia_uvm nvidia_drm nvidia_modeset nvidia  
 
-            sudo env IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 $3 -s --no-kernel-module-source --skip-module-load || { cat /var/log/nvidia-installer.log; exit 1; }
+            sudo env IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 $3 -s --no-kernel-module-source --skip-module-load || { 
+                cat /var/log/nvidia-installer.log
+                echo "Aborting..."
+                exit 1
+            }
 
             unset NVTEST_DRIVER NVTEST_DRIVER_BRANCH NVTEST_DRIVER_CHANGELIST NVTEST_DRIVER_DIR && echo "Unset NVTEST_* envvars -> OK"
             if [[ -f $(dirname $3)/tests-Linux-$(uname -m).tar ]]; then 
