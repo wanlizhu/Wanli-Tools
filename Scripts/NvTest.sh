@@ -141,7 +141,18 @@ if [[ $1 == env ]]; then
         export -f wzhu-disable-pushbuffer-dump
         function wzhu-enable-pcsampler {
             if [[ -z $(which nvreg) ]]; then 
-                echo -e "Install nvreg first\nAborting..."
+                echo -e "Please build nvreg using NvMake.sh\nAborting..."
+                exit 1
+            fi 
+            libsass=
+            for dir in ${PATH//:/ }; do
+                if [[ -f "$dir/libsass.lib" ]]; then
+                    libsass="$dir/libsass.lib"
+                    break 
+                fi
+            done
+            if [[ -z $libsass ]]; then 
+                echo -e "Please build libsass using NvMake.sh\nAborting..."
                 exit 1
             fi 
             read -p "Frame index to start cyclestats at: " -e -i 100 index
@@ -152,10 +163,6 @@ if [[ $1 == env ]]; then
         }
         export -f wzhu-enable-pcsampler 
         function wzhu-disable-pcsampler {
-            if [[ -z $(which nvreg) ]]; then 
-                echo -e "Install nvreg first\nAborting..."
-                exit 1
-            fi 
             nvreg -dOGL_APP_CLAW -dOGL_DEBUG_DIAGENABLE -dPS_CYCLESTATS -dPS_DEBUG_FILE -dOGL_THREAD_CONTROL -dPS_FILE_PATH -dPS_CYCLESTATS_DIRECTORY -dVK_EXPOSE_DEBUG_LABEL -dPS_CYCLESTATS_DEVICE_TO_LOG -dPS_CYCLESTATS_LAUNCH_FLAGS -dOGL_SHADER_DISK_CACHE -dVK_QUEUES_SINGLE_STATE -dPS_CYCLESTATS_FLAGS -dPS_CYCLESTATS_FLAGS2 -dPS_CYCLESTATS_CAPTURE_FLAGS -dPS_CYCLESTATS_START_FRAME -dPS_CYCLESTATS_END_FRAME -dPS_CYCLESTATS_PM_CONFIG -dPS_CYCLESTATS_XFLAGS -dPS_CYCLESTATS_MERGE_FLAGS -dPS_PIXEL_SHADER_STATS_FLAGS -dPS_PIXEL_SHADER_DUMP_FLAGS -dPS_VERTEX_SHADER_STATS_FLAGS -dPS_VERTEX_SHADER_DUMP_FLAGS -dPS_GEOMETRY_SHADER_DUMP_FLAGS -dPS_COMPUTE_SHADER_DUMP_FLAGS -dPS_PIXEL_SHADER_DUMP -dPS_COMPUTE_SHADER_DUMP -dPS_VERTEX_SHADER_DUMP_FLAGS -dPS_VERTEX_SHADER_DUMP -dPS_COMPUTE_SHADER_DUMP -dPS_COMPUTE_SHADER_DUMP -dPS_COMPUTE_SHADER_DUMP_FLAGS -dPS_HULL_SHADER_DUMP -dPS_UCODE_SHADER_DUMP -dPS_PUSHBUFFER_DUMP_FILENAME -dPS_PUSHBUFFER_DUMP_FLAGS -dPS_CYCLESTATS_PROFILER_FLAGS >/tmp/disable-pcsampler || return 1
             source /tmp/disable-pcsampler && echo "Load ENVVARS to disable PCSampler -> OK"
         }

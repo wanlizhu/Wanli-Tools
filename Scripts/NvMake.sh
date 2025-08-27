@@ -49,6 +49,7 @@ while [[ $# -gt 0 ]]; do
             module+=" dist"
         fi ;;
         d3dreg|nvreg) module= ; subdir="drivers/ddraw/tools/D3DRegKeys/d3dreg" ;;  
+        libsass|sass) module= ; subdir="drivers/common/HW/sass3lib"; others+=" SASS3LIB_BUILD_DLL=0 BLACKWELLSASS=1 EXTERNAL_SASSLIB=0" ;;
         amd64|aarch64) arch=$1 ;;
         debug|release|develop) config=$1 ;;
         j|jobs) shift; jobs=$1 ;; 
