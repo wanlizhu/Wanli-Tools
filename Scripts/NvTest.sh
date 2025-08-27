@@ -101,11 +101,15 @@ if [[ $1 == env ]]; then
             fi 
         fi 
         function wzhu-pull {
-            pushd ~/WZhu && git pull && source ~/WZhu/Scripts/NvTest.sh env setup && popd 
+            pushd ~/WZhu 
+            git pull && source ~/WZhu/Scripts/NvTest.sh env setup 
+            popd 
         }
         export -f wzhu-pull 
         function wzhu-push {
-            pushd ~/WZhu && git add . && git commit -m draft && git push && popd 
+            pushd ~/WZhu 
+            git add . && git commit -m draft && git push 
+            popd 
         }
         export -f wzhu-push 
         function wzhu-scp-to-windows {
