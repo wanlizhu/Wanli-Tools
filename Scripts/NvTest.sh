@@ -288,28 +288,29 @@ elif [[ $1 == viewperf ]]; then
     exe="./viewperf/bin/viewperf"
     arg="viewsets/$2/config/$2.xml $3 -resolution 3840x2160"
     dir="$WZHU_VP_ROOT"
+    postproc=
     
     exportEnvs=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
     if [[ $WZHU_PUSHBUF == 1 ]]; then 
-        read -p "Frame index to dump pushbuffer at (empty = all): " index
-        if [[ -z $index ]]; then 
-            exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_ac12fedf=/tmp/pushbuffer-viewperf-$2-subtest$3-frame%d-on-$(hostname).txt; "
-        else
-            exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_8FCB2E8=$index; export __GL_6635F0C4=$index; export __GL_ac12fedf=/tmp/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).txt; "
-        fi 
+        read -p "Frame index to dump pushbuffer at: " index
+        exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_8FCB2E8=$index; export __GL_6635F0C4=$index; export __GL_ac12fedf=/tmp/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml; "
+        postproc="sed -i '1{/<\/FRAME>/d}' /tmp/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml && echo '</FRAME>' >> /tmp/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml"
     fi 
 
-    if [[ $WZHU_PI == 1 ]]; then 
+    if [[ $WZHU_PI == 1 ]]; then # Capture PI report
         commandLine="$exportEnvs cd $(pwd) && rm -rf $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX && $HOME/SinglePassCapture/pic-x $4 --api=ogl --check_clocks=0 --sample=24000 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX --startframe=100 --exe=$exe --arg=\"$arg\" --workdir=$dir | grep -v \"won't hook API\" && sudo -u $USER -H bash -lc \"source $HOME/SinglePassCapture/PerfInspector/Python-venv/bin/activate && NVM_GTLAPI_USER=wanliz $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX/upload_report.sh\"" 
     else
-        if [[ ! -z $2 ]]; then 
-            if [[ $WZHU_GDB == 1 ]]; then 
+        if [[ ! -z $2 ]]; then # Run single viewset
+            if [[ $WZHU_GDB == 1 ]]; then # Run in gdb
                 [[ -z $(which cgdb) ]] && sudo apt install -y cgdb
                 commandLine="$exportEnvs cd $dir && cgdb -ex 'set trace-commands on' -ex 'set pagination off' -ex 'set confirm off' -ex 'set debuginfod enabled on' -ex 'set breakpoint pending on' -ex \"file $exe\" -ex \"set args $arg\" -ex 'set trace-commands off'"
-            else
+            else # Regular run
                 commandLine="$exportEnvs cd $WZHU_VP_ROOT && ./viewperf/bin/viewperf viewsets/$2/config/$2.xml $3 -resolution 3840x2160 && cat $WZHU_VP_ROOT/results/$2*/results.xml"
+                if [[ ! -z $postproc ]]; then 
+                    commandLine+=" && eval \"$postproc\""
+                fi 
             fi 
-        else
+        else # Run all viewsets
             commandLine="$exportEnvs cd $dir; rm -rf /tmp/viewperf"
             for viewset in catia creo energy maya medical snx sw; do 
                 commandLine+="  ; $exe viewsets/$viewset/config/$viewset.xml -resolution 3840x2160 && cat $WZHU_VP_ROOT/results/${viewset//sw/solidworks}*/results.xml >> /tmp/viewperf"
