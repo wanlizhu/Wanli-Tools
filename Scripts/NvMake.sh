@@ -17,6 +17,7 @@ arch=amd64
 config=develop
 jobs=$(nproc)
 others=
+install=
 excludeModules=(
     vgpu # GPU virtualization
     gpgpu # CUDA driver
@@ -45,11 +46,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in 
         bfm)  branch=dev/gpu_drv/bugfix_main ;;
         r580) branch=rel/gpu_drv/r580/r580_00 ;;
-        sweep|drivers|opengl) module=$1; if [[ $1 == drivers ]]; then 
-            module+=" dist"
-        fi ;;
+        drivers) module="drivers dist" ;;
+        sweep|opengl) module=$1 ;;
         d3dreg|nvreg) module= ; subdir="drivers/ddraw/tools/D3DRegKeys/d3dreg" ;;  
-        libsass|sass) module= ; subdir="drivers/common/HW/sass3lib"; others+=" SASS3LIB_BUILD_DLL=0 BLACKWELLSASS=1 EXTERNAL_SASSLIB=0" ;;
+        libsass3|libsass|sass) module= ; subdir="drivers/common/HW/sass3lib"; others+=" SASS3LIB_BUILD_DLL=0 BLACKWELLSASS=1 EXTERNAL_SASSLIB=0" ;;
         amd64|aarch64) arch=$1 ;;
         debug|release|develop) config=$1 ;;
         j|jobs) shift; jobs=$1 ;; 
@@ -57,6 +57,7 @@ while [[ $# -gt 0 ]]; do
             others+=" compilecommands"
         fi ;;
         full|fullbuild) excludeModules=() ;;
+        install) install=1 ;;
         *) others+=" $1" ;;
     esac
     shift 
@@ -105,5 +106,20 @@ if [[ $WZHU_YES != 1 ]]; then
 fi 
 
 pushd . >/dev/null || exit 1
-eval "$commandLine" 
+eval "$commandLine" && {
+    if [[ $install == 1 ]]; then 
+        case "$module" in 
+            opengl) 
+                read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so: "
+                version=$(ls /usr/lib/*-linux-gnu/libnvidia-glcore.so.*  | awk -F '.so.' '{print $2}' | head -1)
+                sudo cp -vf --remove-destination $P4ROOT/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so /usr/lib/$(uname -m)-linux-gnu/libnvidia-glcore.so.$version  ;;
+            d3dreg|nvreg) 
+                read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/nvreg: "
+                sudo cp -vf $P4ROOT/$branch/drivers/ddraw/tools/D3DRegKeys/d3dreg/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/nvreg /usr/bin/ ;;
+            libsass3|libsass|sass) 
+                read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libsass3.so: "
+                sudo cp -vf $P4ROOT/$branch/drivers/common/HW/sass3lib/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libsass3.so /usr/lib/$(uname -m)-linux-gnu/ ;;
+        esac 
+    fi 
+}
 popd >/dev/null   
