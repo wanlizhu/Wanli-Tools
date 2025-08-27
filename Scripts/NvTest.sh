@@ -143,8 +143,7 @@ if [[ $1 == env ]]; then
                 fi
             done
             if [[ -z $libsass ]]; then 
-                echo -e "Please build libsass using NvMake.sh\nAborting..."
-                exit 1
+                echo "Please build libsass using NvMake.sh"
             fi 
             read -p "Frame index to start cyclestats at: " -e -i 100 index
             mkdir -p $HOME/PCSampler
