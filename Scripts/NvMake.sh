@@ -120,6 +120,7 @@ if [[ $? -eq 0 && $install == 1 ]]; then
             libsass3|libsass|sass) 
                 read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libsass3.so: "
                 sudo cp -vf $P4ROOT/$branch/drivers/common/HW/sass3lib/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libsass3.so /usr/lib/$(uname -m)-linux-gnu/ ;;
+            *) echo "Please install \"$module\" manually" ;; 
         esac 
     else
         echo "Can't install $arch on $(uname -m) host"
