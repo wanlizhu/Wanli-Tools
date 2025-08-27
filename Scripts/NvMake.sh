@@ -13,6 +13,7 @@ done
 branch=rel/gpu_drv/r580/r580_00
 subdir=
 module="drivers dist"
+module2=drivers # Module name to install
 arch=amd64 
 config=develop
 jobs=$(nproc)
@@ -46,10 +47,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in 
         bfm)  branch=dev/gpu_drv/bugfix_main ;;
         r580) branch=rel/gpu_drv/r580/r580_00 ;;
-        drivers) module="drivers dist" ;;
-        sweep|opengl) module=$1 ;;
-        d3dreg|nvreg) module= ; subdir="drivers/ddraw/tools/D3DRegKeys/d3dreg" ;;  
-        libsass3|libsass|sass) module= ; subdir="drivers/common/HW/sass3lib"; others+=" SASS3LIB_BUILD_DLL=0 BLACKWELLSASS=1 EXTERNAL_SASSLIB=0" ;;
+        drivers) module="drivers dist"; module2=drivers ;;
+        sweep|opengl) module=$1; module2=$1 ;;
+        d3dreg|nvreg) module= ; module2=$1; subdir="drivers/ddraw/tools/D3DRegKeys/d3dreg" ;;  
+        libsass3|libsass|sass) module= ; module2=$1; subdir="drivers/common/HW/sass3lib"; others+=" SASS3LIB_BUILD_DLL=0 BLACKWELLSASS=1 EXTERNAL_SASSLIB=0" ;;
         amd64|aarch64) arch=$1 ;;
         debug|release|develop) config=$1 ;;
         j|jobs) shift; jobs=$1 ;; 
@@ -109,7 +110,7 @@ pushd . >/dev/null || exit 1
 eval "$commandLine" 
 if [[ $? -eq 0 && $install == 1 ]]; then 
     if [[ $(uname -m | sed 's/^x86_64$/amd64/') == $arch ]]; then 
-        case "$module" in 
+        case "$module2" in 
             opengl) 
                 read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so: "
                 version=$(ls /usr/lib/*-linux-gnu/libnvidia-glcore.so.*  | awk -F '.so.' '{print $2}' | head -1)
@@ -120,7 +121,7 @@ if [[ $? -eq 0 && $install == 1 ]]; then
             libsass3|libsass|sass) 
                 read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libsass3.so: "
                 sudo cp -vf $P4ROOT/$branch/drivers/common/HW/sass3lib/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libsass3.so /usr/lib/$(uname -m)-linux-gnu/ ;;
-            *) echo "Please install \"$module\" manually" ;; 
+            *) echo "Please install \"$module2\" manually" ;; 
         esac 
     else
         echo "Can't install $arch on $(uname -m) host"
