@@ -125,5 +125,5 @@ eval "$commandLine" && {
             echo "Can't install $arch on $(uname -m) host"
         fi 
     fi 
-}
+} || echo "Failed to build"
 popd >/dev/null   
