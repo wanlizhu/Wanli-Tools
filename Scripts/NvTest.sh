@@ -285,9 +285,9 @@ elif [[ $1 == viewperf ]]; then
     if [[ $WZHU_PUSHBUF == 1 ]]; then 
         read -p "Frame index to dump pushbuffer at (empty = all): " index
         if [[ -z $index ]]; then 
-            exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_ac12fedf=/tmp/pushbuffer-viewperf-$2-subtest$3-on-$(hostname)-%d.txt; "
+            exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_ac12fedf=/tmp/pushbuffer-viewperf-$2-subtest$3-frame%d-on-$(hostname).txt; "
         else
-            exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_8FCB2E8=$index; export __GL_6635F0C4=$index; export __GL_ac12fedf=/tmp/pushbuffer-viewperf-$2-subtest$3-on-$(hostname).txt; "
+            exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_8FCB2E8=$index; export __GL_6635F0C4=$index; export __GL_ac12fedf=/tmp/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).txt; "
         fi 
     fi 
 
