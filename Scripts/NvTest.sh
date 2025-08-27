@@ -30,13 +30,6 @@ if [[ $1 == env ]]; then
         echo "NVTEST_DRIVER_DIR       : $NVTEST_DRIVER_DIR"
         echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
     elif [[ $2 == setup ]]; then 
-        silentMode=
-        while [[ $# -gt 2 ]]; do 
-            case $3 in 
-                silent) silentMode=1 ;;  
-            esac
-            shift 
-        done 
         export PATH="$PATH:$HOME/WZhu/Scripts"
         export __GL_SYNC_TO_VBLANK=0
         export vblank_mode=0
@@ -56,10 +49,8 @@ if [[ $1 == env ]]; then
                 .cursorignore
                 .clangd
                 *.code-workspace" | sed 's/^[[:space:]]*//' > ~/.p4ignore
-            [[ -z $silentMode ]] && echo "Setting up perforce envvars for $P4CLIENT"
         }
         if [[ $UID -ne 0 ]] && ! sudo grep -q "$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoers; then
-            [[ -z $silentMode ]] && echo "Setting up NoPasswd sudo for $USER"
             echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers >/dev/null 
         fi  
         if [[ -f ~/WZhu/Scripts/hosts ]]; then 
