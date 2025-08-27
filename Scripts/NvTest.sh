@@ -74,7 +74,28 @@ if [[ $1 == env ]]; then
                 fi 
             done < ~/WZhu/Scripts/hosts
         fi 
-        if [[ -z $silentMode ]]; then 
+        function wzhu-pull {
+            pushd ~/WZhu 
+            git pull && source ~/WZhu/Scripts/NvTest.sh env setup 
+            popd 
+        }
+        export -f wzhu-pull 
+        function wzhu-push {
+            pushd ~/WZhu 
+            git add . && git commit -m draft && git push 
+            popd 
+        }
+        export -f wzhu-push 
+        function wzhu-scp-to-windows {
+            if [[ ! -z $1 ]]; then 
+                read -p "Windows Host IP: " -e -i "$(cat $HOME/.windows-host-ip 2>/dev/null)" host
+                echo "$host" > $HOME/.windows-host-ip
+                [[ -z $(which sshpass) ]] && sudo apt install -y sshpass
+                sshpass -p "$(echo 'U2FsdGVkX1+UnE9oAYZ8DjyHzGqQ3wxZbhrJanHFw9u7ypNWEkG2dOJQShrj5dlT' | openssl enc -d -aes-256-cbc -pbkdf2 -a)" scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $@ WanliZhu@$host:'C:\Users\WanliZhu\Desktop\'
+            fi 
+        }
+        export -f wzhu-scp-to-windows
+        function wzhu-add-keys {
             if ! ls /etc/ssl/certs/certnew*.pem &>/dev/null; then
                 if [[ ! -z $(ls /mnt/linuxqa 2>/dev/null) ]]; then
                     sudo apt install -y nfs-common
@@ -99,28 +120,8 @@ if [[ $1 == env ]]; then
                 echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHx7hz8+bJjBioa3Rlvmaib8pMSd0XTmRwXwaxrT3hFL wanliz@Enzo-MacBook' > ~/.ssh/id_ed25519.pub 
                 chmod 644 ~/.ssh/id_ed25519.pub
             fi 
-        fi 
-        function wzhu-pull {
-            pushd ~/WZhu 
-            git pull && source ~/WZhu/Scripts/NvTest.sh env setup 
-            popd 
         }
-        export -f wzhu-pull 
-        function wzhu-push {
-            pushd ~/WZhu 
-            git add . && git commit -m draft && git push 
-            popd 
-        }
-        export -f wzhu-push 
-        function wzhu-scp-to-windows {
-            if [[ ! -z $1 ]]; then 
-                read -p "Windows Host IP: " -e -i "$(cat $HOME/.windows-host-ip 2>/dev/null)" host
-                echo "$host" > $HOME/.windows-host-ip
-                [[ -z $(which sshpass) ]] && sudo apt install -y sshpass
-                sshpass -p "$(echo 'U2FsdGVkX1+UnE9oAYZ8DjyHzGqQ3wxZbhrJanHFw9u7ypNWEkG2dOJQShrj5dlT' | openssl enc -d -aes-256-cbc -pbkdf2 -a)" scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $@ WanliZhu@$host:'C:\Users\WanliZhu\Desktop\'
-            fi 
-        }
-        export -f wzhu-scp-to-windows
+        export -f wzhu-add-keys
         function wzhu-enable-pushbuffer-dump {
             read -p "Frame index to dump pushbuffer at: " -e -i 100 index
             export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 ))
@@ -149,7 +150,7 @@ if [[ $1 == env ]]; then
             echo -e "\nexport __GL_DiagEnable=1" >> /tmp/enable-pcsampler            
             source /tmp/enable-pcsampler && echo "Load ENVVARS to enable PCSampler -> OK"
         }
-        export -f wzhu-enable-sampler 
+        export -f wzhu-enable-pcsampler 
         function wzhu-disable-pcsampler {
             if [[ -z $(which nvreg) ]]; then 
                 echo -e "Install nvreg first\nAborting..."
@@ -158,7 +159,7 @@ if [[ $1 == env ]]; then
             nvreg -dOGL_APP_CLAW -dOGL_DEBUG_DIAGENABLE -dPS_CYCLESTATS -dPS_DEBUG_FILE -dOGL_THREAD_CONTROL -dPS_FILE_PATH -dPS_CYCLESTATS_DIRECTORY -dVK_EXPOSE_DEBUG_LABEL -dPS_CYCLESTATS_DEVICE_TO_LOG -dPS_CYCLESTATS_LAUNCH_FLAGS -dOGL_SHADER_DISK_CACHE -dVK_QUEUES_SINGLE_STATE -dPS_CYCLESTATS_FLAGS -dPS_CYCLESTATS_FLAGS2 -dPS_CYCLESTATS_CAPTURE_FLAGS -dPS_CYCLESTATS_START_FRAME -dPS_CYCLESTATS_END_FRAME -dPS_CYCLESTATS_PM_CONFIG -dPS_CYCLESTATS_XFLAGS -dPS_CYCLESTATS_MERGE_FLAGS -dPS_PIXEL_SHADER_STATS_FLAGS -dPS_PIXEL_SHADER_DUMP_FLAGS -dPS_VERTEX_SHADER_STATS_FLAGS -dPS_VERTEX_SHADER_DUMP_FLAGS -dPS_GEOMETRY_SHADER_DUMP_FLAGS -dPS_COMPUTE_SHADER_DUMP_FLAGS -dPS_PIXEL_SHADER_DUMP -dPS_COMPUTE_SHADER_DUMP -dPS_VERTEX_SHADER_DUMP_FLAGS -dPS_VERTEX_SHADER_DUMP -dPS_COMPUTE_SHADER_DUMP -dPS_COMPUTE_SHADER_DUMP -dPS_COMPUTE_SHADER_DUMP_FLAGS -dPS_HULL_SHADER_DUMP -dPS_UCODE_SHADER_DUMP -dPS_PUSHBUFFER_DUMP_FILENAME -dPS_PUSHBUFFER_DUMP_FLAGS -dPS_CYCLESTATS_PROFILER_FLAGS >/tmp/disable-pcsampler || return 1
             source /tmp/disable-pcsampler && echo "Load ENVVARS to disable PCSampler -> OK"
         }
-        export -f wzhu-disable-sampler 
+        export -f wzhu-disable-pcsampler 
     fi 
 elif [[ $1 == driver || $1 == drivers ]]; then 
     if [[ $2 == rsync ]]; then
