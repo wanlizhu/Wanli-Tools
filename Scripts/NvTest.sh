@@ -292,7 +292,7 @@ elif [[ $1 == viewperf ]]; then
     
     exportEnvs=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
     if [[ $WZHU_PUSHBUF == 1 ]]; then 
-        read -p "Frame index to dump pushbuffer at: " index
+        read -p "Frame index to dump pushbuffer at: " -e -i 100 index
         exportEnvs+=" export __GL_ac12fede=$(( 0x00000001 | 0x00000002 | 0x00000080 | 0x00000100 | 0x00010000 )); export __GL_8FCB2E8=$index; export __GL_6635F0C4=$index; export __GL_ac12fedf=/tmp/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml; "
         postproc="sed -i '1{/<\/FRAME>/d}' /tmp/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml && echo '</FRAME>' >> /tmp/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml"
     fi 
