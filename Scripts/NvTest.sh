@@ -285,7 +285,7 @@ elif [[ $1 == startx ]]; then
 
     if [[ $enableWM == 1 ]]; then 
         openbox >/tmp/openbox.stdout 2>/tmp/openbox.stderr & disown 
-        echo "Window manager (openbox) is running..."
+        echo "Window manager (openbox) is running as $(pidof openbox) on $DISPLAY"
     fi 
 elif [[ $1 == xauth ]]; then 
     echo "Xorg PID: $(pidof Xorg)"
