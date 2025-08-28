@@ -74,7 +74,8 @@ if [[ $1 == env ]]; then
         export -f wzhu-pull 
         function wzhu-push {
             pushd ~/WZhu 
-            git add . && git commit -m draft && git push 
+            git add . && git commit -m draft
+            git push 
             popd 
         }
         export -f wzhu-push 
