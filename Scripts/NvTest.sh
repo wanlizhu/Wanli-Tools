@@ -276,15 +276,16 @@ elif [[ $1 == startx ]]; then
         $0 xauth 
     fi 
 
-    if [[ $enableWM == 1 ]]; then 
-        openbox >/tmp/openbox.stdout 2>/tmp/openbox.stderr & disown 
-    fi 
-
     if [[ $enableVNC == 1 ]]; then
         [[ ! -e ~/.vnc/passwd ]] && x11vnc -storepasswd
         screen -S vnc-mirroring x11vnc -display $DISPLAY -auth ~/.Xauthority -noshm -forever --loop -noxdamage -repeat -shared
         sleep 2
         sudo ss -tulpn | grep -E "5900|5901|5902"
+    fi 
+
+    if [[ $enableWM == 1 ]]; then 
+        openbox >/tmp/openbox.stdout 2>/tmp/openbox.stderr & disown 
+        echo "Window manager (openbox) is running..."
     fi 
 elif [[ $1 == xauth ]]; then 
     echo "Xorg PID: $(pidof Xorg)"
