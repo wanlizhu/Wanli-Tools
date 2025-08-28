@@ -66,3 +66,13 @@ else
     npx -y diff2html-cli -i file -s side -F $CL_diff_file.html -- $CL_diff_file.patch && sed -i "s|<h1>.*</h1>|<h1>${CL_new} (new) vs ${CL_old} (old)</h1>|" $CL_diff_file.html && echo "Generated $CL_diff_file.html"
 fi
 ```
+
+# Mount Windows shared folder on Linux
+```bash
+# \\builds\PreRel\devtools
+[[ -z $(which mount.cifs) ]] && sudo apt install -y cifs-utils
+read -r -p "URL: " URL
+URL=$(echo "$URL" | sed 's|\\|/|g')
+sudo mkdir -p /mnt/$(basename $URL).cifs
+sudo mount -t cifs $URL /mnt/$(basename $URL).cifs -o username=wanliz && echo '-> OK' || echo '-> FAILED'
+```
