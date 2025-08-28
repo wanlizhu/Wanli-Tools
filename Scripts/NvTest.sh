@@ -254,9 +254,11 @@ elif [[ $1 == maxclock ]]; then
         echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)" 
     fi 
 elif [[ $1 == startx ]]; then 
+    enableWM=
     enableVNC=
     while [[ $# -gt 1 ]]; do 
         case $2 in 
+            wm) enableWM=1 ;;
             vnc) enableVNC=1 ;; 
         esac
         shift 
@@ -264,16 +266,20 @@ elif [[ $1 == startx ]]; then
 
     [[ -z $DISPLAY ]] && export DISPLAY=:0
     if [[ -z $NVTEST_DRIVER ]]; then
-        screen -S bare-xorg bash -c "sudo X $DISPLAY +iglx || read -p 'Press [Enter] to exit: '"
+        screen -S bare-xorg bash -c "sudo X $DISPLAY -ac +iglx || read -p 'Press [Enter] to exit: '"
+        while [ ! -S /tmp/.X11-unix/X0 ]; do sleep 0.1; done
         xrandr --fb 3840x2160  
     else
         sudo -H bash -lc "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'  || read -p 'Press [Enter] to exit: '\""
+        sudo xhost +
+        $0 xauth 
     fi 
 
-    $0 xauth 
+    if [[ $enableWM == 1 ]]; then 
+        openbox >/tmp/openbox.stdout 2>/tmp/openbox.stderr & disown 
+    fi 
 
     if [[ $enableVNC == 1 ]]; then
-        [[ -z $(pidof Xorg) ]] && { echo "Xorg is not running"; exit 1; }
         [[ ! -e ~/.vnc/passwd ]] && x11vnc -storepasswd
         screen -S vnc-mirroring x11vnc -display $DISPLAY -auth ~/.Xauthority -noshm -forever --loop -noxdamage -repeat -shared
         sleep 2
