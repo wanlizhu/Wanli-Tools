@@ -16,12 +16,27 @@ void MSAAResolve_GL::Run() {
             {GLFW_STENCIL_BITS, 8},
             {GLFW_DOUBLEBUFFER, GLFW_TRUE},
         });
+
+        // Check for actual MSAA samples
+        glGetIntegerv(GL_SAMPLES, &m_actualMSAASamples);
+        std::cout << "Actual MSAA samples: " << m_actualMSAASamples << std::endl;
+        if (m_actualMSAASamples <= 1) {
+            throw std::runtime_error("No MSAA");
+        }
+
+        // Check for required extensions
+        const char* extensions = (const char*)glGetString(GL_EXTENSIONS);
+        if (!strstr(extensions, "GL_ARB_framebuffer_object")) {
+            throw std::runtime_error("GL_ARB_framebuffer_object extension not supported by NVIDIA driver - driver may be too old");
+        }
+
         CreateMSAAFramebuffers();
         CreateShaderProgram();
         CreateVertexArray();
         CreateUniformBuffer();
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
+        exit(1);
     }
 
     std::cout << "Initialization Finished" << std::endl;
@@ -32,7 +47,10 @@ void MSAAResolve_GL::Run() {
             glfwSetWindowShouldClose(m_window, GLFW_TRUE);
         }
 
+        BeginGPUTimer();
         Render();
+        glFinish();
+        EndGPUTimer(true);
 
         glfwSwapBuffers(m_window);
     }
