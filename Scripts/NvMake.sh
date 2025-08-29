@@ -107,10 +107,13 @@ if [[ $WZHU_YES != 1 ]]; then
 fi 
 
 pushd . >/dev/null || exit 1
-eval "$commandLine" 
+time eval "$commandLine" 
+
 if [[ $? -eq 0 && $install == 1 ]]; then 
     if [[ $(uname -m | sed 's/^x86_64$/amd64/') == $arch ]]; then 
         case "$module2" in 
+            drivers)
+                NvTest.sh driver local $(realpath $workdir/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run) ;;
             opengl) 
                 read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so: "
                 version=$(ls /usr/lib/*-linux-gnu/libnvidia-glcore.so.*  | awk -F '.so.' '{print $2}' | head -1)
@@ -124,7 +127,7 @@ if [[ $? -eq 0 && $install == 1 ]]; then
             *) echo "Please install \"$module2\" manually" ;; 
         esac 
     else
-        echo "Can't install $arch on $(uname -m) host"
+        echo "Can't install $arch builds on $(uname -m) host"
     fi 
 fi 
 popd >/dev/null   
