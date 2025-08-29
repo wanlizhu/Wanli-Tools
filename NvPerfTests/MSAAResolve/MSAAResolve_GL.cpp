@@ -1,35 +1,31 @@
 #include "MSAAResolve_GLVK.h"
 
-#define GLAD_GL_IMPLEMENTATION
-#define GLAD_GLX_IMPLEMENTATION      
-#define GLAD_EGL_IMPLEMENTATION      
-#include "glad/gl.h"
-#include "glad/glx.h" // X11
-#include "glad/egl.h" // Wayland
-
-#define GLFW_EXPOSE_NATIVE_X11
-#define GLFW_EXPOSE_NATIVE_GLX
-#include <GLFW/glfw3native.h>
-#include <X11/Xlib.h>  
-
-bool MSAAResolve_GL::Initialize() {
+void MSAAResolve_GL::Run() {
     try {
-        InitializeGLFW();
+        OpenWindow("MSAA Resolve GL", TEXTURE_WIDTH, TEXTURE_HEIGHT, {
+            {GLFW_CONTEXT_VERSION_MAJOR, 4},
+            {GLFW_CONTEXT_VERSION_MINOR, 5},
+            {GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE},
+            {GLFW_OPENGL_FORWARD_COMPAT, GLFW_FALSE},
+            {GLFW_SAMPLES, MSAA_SAMPLE_COUNT},
+            {GLFW_RED_BITS, 8},
+            {GLFW_GREEN_BITS, 8},
+            {GLFW_BLUE_BITS, 8},
+            {GLFW_ALPHA_BITS, 8},
+            {GLFW_DEPTH_BITS, 24},
+            {GLFW_STENCIL_BITS, 8},
+            {GLFW_DOUBLEBUFFER, GLFW_TRUE},
+        });
         CreateMSAAFramebuffers();
         CreateShaderProgram();
         CreateVertexArray();
         CreateUniformBuffer();
-    }
-    catch (const std::exception& e) {
+    } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
-        return false;
     }
 
     std::cout << "Initialization Finished" << std::endl;
-    return true;
-}
 
-void MSAAResolve_GL::Run() {
     while (!glfwWindowShouldClose(m_window)) {
         glfwPollEvents();
         if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -37,11 +33,10 @@ void MSAAResolve_GL::Run() {
         }
 
         Render();
+
         glfwSwapBuffers(m_window);
     }
-}
 
-void MSAAResolve_GL::Cleanup() {
     glDeleteProgram(m_shaderProgram);
     glDeleteVertexArrays(1, &m_vertexArray);
     glDeleteBuffers(1, &m_uniformBuffer);
@@ -51,79 +46,6 @@ void MSAAResolve_GL::Cleanup() {
     glDeleteFramebuffers(1, &m_resolveFramebuffer);
     glfwDestroyWindow(m_window);
     glfwTerminate();
-    std::cout << "Cleanup Finished" << std::endl;
-}
-
-void GLFW_ErrorCallback_GL(int error, const char* description) {
-    std::cerr << "GLFW Error " << error << ": " << description << std::endl;
-}
-
-void MSAAResolve_GL::InitializeGLFW() {
-    glfwSetErrorCallback(GLFW_ErrorCallback_GL);
-    if (!glfwInit()) {
-        throw std::runtime_error("Failed to initialize GLFW");
-    }
-
-    // Set up window hints
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_FALSE);
-    glfwWindowHint(GLFW_SAMPLES, MSAA_SAMPLE_COUNT);
-    glfwWindowHint(GLFW_RED_BITS, 8);
-    glfwWindowHint(GLFW_GREEN_BITS, 8);
-    glfwWindowHint(GLFW_BLUE_BITS, 8);
-    glfwWindowHint(GLFW_ALPHA_BITS, 8);
-    glfwWindowHint(GLFW_DEPTH_BITS, 24);
-    glfwWindowHint(GLFW_STENCIL_BITS, 8);
-    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-
-    m_window = glfwCreateWindow(TEXTURE_WIDTH, TEXTURE_HEIGHT, "OpenGL MSAA Resolve Test", nullptr, nullptr);
-    if (!m_window) {
-        glfwTerminate();
-        throw std::runtime_error("Failed to create GLFW window");
-    }
-
-    glfwMakeContextCurrent(m_window);
-
-    // Load OpenGL symbols
-    if (!gladLoaderLoadGL()) {
-        glfwTerminate();
-        throw std::runtime_error("Failed to call gladLoaderLoadGL");
-    }
-    // Load GLX symbols
-
-    Display* display = glfwGetX11Display();
-    if (!gladLoaderLoadGLX(display, DefaultScreen(display))) {
-        glfwTerminate();
-        throw std::runtime_error("Failed to call gladLoaderLoadGLX");
-    }
-
-    // Disable Vsync
-    glfwSwapInterval(0);
-
-    // Check for OpenGL vendor
-    const char* vendor = (const char*)glGetString(GL_VENDOR);
-    const char* renderer = (const char*)glGetString(GL_RENDERER);
-    const char* version = (const char*)glGetString(GL_VERSION);
-    std::cout << "OpenGL Vendor: " << vendor << std::endl;
-    std::cout << "OpenGL Renderer: " << renderer << std::endl;
-    std::cout << "OpenGL Version: " << version << std::endl;
-
-    // Check for actual MSAA samples
-    glGetIntegerv(GL_SAMPLES, &m_actualMSAASamples);
-    std::cout << "Actual MSAA samples: " << m_actualMSAASamples << std::endl;
-    if (m_actualMSAASamples <= 1) {
-        throw std::runtime_error("No MSAA");
-    }
-
-    // Check for required extensions
-    const char* extensions = (const char*)glGetString(GL_EXTENSIONS);
-    if (!strstr(extensions, "GL_ARB_framebuffer_object")) {
-        throw std::runtime_error("GL_ARB_framebuffer_object extension not supported by NVIDIA driver - driver may be too old");
-    }
-
-    std::cout << "GLFW window created with " << m_actualMSAASamples << "x MSAA" << std::endl;
 }
 
 void MSAAResolve_GL::CreateMSAAFramebuffers() {

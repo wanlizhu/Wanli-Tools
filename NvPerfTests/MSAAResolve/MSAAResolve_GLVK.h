@@ -1,45 +1,21 @@
 #pragma once
-#include "glad/gl.h"
-#include "glad/glx.h" // X11
-#include "glad/egl.h" // Wayland
-#include "vulkan/vulkan.h"
-#include <GLFW/glfw3.h>
-#include <iostream>
-#include <vector>
-#include <fstream>
-#include <sstream>
-#include <cstring>
-#include <cstdlib>
-#include <map>
-#include <algorithm>
-#include <string>
-#include <stdexcept>
-#include <filesystem>
-#include <unordered_map>
+#include "Window_GL.h"
 
 // Global embedded files
 extern std::unordered_map<std::string, std::vector<uint8_t>> g_files;
 
-class MSAAResolve_API {
+class MSAAResolve_API : public Window_GL {
 public:
     static const unsigned int TEXTURE_WIDTH = 3840;
     static const unsigned int TEXTURE_HEIGHT = 2160;
     static const unsigned int MSAA_SAMPLE_COUNT = 8;
-
-    virtual ~MSAAResolve_API() {}
-    virtual bool Initialize() = 0;
-    virtual void Run() = 0;
-    virtual void Cleanup() = 0;
 };
 
 class MSAAResolve_GL : public MSAAResolve_API {
 public:
-    virtual bool Initialize() override;
-    virtual void Run() override;
-    virtual void Cleanup() override;
+    void Run();
 
 private:
-    void InitializeGLFW();
     void CreateMSAAFramebuffers();
     void CreateShaderProgram();
     void CreateVertexArray();
@@ -47,7 +23,6 @@ private:
     void Render();
 
 private:
-    GLFWwindow* m_window = nullptr;
     GLuint m_msaaFramebuffer = 0;
     GLuint m_msaaColorTexture = 0;
     GLuint m_resolveFramebuffer = 0;
@@ -59,6 +34,7 @@ private:
     int m_actualMSAASamples = 0;
 };
 
+/*
 class MSAAResolve_VK : public MSAAResolve_API {
 public:
     virtual bool Initialize() override;
@@ -129,3 +105,4 @@ private:
     // Frame count for animation
     uint32_t m_frameCount = 0;
 };
+*/

@@ -1,0 +1,8 @@
+CompileFlags:
+  CompilationDatabase: build/
+
+InlayHints:
+  ParameterNames: No
+  DeducedTypes: No
+  Designators: No
+  BlockEnd: No

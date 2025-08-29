@@ -1,0 +1,38 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMake Configure (WSL2)",
+            "type": "shell",
+            "command": "wsl",
+            "args": [
+                "bash",
+                "-c",
+                "cd /mnt/c/Users/WanliZhu/OneDrive/WZhu/NvPerfTests && cmake -B build"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "options": {
+                "statusbar": {
+                    "hide" : true
+                }
+            }
+        },
+        {
+            "label": "CMake Build (WSL2)",
+            "type": "shell",
+            "command": "wsl",
+            "args": [
+                "bash",
+                "-c",
+                "cd /mnt/c/Users/WanliZhu/OneDrive/WZhu/NvPerfTests && cmake --build build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": "CMake Configure (WSL2)",
+            "problemMatcher": ["$gcc"]
+        }
+    ]
+}

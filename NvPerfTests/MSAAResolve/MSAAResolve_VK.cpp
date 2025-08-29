@@ -1,5 +1,5 @@
 #include "MSAAResolve_GLVK.h"
-
+/*
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
 };
@@ -1036,3 +1036,4 @@ void MSAAResolve_VK::Render() {
         throw std::runtime_error("Failed to present swapchain image");
     }
 }
+*/
