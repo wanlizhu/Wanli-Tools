@@ -31,6 +31,5 @@ target_link_libraries(Window_GLVK PUBLIC
     Threads::Threads
     X11
     glfw
-    $<$<PLATFORM_ID:Linux>:OpenGL::GLX>
 )
 
