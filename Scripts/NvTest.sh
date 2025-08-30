@@ -227,7 +227,7 @@ elif [[ $1 == driver || $1 == drivers ]]; then
         fi 
     else
         sudo -H bash -lc "NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh $*" || exit 1
-        read -p "ENVVARS (Copy & Paste): " envvars
+        read -p "Copy & Paste ENVVARS (optional): " envvars
         for pair in $envvars; do 
             echo "export ${pair%%=*}=${pair#*=}"
             export ${pair%%=*}=${pair#*=}
