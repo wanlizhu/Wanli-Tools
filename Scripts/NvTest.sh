@@ -216,7 +216,7 @@ elif [[ $1 == driver || $1 == drivers ]]; then
             unset NVTEST_DRIVER NVTEST_DRIVER_BRANCH NVTEST_DRIVER_CHANGELIST NVTEST_DRIVER_DIR && echo "Unset NVTEST_* envvars -> OK"
             if [[ -f $(dirname $3)/tests-Linux-$(uname -m).tar ]]; then 
                 tar -xf $(dirname $3)/tests-Linux-$(uname -m).tar -C $HOME 
-                sudo ln -sf $HOME/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool && echo "Updated: $HOME/sandbag-tool"
+                sudo cp -vf $HOME/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool  
             fi 
 
             read -p "Press [Enter] to run Xorg, unsandbag and lock clocks: "
@@ -226,13 +226,35 @@ elif [[ $1 == driver || $1 == drivers ]]; then
             sudo cp -vf --remove-destination $3 /usr/lib/$(uname -m)-linux-gnu/$(basename $3).$version 
         fi 
     else
-        sudo -H bash -lc "NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh $*" || exit 1
-        read -p "Copy & Paste ENVVARS (optional): " envvars
-        for pair in $envvars; do 
+        sudo -H bash -lc "NVTEST_INSTALLER_REUSE_INSTALL=False /mnt/linuxqa/nvt.sh $* > >(tee /tmp/nvt.stdout) 2> >(tee /tmp/nvt.stderr >&2)" || exit 1
+        for pair in $(sudo cat /tmp/nvt.stderr | grep 'ENVVARS:' | awk -F': ' '{print $2}'); do 
             echo "export ${pair%%=*}=${pair#*=}"
             export ${pair%%=*}=${pair#*=}
         done 
-        sudo ln -sf /root/nvt/tests/system/sandbag-tool/sandbag-tool $HOME/sandbag-tool && echo "Updated: $HOME/sandbag-tool"
+
+        sudo rm -f $HOME/sandbag-tool 
+        if [[ $NVTEST_DRIVER == "http"* ]]; then 
+            if [[ $NVTEST_DRIVER == *".tgz" ]]; then 
+                wget --no-check-certificate -P /tmp $NVTEST_DRIVER &&
+                tar -C /tmp -zxvf /tmp/$(basename $NVTEST_DRIVER) && 
+                tar -C /tmp -xf /tmp/tests-Linux-$(uname -m).tar &&
+                sudo ln -sf /tmp/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool 
+            else
+                wget --no-check-certificate -P /tmp $(dirname $NVTEST_DRIVER)/tests-Linux-$(uname -m).tar && 
+                tar -C /tmp -xf /tmp/tests-Linux-$(uname -m).tar &&
+                sudo ln -sf /tmp/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool 
+            fi 
+        elif [[ $NVTEST_DRIVER == "/mnt/"* ]]
+            cp -vf  $(dirname $NVTEST_DRIVER)/tests-Linux-$(uname -m).tar /tmp/ &&
+            tar -C /tmp -xf /tmp/tests-Linux-$(uname -m).tar &&
+            sudo ln -sf /tmp/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool 
+        fi 
+
+        if [[ ! -f $HOME/sandbag-tool ]]; then 
+            echo "Failed to download sandbag-tool compatible with current driver"
+            echo "Unset NVTEST_DRIVER -> OK"
+            unset NVTEST_DRIVER
+        fi 
         
         read -p "Press [Enter] to run Xorg, unsandbag and lock clocks: "
         $0 startx && $0 maxclock && echo -e "\nDriver Installed!"
