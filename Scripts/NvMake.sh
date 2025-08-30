@@ -19,29 +19,7 @@ config=develop
 jobs=$(nproc)
 others=
 install=
-excludeModules=(
-    vgpu # GPU virtualization
-    gpgpu # CUDA driver
-    gpgpucomp # CUDA compiler (used by CUDA and raytracing)
-    compiler # OpenCL 
-    gpgpudbg # CUDA debugger
-    uvm # Unified Virtual Memory (used by CUDA) 
-    raytracing # Vulkan raytracing (depends on gpgpu, gpgpucomp and uvm)
-    optix # Optix raytracing API (depends on gpgpu, gpgpucomp and uvm)
-    #nvapi # Linux re-impl of NVAPI (used by iGPU_vfmax_scripts/perfdebug)
-    nvtopps # Notebook power management 
-    testutils # UVM tests, lock-to-rated-tdp
-    vdpau # VDPAU video acceleration driver
-    ngx # Neural Graphics Experience
-    nvfbc # Nvidia framebuffer capture
-    nvcuvid # CUDA based video driver
-    encodeapi # Video encode API
-    opticalflow # Opticalflow video driver 
-    fabricmanager # Fabric manager 
-    nvlibpkcs11 # PKCS11 cryptograph (used in confidential compute)
-    vulkansc # VulkanSC driver 
-    pcc # VulkanSC PCC
-)
+excludeModules=()
 
 while [[ $# -gt 0 ]]; do 
     case $1 in 
@@ -57,7 +35,29 @@ while [[ $# -gt 0 ]]; do
         cc|comcmd) if [[ ! -z $(grep compilecommands $P4ROOT/$branch/drivers/common/build/build.cfg) ]]; then 
             others+=" compilecommands"
         fi ;;
-        full|fullbuild) excludeModules=() ;;
+        mini|minibuild) excludeModules=(
+                vgpu # GPU virtualization
+                gpgpu # CUDA driver
+                gpgpucomp # CUDA compiler (used by CUDA and raytracing)
+                compiler # OpenCL 
+                gpgpudbg # CUDA debugger
+                uvm # Unified Virtual Memory (used by CUDA) 
+                raytracing # Vulkan raytracing (depends on gpgpu, gpgpucomp and uvm)
+                optix # Optix raytracing API (depends on gpgpu, gpgpucomp and uvm)
+                #nvapi # Linux re-impl of NVAPI (used by iGPU_vfmax_scripts/perfdebug)
+                nvtopps # Notebook power management 
+                testutils # UVM tests, lock-to-rated-tdp
+                vdpau # VDPAU video acceleration driver
+                ngx # Neural Graphics Experience
+                nvfbc # Nvidia framebuffer capture
+                nvcuvid # CUDA based video driver
+                encodeapi # Video encode API
+                opticalflow # Opticalflow video driver 
+                fabricmanager # Fabric manager 
+                nvlibpkcs11 # PKCS11 cryptograph (used in confidential compute)
+                vulkansc # VulkanSC driver 
+                pcc # VulkanSC PCC
+            ) ;;
         install) install=1 ;;
         *) others+=" $1" ;;
     esac
