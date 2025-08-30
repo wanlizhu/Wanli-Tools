@@ -20,6 +20,7 @@ jobs=$(nproc)
 others=
 install=
 excludeModules=()
+noprompt=
 
 while [[ $# -gt 0 ]]; do 
     case $1 in 
@@ -59,6 +60,7 @@ while [[ $# -gt 0 ]]; do
                 pcc # VulkanSC PCC
             ) ;;
         install) install=1 ;;
+        yes) noprompt=1 ;;
         *) others+=" $1" ;;
     esac
     shift 
@@ -102,7 +104,7 @@ nvmakeArgs=(
 commandLine="cd $workdir && $P4ROOT/tools/linux/unix-build/unix-build ${unixBuildArgs[@]} nvmake ${nvmakeArgs[@]} > >(tee /tmp/nvmake.stdout) 2> >(tee /tmp/nvmake.stderr >&2)"
 
 echo "${commandLine}"
-if [[ $WZHU_YES != 1 ]]; then 
+if [[ -z $noprompt ]]; then 
     read -p "Press [Enter] to continue: "
 fi 
 
