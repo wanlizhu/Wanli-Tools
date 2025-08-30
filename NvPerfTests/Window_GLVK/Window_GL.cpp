@@ -58,7 +58,7 @@ void Window_GL::OpenWindow(
     glGenQueries(2, m_queries);
     m_timePoint = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Window Initialization Finished" << std::endl;
+    std::cout << "Created Window \"" << title <<  "\" " << width << "x" << height << std::endl;
 }
 
 void Window_GL::CloseWindow() {
@@ -69,19 +69,14 @@ void Window_GL::CloseWindow() {
 }
 
 void Window_GL::BeginGPUTimer() {
-    // Record start timestamp
     glQueryCounter(m_queries[0], GL_TIMESTAMP);
 }
 
-double Window_GL::EndGPUTimer(bool wait) {
-    // Record end timestamp
+void Window_GL::EndGPUTimer() {
     glQueryCounter(m_queries[1], GL_TIMESTAMP);
-    
-    if (!wait) {
-        return -1.0;
-    }
-    
-    // Wait for both queries to complete
+}
+
+std::chrono::nanoseconds Window_GL::ReadGPUTimer() {
     GLint available[2] = {0, 0};
     int retries = 0;
     do {
@@ -90,41 +85,25 @@ double Window_GL::EndGPUTimer(bool wait) {
         if (++retries > 1) {
             usleep(100);
         }
-    } while (!(available[0] && available[1]) && retries < 10000);
+    } while (!(available[0] && available[1]));
+    assert(available[0] && available[1]);
     
-    if (!(available[0] && available[1])) {
-        return -1.0;  // Timeout
-    }
-    
-    // Get the timestamps
     GLuint64 startTime = 0, endTime = 0;
     glGetQueryObjectui64v(m_queries[0], GL_QUERY_RESULT, &startTime);
     glGetQueryObjectui64v(m_queries[1], GL_QUERY_RESULT, &endTime);
-    
-    // Calculate elapsed time in nanoseconds
-    GLuint64 elapsedNs = (endTime > startTime) ? (endTime - startTime) : 0;
-    
-    // Convert to milliseconds
-    double elapsedMs = elapsedNs / 1000000.0;
-    
-    // Debug output for first few frames per test
-    if (m_debugCounter++ < 10) {
-        std::cout << "Frame " << m_debugCounter << " GPU time: " << elapsedNs 
-                  << " ns = " << elapsedMs << " ms" << std::endl;
-    }
-    
-    return elapsedMs;
+    assert(endTime >= startTime);
+
+    return std::chrono::nanoseconds(endTime - startTime);
 }
 
-double Window_GL::ReadTimer() {
-    auto nano = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - m_timePoint);
-    return nano.count() * 1.0 / 1e6; // ms
+std::chrono::nanoseconds Window_GL::ReadCPUTimer() {
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - m_timePoint);
 }
 
-double Window_GL::ReadAndResetTimer() {
-    double ms = ReadTimer();
+std::chrono::nanoseconds Window_GL::ResetCPUTimer() {
+    auto ns = ReadCPUTimer();
     m_timePoint = std::chrono::high_resolution_clock::now();
-    return ms;
+    return ns;
 }
 
 GLuint CompileShader(GLenum stage, const std::string& filename) {
@@ -196,7 +175,7 @@ GLuint Window_GL::CompileAndLinkShaders(
 
     glDeleteShader(vs);
     glDeleteShader(ps);
-    std::cout << "Linked program " << program << " with " << vsfile << " and " << psfile << std::endl;
+    std::cout << "Linked program (ID: " << program << ") with " << vsfile << " and " << psfile << std::endl;
 
     return program;
 }

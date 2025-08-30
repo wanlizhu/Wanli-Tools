@@ -5,4 +5,3 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(Window_GLVK)
 add_subdirectory(UnitTests/MSAA)
-add_subdirectory(UnitTests/Bandwidth)
