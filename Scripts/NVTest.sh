@@ -290,6 +290,11 @@ elif [[ $1 == startx ]]; then
         shift 
     done 
 
+    if [[ ! -z $(pidof Xorg) ]]; then 
+        read -p "Press [Enter] to kill running Xorg ($(pidof Xorg)): "
+        sudo pkill Xorg
+    fi 
+
     [[ -z $DISPLAY ]] && export DISPLAY=:0
     if [[ -z $NVTEST_DRIVER ]]; then
         screen -S bare-xorg bash -c "sudo X $DISPLAY -ac +iglx || read -p 'Press [Enter] to exit: '"
