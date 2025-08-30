@@ -279,6 +279,7 @@ elif [[ $1 == maxclock ]]; then
         echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)" 
     fi 
 elif [[ $1 == startx ]]; then 
+    args="$@"
     enableWM=
     enableVNC=
     while [[ $# -gt 1 ]]; do 
@@ -296,6 +297,13 @@ elif [[ $1 == startx ]]; then
         xrandr --fb 3840x2160  
     else
         sudo -H bash -lc "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'  || read -p 'Press [Enter] to exit: '\""
+        if [[ -z $(pidof Xorg) ]]; then 
+            echo "Failed to start Xorg using nvt.sh"
+            echo "Fall back to start a bare Xorg"
+            unset NVTEST_DRIVE
+            $0 $args 
+            exit 
+        fi 
         sudo xhost +
         $0 xauth 
     fi 
