@@ -350,7 +350,7 @@ private:
     }
 
     bool CreateConstantBuffer() {
-        UINT constantBufferSize = sizeof(UINT) * 4; // frameCount + padding
+        UINT constantBufferSize = sizeof(UINT) * 4; // frameIndex + padding
         
         CD3DX12_HEAP_PROPERTIES uploadHeapProps(D3D12_HEAP_TYPE_UPLOAD);
         CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(constantBufferSize);
@@ -396,9 +396,9 @@ private:
         m_commandList->ClearRenderTargetView(msaaRtvHandle, clearColor, 0, nullptr);
 
         // Update constant buffer with frame count
-        static UINT frameCount = 0;
-        frameCount++;
-        UINT constantBufferData[4] = { frameCount, 0, 0, 0 };
+        static UINT frameIndex = 0;
+        frameIndex++;
+        UINT constantBufferData[4] = { frameIndex, 0, 0, 0 };
         memcpy(m_pConstantBufferDataBegin, &constantBufferData, sizeof(constantBufferData));
 
         // Set render target

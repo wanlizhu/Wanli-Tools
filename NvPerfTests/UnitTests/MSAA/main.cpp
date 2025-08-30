@@ -72,8 +72,12 @@ public:
         glBufferData(GL_UNIFORM_BUFFER, sizeof(unsigned int) * 4, nullptr, GL_DYNAMIC_DRAW);
 
         m_shaderProgram = CompileAndLinkShaders("vertex-shader.glsl", "fragment-shader.glsl");
-        GLint frameCountLoc = glGetUniformLocation(m_shaderProgram, "frameCount");
+        GLint frameCountLoc = glGetUniformLocation(m_shaderProgram, "frameIndex");
         glUseProgram(m_shaderProgram);
+
+        double timeInTotal = 0.0;
+        double frames = 0;
+        ReadAndResetTimer();
 
         while (!glfwWindowShouldClose(m_window)) {
             glfwPollEvents();
@@ -83,21 +87,25 @@ public:
 
             BeginGPUTimer();
             DrawFullscreenTriangle();
+            timeInTotal += EndGPUTimer(true);
+            frames += 1;
+
             m_sizeReadFromMSAAFB += sizeReadFromMSAAFB;
             m_sizeReadFromResolveFB += sizeReadFromResolveFB;
             m_sizeWriteToResolveFB += sizeWriteToResolveFB;
             m_sizeWriteToDefaultFB += sizeWriteToDefaultFB;
 
-            double fps = EndGPUTimer();
-            if (fps > 0) {
-                double ms = 1000.0 / fps;
-                printf("Avg FPS: %.2f, Avg BW(G/s): %.2f\n", fps, 
-                    (m_sizeReadFromMSAAFB + m_sizeReadFromResolveFB + m_sizeWriteToResolveFB + m_sizeWriteToDefaultFB) / ms / (1024 * 1024 * 1024));
+            if (ReadTimer() > 2000) {
+                printf("Avg FPS: %.2f, Avg BW(G/s): %.2f\n", 1000.0 / (timeInTotal / frames), 
+                    (m_sizeReadFromMSAAFB + m_sizeReadFromResolveFB + m_sizeWriteToResolveFB + m_sizeWriteToDefaultFB) / (timeInTotal / frames) / (1024 * 1024 * 1024));
                 
                 m_sizeReadFromMSAAFB = 0.0;
                 m_sizeReadFromResolveFB = 0.0;
                 m_sizeWriteToResolveFB = 0.0;
                 m_sizeWriteToDefaultFB = 0.0;
+                frames = 0;
+                timeInTotal = 0;
+                ReadAndResetTimer();
             }
 
             glfwSwapBuffers(m_window);
@@ -154,7 +162,7 @@ private:
     void DrawFullscreenTriangle() {
         glBindFramebuffer(GL_FRAMEBUFFER, m_msaaFramebuffer);
         glViewport(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-        glUniform1ui(m_frameCountLoc, m_frameCount++);
+        glUniform1ui(m_frameCountLoc, m_frameIndex++);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -190,7 +198,7 @@ private:
     GLuint m_shaderProgram = 0;
     GLuint m_uniformBuffer = 0;
     GLuint m_frameCountLoc = 0;
-    int m_frameCount = 0;
+    int m_frameIndex = 0;
     int m_actualMSAASamples = 0;
 
     double m_sizeReadFromMSAAFB = 0.0;

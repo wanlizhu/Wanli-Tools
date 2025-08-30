@@ -183,7 +183,7 @@ void MSAAResolve_GL::CreateUniformBuffer() {
 }
 
 void MSAAResolve_GL::Render() {
-    m_frameCount++;
+    m_frameIndex++;
     glUseProgram(m_shaderProgram);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_msaaFramebuffer);
@@ -193,8 +193,8 @@ void MSAAResolve_GL::Render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Set up uniforms
-    GLint frameCountLoc = glGetUniformLocation(m_shaderProgram, "frameCount");
-    glUniform1ui(frameCountLoc, m_frameCount);
+    GLint frameCountLoc = glGetUniformLocation(m_shaderProgram, "frameIndex");
+    glUniform1ui(frameCountLoc, m_frameIndex);
 
     // Actual draw call
     glBindVertexArray(m_vertexArray);

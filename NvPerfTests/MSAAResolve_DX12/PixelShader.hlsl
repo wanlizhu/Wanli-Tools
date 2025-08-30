@@ -6,7 +6,7 @@ struct PSInput
 
 cbuffer FrameConstants : register(b0)
 {
-    uint frameCount;
+    uint frameIndex;
     uint3 padding;
 };
 
@@ -31,7 +31,7 @@ float random(uint2 pixelCoord, uint frame)
 float4 PSMain(PSInput input) : SV_TARGET
 {
     uint2 pixelCoord = uint2(input.position.xy);
-    float randValue = random(pixelCoord, frameCount);
+    float randValue = random(pixelCoord, frameIndex);
     
     // Generate 0 or 1 based on random value
     float result = randValue > 0.5 ? 1.0 : 0.0;

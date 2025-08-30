@@ -17,6 +17,7 @@
 #include <filesystem>
 #include <unordered_map>
 #include <chrono>
+#include <unistd.h>
 
 extern std::unordered_map<std::string, std::vector<uint8_t>> g_embeddedFiles;
 
@@ -32,7 +33,9 @@ protected:
     );
     void CloseWindow(); 
     void BeginGPUTimer();
-    double EndGPUTimer();
+    double EndGPUTimer(bool wait);
+    double ReadTimer();
+    double ReadAndResetTimer();
     GLuint CompileAndLinkShaders(
         const std::string& vsfile, 
         const std::string& psfile
@@ -42,8 +45,7 @@ protected:
     GLFWwindow* m_window = NULL;
 
 private:
-    GLuint m_query1 = 0, m_query2 = 0;
-    double m_accumTimeMs = 0.0, m_accumFrames = 0.0;
-    std::chrono::high_resolution_clock::time_point m_printTime;
-    bool m_waitPrevTimer = false;
+    GLuint m_queries[2] = {0, 0};
+    std::chrono::high_resolution_clock::time_point m_timePoint;
+    int m_debugCounter = 0;
 };

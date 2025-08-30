@@ -1,4 +1,8 @@
 #include "Window_GL.h"
+#include <chrono>
+#include <cstdint>
+#include <ratio>
+#include <unistd.h>
 
 #define GLFW_EXPOSE_NATIVE_X11
 #define GLFW_EXPOSE_NATIVE_GLX
@@ -51,62 +55,82 @@ void Window_GL::OpenWindow(
     std::cout << "OpenGL Renderer: " << renderer << std::endl;
     std::cout << "OpenGL Version: " << version << std::endl;
 
-    glGenQueries(1, &m_query1);
-    glGenQueries(1, &m_query2);
-    m_printTime = std::chrono::high_resolution_clock::now();
+    glGenQueries(2, m_queries);
+    m_timePoint = std::chrono::high_resolution_clock::now();
 
     std::cout << "Window Initialization Finished" << std::endl;
 }
 
 void Window_GL::CloseWindow() {
-    glDeleteQueries(1, &m_query1);
-    glDeleteQueries(1, &m_query2);
+    glDeleteQueries(2, m_queries);
     glfwDestroyWindow(m_window);
     glfwTerminate();
     std::cout << "Window Cleanup Finished" << std::endl;
 }
 
 void Window_GL::BeginGPUTimer() {
-    if (!m_waitPrevTimer) {
-        glQueryCounter(m_query1, GL_TIMESTAMP);
-    }
+    // Record start timestamp
+    glQueryCounter(m_queries[0], GL_TIMESTAMP);
 }
 
-double Window_GL::EndGPUTimer() {
-    if (m_waitPrevTimer) {
-        GLint a0 = 0, a1 = 0;
-        glGetQueryObjectiv(m_query1, GL_QUERY_RESULT_AVAILABLE, &a0);
-        glGetQueryObjectiv(m_query2, GL_QUERY_RESULT_AVAILABLE, &a1);
-        if (a0 && a1) {
-            m_waitPrevTimer = false;
-            uint64_t t0 = 0, t1 = 0;
-            glGetQueryObjectui64v(m_query1, GL_QUERY_RESULT, &t0);
-            glGetQueryObjectui64v(m_query2, GL_QUERY_RESULT, &t1);
-            const uint64_t ns = (t1 >= t0) ? (t1 - t0) : 0; 
-            double ms = ns * 1.0 / 1e6;
-            m_accumTimeMs += ms;
-            m_accumFrames += 1;
-
-            auto time = std::chrono::high_resolution_clock::now();
-            if (time - m_printTime > std::chrono::seconds(2)) {
-                double fps = 1000.0 / (m_accumTimeMs / m_accumFrames);
-                m_accumTimeMs = 0.0;
-                m_accumFrames = 0.0;
-                m_printTime = time;
-                return fps;
-            }
-        }
-    } else {
-        glQueryCounter(m_query2, GL_TIMESTAMP);
-        m_waitPrevTimer = true;
-        return EndGPUTimer();
+double Window_GL::EndGPUTimer(bool wait) {
+    // Record end timestamp
+    glQueryCounter(m_queries[1], GL_TIMESTAMP);
+    
+    if (!wait) {
+        return -1.0;
     }
+    
+    // Wait for both queries to complete
+    GLint available[2] = {0, 0};
+    int retries = 0;
+    do {
+        glGetQueryObjectiv(m_queries[0], GL_QUERY_RESULT_AVAILABLE, &available[0]);
+        glGetQueryObjectiv(m_queries[1], GL_QUERY_RESULT_AVAILABLE, &available[1]);
+        if (++retries > 1) {
+            usleep(100);
+        }
+    } while (!(available[0] && available[1]) && retries < 10000);
+    
+    if (!(available[0] && available[1])) {
+        return -1.0;  // Timeout
+    }
+    
+    // Get the timestamps
+    GLuint64 startTime = 0, endTime = 0;
+    glGetQueryObjectui64v(m_queries[0], GL_QUERY_RESULT, &startTime);
+    glGetQueryObjectui64v(m_queries[1], GL_QUERY_RESULT, &endTime);
+    
+    // Calculate elapsed time in nanoseconds
+    GLuint64 elapsedNs = (endTime > startTime) ? (endTime - startTime) : 0;
+    
+    // Convert to milliseconds
+    double elapsedMs = elapsedNs / 1000000.0;
+    
+    // Debug output for first few frames per test
+    if (m_debugCounter++ < 10) {
+        std::cout << "Frame " << m_debugCounter << " GPU time: " << elapsedNs 
+                  << " ns = " << elapsedMs << " ms" << std::endl;
+    }
+    
+    return elapsedMs;
+}
 
-    return -1.0;
+double Window_GL::ReadTimer() {
+    auto nano = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - m_timePoint);
+    return nano.count() * 1.0 / 1e6; // ms
+}
+
+double Window_GL::ReadAndResetTimer() {
+    double ms = ReadTimer();
+    m_timePoint = std::chrono::high_resolution_clock::now();
+    return ms;
 }
 
 GLuint CompileShader(GLenum stage, const std::string& filename) {
     const char* source = nullptr;
+    std::string fileContent;
+    
     if (std::filesystem::exists(filename)) {
         std::cout << "Load shader from file: " << filename << std::endl;
         std::ifstream file(filename);
@@ -117,8 +141,8 @@ GLuint CompileShader(GLenum stage, const std::string& filename) {
 
         std::stringstream buffer;
         buffer << file.rdbuf();
-        std::string bufferstr = buffer.str();
-        source = bufferstr.c_str();
+        fileContent = buffer.str();
+        source = fileContent.c_str();
     }
     else {
         std::cout << "Load shader from embedded string: " << filename << std::endl;
