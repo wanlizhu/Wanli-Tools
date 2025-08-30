@@ -244,10 +244,12 @@ elif [[ $1 == driver || $1 == drivers ]]; then
                 tar -C /tmp -xf /tmp/tests-Linux-$(uname -m).tar &&
                 sudo ln -sf /tmp/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool 
             fi 
-        elif [[ $NVTEST_DRIVER == "/mnt/"* ]]
+        elif [[ $NVTEST_DRIVER == "/mnt/"* ]]; then 
             cp -vf  $(dirname $NVTEST_DRIVER)/tests-Linux-$(uname -m).tar /tmp/ &&
             tar -C /tmp -xf /tmp/tests-Linux-$(uname -m).tar &&
             sudo ln -sf /tmp/tests-Linux-$(uname -m)/sandbag-tool/sandbag-tool $HOME/sandbag-tool 
+        else
+            echo "Unknown NVTEST_DRIVER path pattern: \"$NVTEST_DRIVER\""
         fi 
 
         if [[ ! -f $HOME/sandbag-tool ]]; then 
