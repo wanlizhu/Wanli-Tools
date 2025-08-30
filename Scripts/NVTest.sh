@@ -254,8 +254,8 @@ elif [[ $1 == driver || $1 == drivers ]]; then
 
         if [[ ! -f $HOME/sandbag-tool ]]; then 
             echo "Failed to download sandbag-tool compatible with current driver"
-            echo "Unset NVTEST_DRIVER -> OK"
-            unset NVTEST_DRIVER
+            echo "Fall back to /root/nvt/tests/system/sandbag-tool/sandbag-tool"
+            sudo cp -vf /root/nvt/tests/system/sandbag-tool/sandbag-tool $HOME/sandbag-tool
         fi 
         
         read -p "Press [Enter] to run Xorg, unsandbag and lock clocks: "
