@@ -358,7 +358,10 @@ elif [[ $1 == viewperf ]]; then
     exportEnvs=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
 
     if [[ $WZHU_PI == 1 ]]; then # Capture PI report
-        commandLine="$exportEnvs cd $(pwd) && rm -rf $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX && $HOME/SinglePassCapture/pic-x $4 --api=ogl --check_clocks=0 --sample=24000 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX --startframe=100 --exe=$exe --arg=\"$arg\" --workdir=$dir | grep -v \"won't hook API\" && sudo -u $USER -H bash -lc \"source $HOME/SinglePassCapture/PerfInspector/Python-venv/bin/activate && NVM_GTLAPI_USER=wanliz $HOME/SinglePassCapture/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX/upload_report.sh\"" 
+        if [[ -z $WZHU_PI_ROOT ]]; then 
+            WZHU_PI_ROOT=$HOME/SinglePassCapture
+        fi 
+        commandLine="$exportEnvs cd $(pwd) && rm -rf $WZHU_PI_ROOT/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX && $WZHU_PI_ROOT/pic-x $4 --api=ogl --check_clocks=0 --sample=24000 --aftbuffersize=2048 --name=viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX --startframe=100 --exe=$exe --arg=\"$arg\" --workdir=$dir | grep -v \"won't hook API\" && sudo -u $USER -H bash -lc \"source $WZHU_PI_ROOT/PerfInspector/Python-venv/bin/activate && NVM_GTLAPI_USER=wanliz $WZHU_PI_ROOT/PerfInspector/output/viewperf-$2-subtest$3-on-$(hostname)$WZHU_PI_SUFFIX/upload_report.sh\"" 
     else
         if [[ ! -z $2 ]]; then # Run single viewset
             if [[ $WZHU_GDB == 1 ]]; then # Run in gdb
