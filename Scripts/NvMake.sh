@@ -115,7 +115,7 @@ if [[ $? -eq 0 && $install == 1 ]]; then
     if [[ $(uname -m | sed 's/^x86_64$/amd64/') == $arch ]]; then 
         case "$module2" in 
             drivers)
-                NvTest.sh driver local $(realpath $workdir/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run) ;;
+                NVTest.sh driver local $(realpath $workdir/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run) ;;
             opengl) 
                 read -p "Press [Enter] to install _out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so: "
                 version=$(ls /usr/lib/*-linux-gnu/libnvidia-glcore.so.*  | awk -F '.so.' '{print $2}' | head -1)

@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 file(GLOB_RECURSE SOURCE *.c *.cpp *.h)
-add_executable(UnitTest_MSAA ${SOURCE})
-target_include_directories(UnitTest_MSAA PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-target_link_libraries(UnitTest_MSAA PUBLIC Window_GLVK)
+add_executable(MSAA ${SOURCE})
+target_include_directories(MSAA PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(MSAA PUBLIC Window_GLVK)
 
