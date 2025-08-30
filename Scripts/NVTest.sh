@@ -259,7 +259,7 @@ elif [[ $1 == driver || $1 == drivers ]]; then
         fi 
         
         read -p "Press [Enter] to run Xorg, unsandbag and lock clocks: "
-        $0 startx && $0 maxclock && echo -e "\nDriver Installed!"
+        $0 maxclock && $0 startx && $0 maxclock && echo -e "\nDriver Installed!"
     fi 
     /bin/bash 
 elif [[ $1 == maxclock ]]; then 
@@ -297,15 +297,9 @@ elif [[ $1 == startx ]]; then
         xrandr --fb 3840x2160  
     else
         sudo -H bash -lc "screen -S nvtest-fake-display bash -c \"NVTEST_NO_SMI=1 NVTEST_NO_RMMOD=1 NVTEST_NO_MODPROBE=1 /mnt/linuxqa/nvt.sh 3840x2160__runcmd --cmd 'sleep 2147483647'  || read -p 'Press [Enter] to exit: '\""
-        if [[ -z $(pidof Xorg) ]]; then 
-            echo "Failed to start Xorg using nvt.sh"
-            echo "Fall back to start a bare Xorg"
-            unset NVTEST_DRIVE
-            $0 $args 
-            exit 
-        fi 
+        echo "Xorg: $(pidof Xorg)"
         sudo xhost +
-        $0 xauth 
+        $0 xauth
     fi 
 
     if [[ $enableVNC == 1 ]]; then
