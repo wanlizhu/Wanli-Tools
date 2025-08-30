@@ -802,7 +802,7 @@ void MSAAResolve_VK::CreateMSAAFramebuffers() {
 void MSAAResolve_VK::CreateDescriptorSet() {
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = sizeof(uint32_t) * 4; // frameCount + padding
+    bufferInfo.size = sizeof(uint32_t) * 4; // frameIndex + padding
     bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -924,8 +924,8 @@ void MSAAResolve_VK::Render() {
     vkResetFences(m_device, 1, &m_inFlightFence);
 
     // Update uniform buffer with frame count
-    m_frameCount++;
-    uint32_t uniformData[4] = { m_frameCount, 0, 0, 0 }; // frameCount + padding
+    m_frameIndex++;
+    uint32_t uniformData[4] = { m_frameIndex, 0, 0, 0 }; // frameIndex + padding
     memcpy(m_uniformBufferMapped, uniformData, sizeof(uniformData));
 
     // Reset command buffer after waiting for fence

@@ -30,7 +30,7 @@ private:
     GLuint m_shaderProgram = 0;
     GLuint m_vertexArray = 0;
     GLuint m_uniformBuffer = 0;
-    int m_frameCount = 0;
+    int m_frameIndex = 0;
     int m_actualMSAASamples = 0;
 };
 
@@ -103,6 +103,6 @@ private:
     VkFence m_inFlightFence = VK_NULL_HANDLE;
     
     // Frame count for animation
-    uint32_t m_frameCount = 0;
+    uint32_t m_frameIndex = 0;
 };
 */

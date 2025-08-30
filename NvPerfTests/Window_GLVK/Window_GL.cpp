@@ -1,4 +1,8 @@
 #include "Window_GL.h"
+#include <chrono>
+#include <cstdint>
+#include <ratio>
+#include <unistd.h>
 
 #define GLFW_EXPOSE_NATIVE_X11
 #define GLFW_EXPOSE_NATIVE_GLX
@@ -51,62 +55,61 @@ void Window_GL::OpenWindow(
     std::cout << "OpenGL Renderer: " << renderer << std::endl;
     std::cout << "OpenGL Version: " << version << std::endl;
 
-    glGenQueries(1, &m_query1);
-    glGenQueries(1, &m_query2);
-    m_printTime = std::chrono::high_resolution_clock::now();
+    glGenQueries(2, m_queries);
+    m_timePoint = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Window Initialization Finished" << std::endl;
+    std::cout << "Created Window \"" << title <<  "\" " << width << "x" << height << std::endl;
 }
 
 void Window_GL::CloseWindow() {
-    glDeleteQueries(1, &m_query1);
-    glDeleteQueries(1, &m_query2);
+    glDeleteQueries(2, m_queries);
     glfwDestroyWindow(m_window);
     glfwTerminate();
     std::cout << "Window Cleanup Finished" << std::endl;
 }
 
 void Window_GL::BeginGPUTimer() {
-    if (!m_waitPrevTimer) {
-        glQueryCounter(m_query1, GL_TIMESTAMP);
-    }
+    glQueryCounter(m_queries[0], GL_TIMESTAMP);
 }
 
-double Window_GL::EndGPUTimer() {
-    if (m_waitPrevTimer) {
-        GLint a0 = 0, a1 = 0;
-        glGetQueryObjectiv(m_query1, GL_QUERY_RESULT_AVAILABLE, &a0);
-        glGetQueryObjectiv(m_query2, GL_QUERY_RESULT_AVAILABLE, &a1);
-        if (a0 && a1) {
-            m_waitPrevTimer = false;
-            uint64_t t0 = 0, t1 = 0;
-            glGetQueryObjectui64v(m_query1, GL_QUERY_RESULT, &t0);
-            glGetQueryObjectui64v(m_query2, GL_QUERY_RESULT, &t1);
-            const uint64_t ns = (t1 >= t0) ? (t1 - t0) : 0; 
-            double ms = ns * 1.0 / 1e6;
-            m_accumTimeMs += ms;
-            m_accumFrames += 1;
+void Window_GL::EndGPUTimer() {
+    glQueryCounter(m_queries[1], GL_TIMESTAMP);
+}
 
-            auto time = std::chrono::high_resolution_clock::now();
-            if (time - m_printTime > std::chrono::seconds(2)) {
-                double fps = 1000.0 / (m_accumTimeMs / m_accumFrames);
-                m_accumTimeMs = 0.0;
-                m_accumFrames = 0.0;
-                m_printTime = time;
-                return fps;
-            }
+std::chrono::nanoseconds Window_GL::ReadGPUTimer() {
+    GLint available[2] = {0, 0};
+    int retries = 0;
+    do {
+        glGetQueryObjectiv(m_queries[0], GL_QUERY_RESULT_AVAILABLE, &available[0]);
+        glGetQueryObjectiv(m_queries[1], GL_QUERY_RESULT_AVAILABLE, &available[1]);
+        if (++retries > 1) {
+            usleep(100);
         }
-    } else {
-        glQueryCounter(m_query2, GL_TIMESTAMP);
-        m_waitPrevTimer = true;
-        return EndGPUTimer();
-    }
+    } while (!(available[0] && available[1]));
+    assert(available[0] && available[1]);
+    
+    GLuint64 startTime = 0, endTime = 0;
+    glGetQueryObjectui64v(m_queries[0], GL_QUERY_RESULT, &startTime);
+    glGetQueryObjectui64v(m_queries[1], GL_QUERY_RESULT, &endTime);
+    assert(endTime >= startTime);
 
-    return -1.0;
+    return std::chrono::nanoseconds(endTime - startTime);
+}
+
+std::chrono::nanoseconds Window_GL::ReadCPUTimer() {
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - m_timePoint);
+}
+
+std::chrono::nanoseconds Window_GL::ResetCPUTimer() {
+    auto ns = ReadCPUTimer();
+    m_timePoint = std::chrono::high_resolution_clock::now();
+    return ns;
 }
 
 GLuint CompileShader(GLenum stage, const std::string& filename) {
     const char* source = nullptr;
+    std::string fileContent;
+    
     if (std::filesystem::exists(filename)) {
         std::cout << "Load shader from file: " << filename << std::endl;
         std::ifstream file(filename);
@@ -117,8 +120,8 @@ GLuint CompileShader(GLenum stage, const std::string& filename) {
 
         std::stringstream buffer;
         buffer << file.rdbuf();
-        std::string bufferstr = buffer.str();
-        source = bufferstr.c_str();
+        fileContent = buffer.str();
+        source = fileContent.c_str();
     }
     else {
         std::cout << "Load shader from embedded string: " << filename << std::endl;
@@ -172,7 +175,7 @@ GLuint Window_GL::CompileAndLinkShaders(
 
     glDeleteShader(vs);
     glDeleteShader(ps);
-    std::cout << "Linked program " << program << " with " << vsfile << " and " << psfile << std::endl;
+    std::cout << "Linked program (ID: " << program << ") with " << vsfile << " and " << psfile << std::endl;
 
     return program;
 }

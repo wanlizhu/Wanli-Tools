@@ -1,11 +1,11 @@
 #version 330 core
 #if defined(VULKAN)
 layout(std140) uniform params_t {
-    uint frameCount;
+    uint frameIndex;
     uint padding[3];  
 };
 #else
-uniform uint frameCount;
+uniform uint frameIndex;
 #endif 
 
 in vec2 uv;
@@ -32,7 +32,7 @@ float random(uvec2 pixelCoord, uint frame)
 void main()
 {
     uvec2 pixelCoord = uvec2(gl_FragCoord.xy);
-    float randValue = random(pixelCoord, frameCount);
+    float randValue = random(pixelCoord, frameIndex);
     
     // Generate 0 or 1 based on random value
     float result = randValue > 0.5 ? 1.0 : 0.0;
