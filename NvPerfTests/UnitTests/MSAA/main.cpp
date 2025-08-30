@@ -17,8 +17,8 @@ class UnitTest_MSAA_GL : public Window_GL {
 public:
     static const unsigned int TEXTURE_WIDTH = 3840;
     static const unsigned int TEXTURE_HEIGHT = 2160;
-    static const unsigned int MSAA_SAMPLE_COUNT = 16;
-    static const unsigned int MSAA_FORMAT = GL_RGBA32F;
+    static const unsigned int MSAA_SAMPLE_COUNT = 8;
+    static const unsigned int MSAA_FORMAT = GL_RGBA8;
 
     // Resolve blit: DRAM -> L2(decompress) -> ROP resolve -> L2(compress) -> DRAM 
     // Present blit: DRAM -> L2 -> ROP copy -> L2 -> DRAM  
