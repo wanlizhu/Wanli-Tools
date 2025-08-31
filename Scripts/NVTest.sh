@@ -35,6 +35,7 @@ if [[ $1 == env ]]; then
         export vblank_mode=0
         export __GL_DEBUG_BYPASS_ASSERT=c 
         export PIP_BREAK_SYSTEM_PACKAGES=1
+        export NVM_GTLAPI_USER=wanliz
         export QT_QPA_PLATFORM_PLUGIN_PATH="/usr/lib/$(uname -m)-linux-gnu/qt5/plugins/platforms" # For qapitrace
         [[ -z $SSL_CERT_DIR ]] && export SSL_CERT_DIR=/etc/ssl/certs
         [[ -z $DISPLAY ]] && export DISPLAY=:0
