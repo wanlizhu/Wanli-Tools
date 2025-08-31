@@ -80,11 +80,11 @@ if [[ $1 == env ]]; then
         }
         export -f wzhu-push 
         function wzhu-scp-to-windows {
-            if [[ ! -z $1 ]]; then 
+            if [[ ! -z "$1" ]]; then 
                 read -p "Windows Host IP: " -e -i "$(cat $HOME/.windows-host-ip 2>/dev/null)" host
                 echo "$host" > $HOME/.windows-host-ip
                 [[ -z $(which sshpass) ]] && sudo apt install -y sshpass
-                sshpass -p "$(echo 'U2FsdGVkX1+UnE9oAYZ8DjyHzGqQ3wxZbhrJanHFw9u7ypNWEkG2dOJQShrj5dlT' | openssl enc -d -aes-256-cbc -pbkdf2 -a)" scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $@ WanliZhu@$host:'C:\Users\WanliZhu\Desktop\'
+                sshpass -p "$(echo 'U2FsdGVkX1+UnE9oAYZ8DjyHzGqQ3wxZbhrJanHFw9u7ypNWEkG2dOJQShrj5dlT' | openssl enc -d -aes-256-cbc -pbkdf2 -a)" scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@" WanliZhu@$host:'C:\Users\WanliZhu\Desktop\'
             fi 
         }
         export -f wzhu-scp-to-windows
