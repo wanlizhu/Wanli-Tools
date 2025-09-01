@@ -356,11 +356,11 @@ elif [[ $1 == viewperf ]]; then
         postproc="sed -i '1{/<\/FRAME>/d}' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml && sed -i '$ { /<\/FRAME>/! s/$/\n<\/FRAME>/ }' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml"
     fi 
     if [[ $WZHU_GLHOOKS == 1 ]]; then 
-        if [[ ! -f $HOME/WZhu/NVPerfTests/build/GLHooks/GLHooks ]]; then 
-            echo "Build $HOME/WZhu/NVPerfTests/build/GLHooks/GLHooks first"
+        if [[ ! -f $HOME/WZhu/NVPerfTests/build/GLHooks/libGLHooks.so ]]; then 
+            echo "Build $HOME/WZhu/NVPerfTests/build/GLHooks/libGLHooks.so first"
             exit 1 
         fi 
-        export LD_PRELOAD=$HOME/WZhu/NVPerfTests/build/GLHooks/GLHooks 
+        export LD_PRELOAD=$HOME/WZhu/NVPerfTests/build/GLHooks/libGLHooks.so 
     fi 
 
     exportEnvs=$(env | grep -E '^(__GL_|WZHU_|LD_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
