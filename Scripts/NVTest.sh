@@ -366,8 +366,10 @@ elif [[ $1 == viewperf ]]; then
     fi 
     if [[ $WZHU_GLHOOKS == 1 ]]; then 
         if [[ ! -f $HOME/WZhu/NVPerfTests/build/GLHooks/libGLHooks.so ]]; then 
-            echo "Build $HOME/WZhu/NVPerfTests/build/GLHooks/libGLHooks.so first"
-            exit 1 
+            mkdir -p $HOME/WZhu/NVPerfTests/build
+            pushd $HOME/WZhu/NVPerfTests/build
+            cmake .. && cmake --build . || exit 1
+            popd 
         fi 
         export LD_PRELOAD=$HOME/WZhu/NVPerfTests/build/GLHooks/libGLHooks.so 
     fi 
