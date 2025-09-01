@@ -365,12 +365,10 @@ elif [[ $1 == viewperf ]]; then
         postproc="sed -i '1{/<\/FRAME>/d}' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml && sed -i '$ { /<\/FRAME>/! s/$/\n<\/FRAME>/ }' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml"
     fi 
     if [[ $WZHU_GLHOOKS == 1 ]]; then 
-        if [[ ! -f $HOME/WZhu/NVPerfTests/build/GLHooks/libGLHooks.so ]]; then 
-            mkdir -p $HOME/WZhu/NVPerfTests/build
-            pushd $HOME/WZhu/NVPerfTests/build
-            cmake .. && cmake --build . || exit 1
-            popd 
-        fi 
+        mkdir -p $HOME/WZhu/NVPerfTests/build
+        pushd $HOME/WZhu/NVPerfTests/build
+        cmake .. && cmake --build . || exit 1
+        popd 
         export LD_PRELOAD=$HOME/WZhu/NVPerfTests/build/GLHooks/libGLHooks.so 
     fi 
 
