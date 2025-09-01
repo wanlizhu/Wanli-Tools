@@ -1,4 +1,5 @@
 #pragma once
+#include <deque>
 #include <dlfcn.h>
 #include <GL/gl.h>
 #include <GL/glext.h>
@@ -34,8 +35,7 @@ struct GPUTimerRec {
     }
 };
 
-void* LoadReadAPI(const char*);
-void  RunWithGPUTimer(
+void RunWithGPUTimer(
     const std::string& name, 
     const std::function<void()>& func
 );
