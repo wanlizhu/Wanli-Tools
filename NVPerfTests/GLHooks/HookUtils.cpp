@@ -1,60 +1,47 @@
 #include "HookUtils.h"
 
-// Weak glibc entry so we don't hardcode version strings; absent on non-glibc.
-extern "C" void* __libc_dlsym(void* handle, const char* symbol) __attribute__((weak));
+std::unordered_map<std::string, void*> replacements;
 
 __attribute__((constructor))
 static void GLHooks_BEGIN() {
-    if (!__libc_dlsym) {
-        fprintf(stderr, "Warning: __libc_dlsym not available\n");
-    }
+    replacements["glBlitFramebuffer"] = (void*)glBlitFramebuffer;
 }
 
 __attribute__((destructor))
 static void GLHooks_END() {
 }
 
-void* LoadRealAPI(const char* name) {
-    using PFN_glXGetProcAddress = void* (*)(const GLubyte*);
-    using PFN_eglGetProcAddress = void* (*)(const char*);
+extern "C" void (*glXGetProcAddress(const GLubyte *procname))(void) {
+    static auto real_glXGetProcAddress = (decltype(&glXGetProcAddress))dlsym(RTLD_NEXT, "glXGetProcAddress");
 
-    static bool inited = false;
-    static PFN_glXGetProcAddress real_glXGetProcAddress = nullptr;
-    static PFN_glXGetProcAddress real_glXGetProcAddressARB = nullptr;
-    static PFN_eglGetProcAddress real_eglGetProcAddress = nullptr;
-    if (inited == false && __libc_dlsym) {
-        inited = true;
-        real_glXGetProcAddress = (PFN_glXGetProcAddress) __libc_dlsym(RTLD_NEXT, "glXGetProcAddress");
-        real_glXGetProcAddressARB = (PFN_glXGetProcAddress) __libc_dlsym(RTLD_NEXT, "glXGetProcAddressARB");
-        real_eglGetProcAddress = (PFN_eglGetProcAddress) __libc_dlsym(RTLD_NEXT, "eglGetProcAddress");
+    auto it = replacements.find((const char*)procname);
+    if (it != replacements.end()) {
+        return (void (*)(void))it->second;
     }
+
+    return real_glXGetProcAddress(procname);
+}
+
+extern "C" void (*glXGetProcAddressARB(const GLubyte *procname))(void) {
+    static auto real_glXGetProcAddressARB = (decltype(&glXGetProcAddressARB))dlsym(RTLD_NEXT, "glXGetProcAddressARB");
     
-    void* addr = nullptr;
-    if (__libc_dlsym) {
-        addr = __libc_dlsym(RTLD_NEXT, name);
-    }
-    if (addr == nullptr && real_glXGetProcAddress) {
-        addr = real_glXGetProcAddress((const GLubyte*)name);
-    }
-    if (addr == nullptr && real_glXGetProcAddressARB) {
-        addr = real_glXGetProcAddressARB((const GLubyte*)name);
-    }
-    if (addr == nullptr && real_eglGetProcAddress) {
-        addr = real_eglGetProcAddress(name);
+    auto it = replacements.find((const char*)procname);
+    if (it != replacements.end()) {
+        return (void (*)(void))it->second;
     }
 
-    return addr;
+    return real_glXGetProcAddressARB(procname);
 }
 
 void RunWithGPUTimer(
     const std::string& name,
     const std::function<void()>& func
 ) {
-    static auto glGenQueries = (PFNGLGENQUERIESPROC)LoadRealAPI("glGenQueries");
-    static auto glQueryCounter = (PFNGLQUERYCOUNTERPROC)LoadRealAPI("glQueryCounter");
-    static auto glGetQueryObjectiv = (PFNGLGETQUERYOBJECTIVPROC)LoadRealAPI("glGetQueryObjectiv");
-    static auto glGetQueryObjectui64v = (PFNGLGETQUERYOBJECTUI64VPROC)LoadRealAPI("glGetQueryObjectui64v");
-    static auto glDeleteQueries = (PFNGLDELETEQUERIESPROC)LoadRealAPI("glDeleteQueries");
+    static auto glGenQueries = (PFNGLGENQUERIESPROC)dlsym(RTLD_NEXT, "glGenQueries");
+    static auto glQueryCounter = (PFNGLQUERYCOUNTERPROC)dlsym(RTLD_NEXT, "glQueryCounter");
+    static auto glGetQueryObjectiv = (PFNGLGETQUERYOBJECTIVPROC)dlsym(RTLD_NEXT, "glGetQueryObjectiv");
+    static auto glGetQueryObjectui64v = (PFNGLGETQUERYOBJECTUI64VPROC)dlsym(RTLD_NEXT, "glGetQueryObjectui64v");
+    static auto glDeleteQueries = (PFNGLDELETEQUERIESPROC)dlsym(RTLD_NEXT, "glDeleteQueries");
     static std::unordered_map<std::string, GPUTimerRec> records;
     static std::mutex recordsMutex;
 

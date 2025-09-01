@@ -344,7 +344,16 @@ elif [[ $1 == xauth ]]; then
         sudo -H bash -lc "echo '[Running as root]'; cp -vf $HOME/.Xauthority /root/"
     fi 
 elif [[ $1 == viewperf ]]; then 
-    [[ -z $WZHU_VP_ROOT ]] && WZHU_VP_ROOT=/root/nvt/tests/viewperf2020v3/viewperf2020
+    [[ -z $WZHU_VP_ROOT ]] && {
+        if [[ -d /root/nvt/tests/viewperf2020v3/viewperf2020 ]]; then 
+            WZHU_VP_ROOT=/root/nvt/tests/viewperf2020v3/viewperf2020
+        elif [[ -d $HOME/viewperf2020v3 ]]; then 
+            WZHU_VP_ROOT=$HOME/viewperf2020v3
+        else
+            echo "Install $HOME/viewperf2020v3 first"
+            exit 1
+        fi 
+    }
     exe="./viewperf/bin/viewperf"
     arg="viewsets/$2/config/$2.xml $3 -resolution 3840x2160"
     dir="$WZHU_VP_ROOT"
