@@ -355,8 +355,11 @@ elif [[ $1 == viewperf ]]; then
         wzhu-enable-pushbuffer-dump $index $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml || exit 1
         postproc="sed -i '1{/<\/FRAME>/d}' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml && sed -i '$ { /<\/FRAME>/! s/$/\n<\/FRAME>/ }' $HOME/pushbuffer-viewperf-$2-subtest$3-frame$index-on-$(hostname).xml"
     fi 
+    if [[ $WZHU_GLHOOKS == 1 ]]; then 
+        export LD_PRELOAD=$HOME/WZhu/NVPerfTests/build/GLHooks/GLHooks 
+    fi 
 
-    exportEnvs=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
+    exportEnvs=$(env | grep -E '^(__GL_|WZHU_|LD_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
 
     if [[ $WZHU_PI == 1 ]]; then # Capture PI report
         if [[ -z $WZHU_PI_ROOT ]]; then 
