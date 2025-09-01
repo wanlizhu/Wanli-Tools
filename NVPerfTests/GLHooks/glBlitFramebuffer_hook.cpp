@@ -5,6 +5,7 @@ extern "C" void glBlitFramebuffer(
     GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1,
     GLbitfield mask, GLenum filter
 ) {
+    return;
     static auto real_glBlitFramebuffer = (decltype(&glBlitFramebuffer))dlsym(RTLD_NEXT, "glBlitFramebuffer");
     RunWithGPUTimer("glBlitFramebuffer", [=](){
         real_glBlitFramebuffer(
