@@ -1,27 +1,5 @@
 #!/bin/bash
 
-if [[ -z $(ls /mnt/linuxqa 2>/dev/null) ]]; then
-    sudo mkdir -p /mnt/linuxqa
-    sudo mount linuxqa.nvidia.com:/storage/people /mnt/linuxqa || exit 1
-fi 
-if [[ -z $(ls /mnt/builds 2>/dev/null) ]]; then
-    sudo mkdir -p /mnt/builds
-    sudo mount linuxqa.nvidia.com:/storage3/builds /mnt/builds  
-fi 
-if [[ -z $(ls /mnt/dvsbuilds 2>/dev/null) ]]; then
-    sudo mkdir -p /mnt/dvsbuilds
-    sudo mount linuxqa.nvidia.com:/storage5/dvsbuilds /mnt/dvsbuilds
-fi 
-if [[ -z $(ls /mnt/data 2>/dev/null) ]]; then
-    sudo mkdir -p /mnt/data
-    sudo mount linuxqa.nvidia.com:/storage/data /mnt/data 
-fi 
-
-if [[ ! -z $(ls /root/nvt 2>/dev/null) ]]; then
-    sudo apt install -y python3 python3-pip libjpeg-dev 
-    sudo -H bash -lc "/mnt/linuxqa/nvt.sh sync" || exit 1
-fi 
-
 if [[ $1 == env ]]; then
     if [[ -z $2 ]]; then 
         echo "NVTEST_DRIVER           : $NVTEST_DRIVER"
@@ -52,6 +30,30 @@ if [[ $1 == env ]]; then
                 .clangd
                 *.code-workspace" | sed 's/^[[:space:]]*//' > ~/.p4ignore
         }
+        
+        if ping -c1 -W1 linuxqa.nvidia.com &>/dev/null; then
+            if [[ -z $(ls /mnt/linuxqa 2>/dev/null) ]]; then
+                sudo mkdir -p /mnt/linuxqa
+                sudo mount linuxqa.nvidia.com:/storage/people /mnt/linuxqa 
+            fi 
+            if [[ -z $(ls /mnt/builds 2>/dev/null) ]]; then
+                sudo mkdir -p /mnt/builds
+                sudo mount linuxqa.nvidia.com:/storage3/builds /mnt/builds  
+            fi 
+            if [[ -z $(ls /mnt/dvsbuilds 2>/dev/null) ]]; then
+                sudo mkdir -p /mnt/dvsbuilds
+                sudo mount linuxqa.nvidia.com:/storage5/dvsbuilds /mnt/dvsbuilds
+            fi 
+            if [[ -z $(ls /mnt/data 2>/dev/null) ]]; then
+                sudo mkdir -p /mnt/data
+                sudo mount linuxqa.nvidia.com:/storage/data /mnt/data 
+            fi
+        fi 
+        if [[ ! -z $(ls /root/nvt 2>/dev/null) ]]; then
+            sudo apt install -y python3 python3-pip libjpeg-dev 
+            sudo -H bash -lc "/mnt/linuxqa/nvt.sh sync" 
+        fi 
+
         if [[ $UID -ne 0 ]] && ! sudo grep -q "$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoers; then
             echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers >/dev/null 
         fi  
