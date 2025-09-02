@@ -20,8 +20,8 @@ if [[ $1 == env ]]; then
         [[ $USER == wanliz ]] && {
             export P4PORT=p4proxy-sc.nvidia.com:2006
             export P4USER=wanliz
-            export P4CLIENT=wanliz_nvidia_sw
-            export P4ROOT=/wanliz_nvidia_sw
+            export P4CLIENT=wanliz_sw_linux
+            export P4ROOT=/wanliz_sw_linux
             export P4IGNORE=$HOME/.p4ignore
             [[ ! -f ~/.p4ignore ]] && echo "_out
                 .git
@@ -151,13 +151,13 @@ elif [[ $1 == driver || $1 == drivers ]]; then
             shift 
         done 
         if [[ $module == drivers ]]; then 
-            ( set -o pipefail; ssh wanliz@office "ls /wanliz_nvidia_sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'" | tee /tmp/list ) || { 
+            ( set -o pipefail; ssh wanliz@office "ls /wanliz_sw_linux/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run | awk -F/ '{print $NF}'" | tee /tmp/list ) || { 
                 echo "Failed to list compiled versions on remote"
                 exit 1
             }
 
-            echo "Remote folder: /wanliz_nvidia_sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config"
-            rsync -ah --progress wanliz@office:/wanliz_nvidia_sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/wanliz_nvidia_sw/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/tests-Linux-$(uname -m).tar $HOME && echo || exit 1
+            echo "Remote folder: /wanliz_sw_linux/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config"
+            rsync -ah --progress wanliz@office:/wanliz_sw_linux/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/NVIDIA-Linux-$(uname -m)-*-internal.run wanliz@office:/wanliz_sw_linux/$branch/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/tests-Linux-$(uname -m).tar $HOME && echo || exit 1
             
             if [[ "$(wc -l < /tmp/list)" -gt 1 ]]; then
                 $0 driver local $HOME || exit 1
@@ -169,15 +169,15 @@ elif [[ $1 == driver || $1 == drivers ]]; then
                 exit 1
             fi 
 
-            if [[ $config != release && -z $(ls /wanliz_nvidia_sw 2>/dev/null) ]]; then
-                echo "Mounting remote source at /wanliz_nvidia_sw"
-                [[ ! -d /wanliz_nvidia_sw ]] && sudo mkdir /wanliz_nvidia_sw && sudo chmod 777 /wanliz_nvidia_sw && sudo chown $USER /wanliz_nvidia_sw
+            if [[ $config != release && -z $(ls /wanliz_sw_linux 2>/dev/null) ]]; then
+                echo "Mounting remote source at /wanliz_sw_linux"
+                [[ ! -d /wanliz_sw_linux ]] && sudo mkdir /wanliz_sw_linux && sudo chmod 777 /wanliz_sw_linux && sudo chown $USER /wanliz_sw_linux
                 sudo apt install -y nfs-common &>/dev/null 
-                sudo mount -t nfs office:/wanliz_nvidia_sw /wanliz_nvidia_sw
+                sudo mount -t nfs office:/wanliz_sw_linux /wanliz_sw_linux
             fi 
         elif [[ $module == opengl ]]; then 
-            echo "Remote folder: /wanliz_nvidia_sw/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config"
-            rsync -ah --progress wanliz@office:/wanliz_nvidia_sw/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so $HOME || exit 1
+            echo "Remote folder: /wanliz_sw_linux/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config"
+            rsync -ah --progress wanliz@office:/wanliz_sw_linux/$branch/drivers/OpenGL/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so $HOME || exit 1
             $0 driver local $HOME/libnvidia-glcore.so
         fi 
     elif [[ $2 == local ]]; then
