@@ -81,10 +81,10 @@ sudo mount -t cifs $URL /mnt/$(basename $URL).cifs -o username=wanliz && echo '-
 ```bash
 read -p "PI report path: " report
 read -p "PI package dir: " dir
-rsync -ah --info=progress2 "${report%/}" "${dir#*:}/PerfInspector/output/" && {
+rsync -ah --info=progress2 "${report%/}" "$dir/PerfInspector/output/" && {
     name=$(basename "$report")
     if [[ "$dir" == *:* ]]; then
-        ssh ${dir%%:*} bash -c "cd ${dir#*:}/PerfInspector/output/$name && pwd && ./upload_report.sh"
+        ssh ${dir%%:*} bash -c "cd ${dir#*:}/PerfInspector/output/$name && ./upload_report.sh"
     else
         pushd $dir/PerfInspector/output/$name &&
         ./upload_report.sh &&
