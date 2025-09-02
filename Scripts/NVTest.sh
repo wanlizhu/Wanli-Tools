@@ -407,6 +407,14 @@ elif [[ $1 == viewperf ]]; then
     echo "${commandLine}"
     read -p "Press [Enter] to continue as root: "
     sudo -H bash -lc "$commandLine" 
+elif [[ $1 == msaa ]]; then 
+    mkdir -p ~/WZhu/NVPerfTests/build 
+    pushd ~/WZhu/NVPerfTests/build
+    cmake .. &&
+    cmake --build . && {
+        ~/WZhu/NVPerfTests/build/UnitTests/MSAA/MSAA 
+    }
+    popd 
 else 
     exportEnvs=$(env | grep -E '^(__GL_|WZHU_)' | while IFS='=' read -r k v; do printf 'export %s=%q; ' $k $v; done)
     sudo -H bash -lc "$exportEnvs /mnt/linuxqa/nvt.sh $*" 
