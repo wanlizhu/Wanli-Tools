@@ -76,3 +76,19 @@ URL=$(echo "$URL" | sed 's|\\|/|g')
 sudo mkdir -p /mnt/$(basename $URL).cifs
 sudo mount -t cifs $URL /mnt/$(basename $URL).cifs -o username=wanliz && echo '-> OK' || echo '-> FAILED'
 ```
+
+# Upload PI report (using a working build)
+```bash
+read -p "PI report path: " report
+read -p "PI package dir: " dir
+rsync -ah --info=progress2 "${report%/}" "$dir/PerfInspector/output/" && {
+    name=$(basename "$report")
+    if [[ "$dir" == *:* ]]; then
+        ssh ${dir%%:*} bash -c "cd ${dir#*:}/PerfInspector/output/$name && pwd && ./upload_report.sh"
+    else
+        pushd $dir/PerfInspector/output/$name &&
+        ./upload_report.sh &&
+        popd 
+    fi 
+}
+```
