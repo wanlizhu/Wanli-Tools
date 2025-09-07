@@ -114,14 +114,14 @@ function Add-GTL-API-Key {
 }
 
 function NoPasswd-SSH {
-    if ssh -v \
+    if ! ssh -v \
       -o BatchMode=yes \
       -o PreferredAuthentications=publickey \
       -o NumberOfPasswordPrompts=0 \
       -o StrictHostKeyChecking=accept-new \
       -o IdentitiesOnly=yes \
       -o ConnectTimeout=2 \
-      "$1" true 2>&1 | grep -qiE 'Authentications that can continue'; then
+      "$1" true &>/dev/null; then
         if [[ ! -f ~/.ssh/id_rsa ]]; then 
             ssh-keygen -t rsa -b 4096 -o -a 100 -N '' -f $HOME/.ssh/id_rsa
         fi 
