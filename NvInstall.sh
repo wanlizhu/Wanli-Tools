@@ -27,9 +27,7 @@ if [[ $host != localhost ]]; then
     sudo rm -rf /tmp/drivers  
     mkdir -p /tmp/drivers 
     source $(dirname $0)/NvConfig.sh
-    type -a NoPasswd-SSH
-    exit 1 
-    NoPasswd-SSH "$host" 
+    NoPasswd-SSH "wanliz@office" 
     rsync -ah --progress "$host:$driver" /tmp/drivers  
     if [[ $driver == *".run" ]]; then 
         rsync -ah --progress "$host:$(dirname $driver)/tests-Linux-$(uname -m).tar" /tmp/drivers  
