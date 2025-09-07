@@ -8,7 +8,7 @@ config=develop
 module=drivers
 while [[ $# -gt 0 ]]; do 
     case $1 in 
-        office) host=wanliz@office ;;
+        office) host="wanliz@office" ;;
         /*) root=$1 ;;
         bfm)  branch=dev/gpu_drv/bugfix_main ;;
         r580) branch=rel/gpu_drv/r580/r580_00 ;;
@@ -27,7 +27,7 @@ esac
 if [[ $host != localhost ]]; then 
     sudo rm -rf /tmp/drivers  
     mkdir -p /tmp/drivers 
-    Load-Wanli-Tools && NoPasswd-SSH $host 
+    Load-Wanli-Tools && NoPasswd-SSH "$host" 
     rsync -ah --progress "$host:$driver" /tmp/drivers  
     if [[ $driver == *".run" ]]; then 
         rsync -ah --progress "$host:$(dirname $driver)/tests-Linux-$(uname -m).tar" /tmp/drivers  
