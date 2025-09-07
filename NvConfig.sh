@@ -115,7 +115,7 @@ function Add-GTL-API-Key {
 }
 
 function NoPasswd-SSH {
-    [[ -z $1 ]] && return 1
+    [[ ! -z $1 ]] && echo "$1" || return 1
     if ssh -v \
       -o BatchMode=yes \
       -o PreferredAuthentications=publickey \
