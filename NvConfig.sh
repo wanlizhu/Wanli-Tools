@@ -48,7 +48,7 @@ declare -A _address_=(
     [n1x6]="10.31.40.241"
 )
 for _host_ in "${!_address_[@]}"; do 
-    _ip_=${_address_[$host]}
+    _ip_=${_address_[$_host_]}
     if sudo grep -Eq "^[[:space:]]*[^#].*\b${_host_}\b" /etc/hosts; then
         sudo sed -i "/^[[:space:]]*#/!{/[[:<:]]${_host_}[[:>:]]/d}" /etc/hosts
     fi
