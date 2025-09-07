@@ -94,8 +94,6 @@ function Sync-Wanli-Tools {
         git -c safe.directory='*' pull
         popd >/dev/null 
     fi 
-
-    Load-Wanli-Tools 
 }
 
 function Add-SSH-Key {
