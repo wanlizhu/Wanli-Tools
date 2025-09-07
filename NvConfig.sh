@@ -110,6 +110,23 @@ function Add-GTL-API-Key {
     chmod 500 ~/.gtl_api_key 
 }
 
+function NoPasswd-SSH {
+    if ssh -v \
+      -o BatchMode=yes \
+      -o PreferredAuthentications=publickey \
+      -o NumberOfPasswordPrompts=0 \
+      -o StrictHostKeyChecking=accept-new \
+      -o IdentityFile="$HOME/.ssh/id_ed25519" \
+      -o IdentitiesOnly=yes \
+      -o ConnectTimeout=5 \
+      "$1" true 2>&1 | grep -qiE 'Authentications that can continue:.*(password|keyboard-interactive)'; then
+        if [[ ! -f ~/.ssh/id_ed25519 ]]; then 
+            Add-SSH-Key || return 1
+        fi 
+        ssh-copy-id -i "$HOME/.ssh/id_ed25519.pub" "$2"
+    fi
+}
+
 function Mount-Windows-Folder {
     [[ -z $(which mount.cifs) ]] && sudo apt install -y cifs-utils
     read -r -p "Windows Shared Folder: " FolderURL
