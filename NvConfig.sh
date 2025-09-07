@@ -47,14 +47,15 @@ declare -A _address_=(
     [horizon7]="172.16.177.216"
     [n1x6]="10.31.40.241"
 )
-for host in "${!_address_[@]}"; do 
-    ip=${_address_[$host]}
-    if sudo grep -Eq "^[[:space:]]*[^#].*\b${host}\b" /etc/hosts; then
-        sudo sed -Ei "/^[[:space:]]*#/! s/^([[:space:]]*)[0-9A-Fa-f:.]+([[:space:]][^#]*\<${host}\>[^#]*)/\1${ip}\2/" /etc/hosts 
+for _host_ in "${!_address_[@]}"; do 
+    _ip_=${_address_[$host]}
+    if sudo grep -Eq "^[[:space:]]*[^#].*\b${_host_}\b" /etc/hosts; then
+        sudo sed -Ei "/^[[:space:]]*#/! s/^([[:space:]]*)[0-9A-Fa-f:.]+([[:space:]][^#]*\<${_host_}\>[^#]*)/\1${_ip_}\2/" /etc/hosts 
     else
-        printf '%s %s\n' "$ip" "$host" | sudo tee -a /etc/hosts &>/dev/null
+        printf '%s %s\n' "$_ip_" "$_host_" | sudo tee -a /etc/hosts &>/dev/null
     fi
 done 
+unset _address_ _host_ _ip_
 
 # Ensure env loader defined in ~/.bashrc
 grep -qF 'function Load-Wanli-Tools' "$HOME/.bashrc" || cat >>"$HOME/.bashrc" <<'EOF'
