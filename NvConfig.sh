@@ -90,7 +90,8 @@ function Sync-Wanli-Tools {
 
     if [[ -d /mnt/linuxqa/wanliz/Wanli-Tools ]]; then 
         pushd /mnt/linuxqa/wanliz/Wanli-Tools >/dev/null 
-        git -c safe.directory='*' pull
+        git config --global --add safe.directory '*'
+        git pull
         popd >/dev/null 
     fi 
 
