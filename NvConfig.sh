@@ -121,7 +121,7 @@ function NoPasswd-SSH {
       -o StrictHostKeyChecking=accept-new \
       -o IdentitiesOnly=yes \
       -o ConnectTimeout=2 \
-      "$1" true 2>&1 | grep -qiE 'Authentications that can continue:.*(password|keyboard-interactive)'; then
+      "$1" true 2>&1 | grep -qiE 'Authentications that can continue'; then
         if [[ ! -f ~/.ssh/id_rsa ]]; then 
             ssh-keygen -t rsa -b 4096 -o -a 100 -N '' -f $HOME/.ssh/id_rsa
         fi 
