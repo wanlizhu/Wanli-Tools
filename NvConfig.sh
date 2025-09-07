@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PATH="$PATH:$HOME/Wanli_Tools:/mnt/linuxqa/wanliz/Wanli_Tools"
+export PATH="$PATH:$HOME/Wanli-Tools:/mnt/linuxqa/wanliz/Wanli-Tools"
 export __GL_SYNC_TO_VBLANK=0
 export vblank_mode=0
 export __GL_DEBUG_BYPASS_ASSERT=c 
@@ -9,6 +9,7 @@ export NVM_GTLAPI_USER=wanliz
 export QT_QPA_PLATFORM_PLUGIN_PATH="/usr/lib/$(uname -m)-linux-gnu/qt5/plugins/platforms" # For qapitrace
 [[ -z $SSL_CERT_DIR ]] && export SSL_CERT_DIR=/etc/ssl/certs
 [[ -z $DISPLAY ]] && export DISPLAY=:0
+
 # Export Perforce variables 
 export P4PORT=p4proxy-sc.nvidia.com:2006
 export P4USER=wanliz
@@ -23,15 +24,18 @@ export P4IGNORE=$HOME/.p4ignore
     .clangd
     compile-commands.json
     *.code-workspace" | sed 's/^[[:space:]]*//' > ~/.p4ignore
+
 # Mount /mnt/linuxqa
 ping -c1 -W1 linuxqa.nvidia.com &>/dev/null \
     && ! mountpoint -q /mnt/linuxqa &>/dev/null \
     && sudo mkdir -p /mnt/linuxqa &>/dev/null \
     && sudo mount linuxqa.nvidia.com:/storage/people /mnt/linuxqa &>/dev/null
+
 # Enable no-password sudo
 [[ $EUID -ne 0 ]] \
     && ! sudo grep -qxF "$USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoers \
     && echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers &>/dev/null
+
 # Add known host names to /etc/hosts
 declare -A _address_=(
     [office]="172.16.179.143"
@@ -49,3 +53,72 @@ for host in "${!_address_[@]}"; do
         printf '%s %s\n' "$ip" "$host" | sudo tee -a /etc/hosts &>/dev/null
     fi
 done 
+
+# Ensure env loader defined in ~/.bashrc
+grep -qF 'function Load-Wanli-Tools' "$HOME/.bashrc" || cat >>"$HOME/.bashrc" <<'EOF'
+function Load-Wanli-Tools {
+    if [[ -f ~/Wanli-Tools/NvConfig.sh ]]; then 
+        source ~/Wanli-Tools/NvConfig.sh
+    elif [[ -f /mnt/linuxqa/wanliz/Wanli-Tools/NvConfig.sh ]]; then 
+        source /mnt/linuxqa/wanliz/Wanli-Tools/NvConfig.sh
+    else
+        echo "Folder ~/Wanli-Tools doesn't exist"
+    fi 
+}
+EOF
+
+# <<<<<<<<<<<<<<<<<<<< Begin: helper functions
+function Sync-Wanli-Tools {
+    pushd ~/Wanli-Tools >/dev/null || return 1
+    if [[ -n $(git status --porcelain=v1 2>/dev/null) ]]; then
+        git add . && git commit -m "$(date)"
+        git pull && git push
+    else
+        git pull 
+    fi 
+    if [[ -d /mnt/linuxqa/wanliz/Wanli-Tools ]]; then 
+        pushd /mnt/linuxqa/wanliz/Wanli-Tools >/dev/null 
+        git pull
+        popd >/dev/null 
+    fi 
+    popd >/dev/null
+}
+
+function Add-SSH-Key {
+    if [[ -f ~/.ssh/id_ed25519 ]]; then 
+        read -p "Press [Enter] to override ~/.ssh/id_ed25519: "
+        sudo rm -rf ~/.ssh/id_ed25519 ~/.ssh/id_ed25519.pub 
+    fi 
+    echo "Setting up SSH key"
+    echo 'U2FsdGVkX1/M3Vl9RSvWt6Nkq+VfxD/N9C4jr96qvbXsbPfxWmVSfIMGg80m6g946QCdnxBxrNRs0i9M0mijcmJzCCSgjRRgE5sd2I9Buo1Xn6D0p8LWOpBu8ITqMv0rNutj31DKnF5kWv52E1K4MJdW035RHoZVCEefGXC46NxMo88qzerpdShuzLG8e66IId0kEBMRtWucvhGatebqKFppGJtZDKW/W1KteoXC3kcAnry90H70x2fBhtWnnK5QWFZCuoC16z+RQxp8p1apGHbXRx8JStX/om4xZuhl9pSPY47nYoCAOzTfgYLFanrdK10Jp/huf40Z0WkNYBEOH4fSTD7oikLugaP8pcY7/iO0vD7GN4RFwcB413noWEW389smYdU+yZsM6VNntXsWPWBSRTPaIEjaJ0vtq/4pIGaEn61Tt8ZMGe8kKFYVAPYTZg/0bai1ghdA9CHwO9+XKwf0aL2WalWd8Amb6FFQh+TlkqML/guFILv8J/zov70Jxz/v9mReZXSpDGnLKBpc1K1466FnlLJ89buyx/dh/VXJb+15RLQYUkSZou0S2zxo' | openssl enc -d -aes-256-cbc -pbkdf2 -a > ~/.ssh/id_ed25519
+    chmod 600 ~/.ssh/id_ed25519
+    echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHx7hz8+bJjBioa3Rlvmaib8pMSd0XTmRwXwaxrT3hFL wanliz@Enzo-MacBook' > ~/.ssh/id_ed25519.pub 
+    chmod 644 ~/.ssh/id_ed25519.pub
+}
+
+function Add-GTL-API-Key {
+    echo "Setting up ~/.gtl_api_key"
+    echo 'U2FsdGVkX18BU0ZpoGynLWZBV16VNV2x85CjdpJfF+JF4HhpClt/vTyr6gs6GAq0lDVWvNk7L7s7eTFcJRhEnU4IpABfxIhfktMypWw85PuJCcDXOyZm396F02KjBRwunVfNkhfuinb5y2L6YR9wYbmrGDn1+DjodSWzt1NgoWotCEyYUz0xAIstEV6lF5zedcGwSzHDdFhj3hh5YxQFANL96BFhK9aSUs4Iqs9nQIT9evjinEh5ZKNq5aJsll91czHS2oOi++7mJ9v29sU/QjaqeSWDlneZj4nPYXhZRCw=' | openssl enc -d -aes-256-cbc -pbkdf2 -a > ~/.gtl_api_key 
+    chmod 500 ~/.gtl_api_key 
+}
+
+function Mount-Windows-Folder {
+    [[ -z $(which mount.cifs) ]] && sudo apt install -y cifs-utils
+    read -r -p "Windows Shared Folder: " FolderURL
+    URL=$(echo "$FolderURL" | sed 's|\\|/|g')
+    sudo mkdir -p /mnt/$(basename $FolderURL).cifs
+    sudo mount -t cifs $FolderURL /mnt/$(basename $FolderURL).cifs -o username=wanliz && echo "Mounted at /mnt/$(basename $FolderURL).cifs" || echo "FAILED"
+}
+
+function Read-Back-Windows {
+    if [[ ! -z "$1" ]]; then 
+        read -p "Windows Host IP: " -e -i "$(cat $HOME/.windows-host-ip 2>/dev/null)" host
+        echo "$host" > $HOME/.windows-host-ip
+        [[ -z $(which sshpass) ]] && sudo apt install -y sshpass
+        if [[ -f /tmp/.windows-host-passwd ]]; then  
+            echo "$(echo 'U2FsdGVkX1+UnE9oAYZ8DjyHzGqQ3wxZbhrJanHFw9u7ypNWEkG2dOJQShrj5dlT' | openssl enc -d -aes-256-cbc -pbkdf2 -a)" > /tmp/.windows-host-passwd
+        fi 
+        sshpass -p "$(cat /tmp/.windows-host-passwd)" scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@" WanliZhu@$host:'C:\Users\WanliZhu\Desktop\'
+    fi 
+}
+# <<<<<<<<<<<<<<<<<<<< End: helper functions
