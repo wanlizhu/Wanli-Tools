@@ -38,6 +38,8 @@ if [[ $(ls $driver | wc -l) -gt 1 ]]; then
     ls $(dirname $driver)/NVIDIA-Linux-$(uname -m)-*.run 2>/dev/null | awk -F/ '{print $NF}' | sort -V | sed -E 's/([0-9]+\.[0-9]+)/\x1b[31m\1\x1b[0m/'
     read -p "Install version: " version
     driver="$(dirname $driver)/NVIDIA-Linux-$(uname -m)-$version-internal.run"
+else
+    driver="$(realpath $driver)"
 fi 
 
 if [[ ! -f $driver ]]; then 
