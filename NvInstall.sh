@@ -1,7 +1,7 @@
 #!/bin/bash
 
-host=localhost
-root=/wanliz_sw_linux
+host=$([[ -d /wanliz_sw_linux ]] && echo localhost || echo "wanliz@office")
+root=$([[ -z $P4ROOT ]] && echo /wanliz_sw_linux || echo "$P4ROOT")
 branch=rel/gpu_drv/r580/r580_00
 subdir=
 config=develop 
