@@ -114,13 +114,11 @@ function Add-GTL-API-Key {
 }
 
 function NoPasswd-SSH {
-    [[ ! -z "$1" ]] && echo "Config NoPasswd SSH for $1" || return 1
     if ssh -v \
       -o BatchMode=yes \
       -o PreferredAuthentications=publickey \
       -o NumberOfPasswordPrompts=0 \
       -o StrictHostKeyChecking=accept-new \
-      -o IdentityFile="$HOME/.ssh/id_ed25519" \
       -o IdentitiesOnly=yes \
       -o ConnectTimeout=2 \
       "$1" true 2>&1 | grep -qiE 'Authentications that can continue:.*(password|keyboard-interactive)'; then
