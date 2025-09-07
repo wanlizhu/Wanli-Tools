@@ -27,7 +27,7 @@ esac
 if [[ $host != localhost ]]; then 
     sudo rm -rf /tmp/drivers  
     mkdir -p /tmp/drivers 
-    NoPasswd-SSH 
+    Load-Wanli-Tools && NoPasswd-SSH 
     rsync -ah --progress "$host:$driver" /tmp/drivers  
     if [[ $driver == *".run" ]]; then 
         rsync -ah --progress "$host:$(dirname $driver)/tests-Linux-$(uname -m).tar" /tmp/drivers  
