@@ -50,7 +50,7 @@ declare -A _address_=(
 for _host_ in "${!_address_[@]}"; do 
     _ip_=${_address_[$_host_]}
     if sudo grep -Eq "${_host_}" /etc/hosts; then
-        sudo sed -i "/$host/d" /etc/hosts
+        sudo sed -i "/$_host_/d" /etc/hosts
     fi
     printf '%s %s\n' "$_ip_" "$_host_" | sudo tee -a /etc/hosts &>/dev/null
 done 
