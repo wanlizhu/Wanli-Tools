@@ -69,19 +69,22 @@ EOF
 
 # <<<<<<<<<<<<<<<<<<<< Begin: helper functions
 function Sync-Wanli-Tools {
-    pushd ~/Wanli-Tools >/dev/null || return 1
-    if [[ -n $(git status --porcelain=v1 2>/dev/null) ]]; then
-        git add . && git commit -m "$(date)"
-        git pull && git push
-    else
-        git pull 
+    if [[ -d ~/Wanli-Tools ]]; then 
+        pushd ~/Wanli-Tools >/dev/null 
+        if [[ -n $(git status --porcelain=v1 2>/dev/null) ]]; then
+            git add . && git commit -m "$(date)"
+            git pull && git push
+        else
+            git pull 
+        fi 
+        popd >/dev/null
     fi 
+
     if [[ -d /mnt/linuxqa/wanliz/Wanli-Tools ]]; then 
         pushd /mnt/linuxqa/wanliz/Wanli-Tools >/dev/null 
         git -c safe.directory='*' pull
         popd >/dev/null 
     fi 
-    popd >/dev/null
 }
 
 function Add-SSH-Key {
