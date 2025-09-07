@@ -65,6 +65,9 @@ function Load-Wanli-Tools {
         echo "Folder ~/Wanli-Tools doesn't exist"
     fi 
 }
+if [[ $USER == wanliz ]]; then
+    Load-Wanli-Tools
+fi
 EOF
 
 # <<<<<<<<<<<<<<<<<<<< Begin: helper functions
