@@ -33,7 +33,7 @@ if [[ $(uname -m) == aarch64 ]]; then
     sudo $perfdebug --lock_strict  set gpcclkkHz  2000000 && echo -e "set gpcclkkHz  2000MHz ... [OK]\n"
     sudo $perfdebug --lock_loose   set xbarclkkHz 1800000 && echo -e "set xbarclkkHz 1800MHz ... [OK]\n"
     #sudo $perfdebug --lock_loose   set sysclkkHz  1800000 && echo -e "set sysclkkHz  ... [OK]\n"
-    sudo $perfdebug --force_regime ffr && echo "Force regime ... [OK]\n"
+    sudo $perfdebug --force_regime ffr && echo -e "Force regime ... [OK]\n"
     sleep 3
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
     echo "The current GPC Clock: $(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)"
