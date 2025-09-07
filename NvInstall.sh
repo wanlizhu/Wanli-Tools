@@ -23,7 +23,7 @@ case $module in
     opengl)  driver="$root/$branch/$subdir/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so" ;;
     *) echo "Error: unknown module: \"$module\""; exit 1 ;;
 esac 
-
+echo "xx$host"
 if [[ $host != localhost ]]; then 
     sudo rm -rf /tmp/drivers  
     mkdir -p /tmp/drivers 
