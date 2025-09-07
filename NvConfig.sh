@@ -22,6 +22,8 @@ export P4IGNORE=$HOME/.p4ignore
     .vscode
     .cursorignore
     .clangd
+    .p4config
+    .p4ignore
     compile-commands.json
     *.code-workspace" | sed 's/^[[:space:]]*//' > ~/.p4ignore
 
