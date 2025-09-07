@@ -113,6 +113,7 @@ function Add-GTL-API-Key {
 }
 
 function NoPasswd-SSH {
+    [[ -z $1 ]] && return 1
     if ssh -v \
       -o BatchMode=yes \
       -o PreferredAuthentications=publickey \
@@ -125,7 +126,7 @@ function NoPasswd-SSH {
         if [[ ! -f ~/.ssh/id_ed25519 ]]; then 
             Add-SSH-Key || return 1
         fi 
-        ssh-copy-id -i "$HOME/.ssh/id_ed25519.pub" "$2"
+        ssh-copy-id -i "$HOME/.ssh/id_ed25519.pub" "$1"
     fi
 }
 
