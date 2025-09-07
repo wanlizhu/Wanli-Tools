@@ -12,7 +12,14 @@ else
     exit 1
 fi 
 
-./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml $subtest -resolution 3840x2160 &&
-cat results/${viewset//sw/solidworks}*/results.xml
+if [[ -z $viewset ]]; then 
+    for viewset in catia creo energy maya medical snx sw; do 
+        ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml $subtest -resolution 3840x2160 &&
+        cat results/${viewset//sw/solidworks}*/results.xml
+    fi 
+else
+    ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml $subtest -resolution 3840x2160 &&
+    cat results/${viewset//sw/solidworks}*/results.xml
+fi 
 
 popd >/dev/null 
