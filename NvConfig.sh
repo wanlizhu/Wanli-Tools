@@ -67,6 +67,7 @@ function Load-Wanli-Tools {
         echo "Folder ~/Wanli-Tools doesn't exist"
     fi 
 }
+export -f Load-Wanli-Tools
 if [[ $USER == wanliz ]]; then
     Load-Wanli-Tools
 fi
