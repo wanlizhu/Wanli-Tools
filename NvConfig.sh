@@ -152,4 +152,24 @@ function Read-Back-Windows {
         sshpass -p "$(cat /tmp/.windows-host-passwd)" scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@" WanliZhu@$host:'C:\Users\WanliZhu\Desktop\'
     fi 
 }
+
+function Remove-Nvidia-Kernel-Module {
+    sudo fuser -v /dev/nvidia* 2>/dev/null | grep -v 'COMMAND' | awk '{print $3}' | sort | uniq | tee > /tmp/nvidia
+    for nvpid in $(cat /tmp/nvidia); do 
+        echo -n "Killing $nvpid "
+        sudo kill -9 $nvpid && echo "-> OK" || echo "-> Failed"
+        sleep 1
+    done
+
+    while :; do
+        removed=0
+        for m in $(lsmod | awk '/^nvidia/ {print $1}'); do
+            if [ ! -d "/sys/module/$m/holders" ] || [ -z "$(ls -A /sys/module/$m/holders 2>/dev/null)" ]; then
+                sudo rmmod -f "$m" && removed=1
+                echo "Remove kernel module $m -> OK"
+            fi
+        done
+        [ "$removed" -eq 0 ] && break
+    done
+}
 # <<<<<<<<<<<<<<<<<<<< End: helper functions
