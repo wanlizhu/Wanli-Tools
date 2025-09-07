@@ -27,6 +27,7 @@ if [[ "$host" != localhost ]]; then
     sudo rm -rf /tmp/drivers  
     mkdir -p /tmp/drivers 
     source $(dirname $0)/NvConfig.sh
+    echo "xxx$host"
     NoPasswd-SSH "$host" 
     rsync -ah --progress "$host:$driver" /tmp/drivers  
     if [[ $driver == *".run" ]]; then 
