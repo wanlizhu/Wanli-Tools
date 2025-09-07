@@ -23,11 +23,11 @@ case $module in
     opengl)  driver="$root/$branch/$subdir/_out/Linux_$(uname -m | sed 's/^x86_64$/amd64/')_$config/libnvidia-glcore.so" ;;
     *) echo "Error: unknown module: \"$module\""; exit 1 ;;
 esac 
-if [[ $host != localhost ]]; then 
+if [[ "$host" != localhost ]]; then 
     sudo rm -rf /tmp/drivers  
     mkdir -p /tmp/drivers 
     source $(dirname $0)/NvConfig.sh
-    NoPasswd-SSH "wanliz@office" 
+    NoPasswd-SSH "$host" 
     rsync -ah --progress "$host:$driver" /tmp/drivers  
     if [[ $driver == *".run" ]]; then 
         rsync -ah --progress "$host:$(dirname $driver)/tests-Linux-$(uname -m).tar" /tmp/drivers  
