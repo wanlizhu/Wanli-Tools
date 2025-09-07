@@ -1,7 +1,7 @@
 #!/bin/bash
 
-viewset=$1
-subtest=$2
+viewset="${1:-maya}"
+subtest="${2:-10}"
 
 if [[ -d ~/viewperf2020v3 ]]; then 
     pushd ~/viewperf2020v3
@@ -12,7 +12,7 @@ else
     exit 1
 fi 
 
-if [[ -z $viewset ]]; then 
+if [[ $viewset == all ]]; then 
     for viewset in catia creo energy maya medical snx sw; do 
         ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml $subtest -resolution 3840x2160 &&
         cat results/${viewset//sw/solidworks}*/results.xml
