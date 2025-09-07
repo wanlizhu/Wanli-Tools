@@ -74,11 +74,11 @@ function Sync-Wanli-Tools {
         git add . && git commit -m "$(date)"
         git pull && git push
     else
-        git -c safe.directory='*' pull 
+        git pull 
     fi 
     if [[ -d /mnt/linuxqa/wanliz/Wanli-Tools ]]; then 
         pushd /mnt/linuxqa/wanliz/Wanli-Tools >/dev/null 
-        git pull
+        git -c safe.directory='*' pull
         popd >/dev/null 
     fi 
     popd >/dev/null
