@@ -122,8 +122,12 @@ function NoPasswd-SSH {
       -o StrictHostKeyChecking=accept-new \
       -o IdentityFile="$HOME/.ssh/id_ed25519" \
       -o IdentitiesOnly=yes \
-      -o ConnectTimeout=5 \
+      -o ConnectTimeout=2 \
       "$1" true 2>&1 | grep -qiE 'Authentications that can continue:.*(password|keyboard-interactive)'; then
+        if [[ ! -f ~/.ssh/id_rsa ]]; then 
+            ssh-keygen -t rsa -b 4096 -o -a 100 -N '' -f $HOME/.ssh/id_rsa
+        fi 
+        ssh-copy-id -i "$HOME/.ssh/id_rsa.pub" "$1"
         if [[ ! -f ~/.ssh/id_ed25519 ]]; then 
             Add-SSH-Key || return 1
         fi 
