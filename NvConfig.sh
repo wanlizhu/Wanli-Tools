@@ -50,10 +50,9 @@ declare -A _address_=(
 for _host_ in "${!_address_[@]}"; do 
     _ip_=${_address_[$host]}
     if sudo grep -Eq "^[[:space:]]*[^#].*\b${_host_}\b" /etc/hosts; then
-        sudo sed -Ei "/^[[:space:]]*#/! s/^([[:space:]]*)[0-9A-Fa-f:.]+([[:space:]][^#]*\<${_host_}\>[^#]*)/\1${_ip_}\2/" /etc/hosts 
-    else
-        printf '%s %s\n' "$_ip_" "$_host_" | sudo tee -a /etc/hosts &>/dev/null
+        sudo sed -i "/^[[:space:]]*#/!{/[[:<:]]${_host_}[[:>:]]/d}" /etc/hosts
     fi
+    printf '%s %s\n' "$_ip_" "$_host_" | sudo tee -a /etc/hosts &>/dev/null
 done 
 unset _address_ _host_ _ip_
 
