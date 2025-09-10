@@ -13,7 +13,7 @@ else
 fi 
 
 if [[ $viewset == all ]]; then 
-    for vi wset in catia creo energy maya medical snx sw; do 
+    for viewset in catia creo energy maya medical snx sw; do 
         ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml $subtest -resolution 3840x2160 &&
         cat results/${viewset//sw/solidworks}*/results.xml
     done 
