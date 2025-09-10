@@ -47,6 +47,8 @@ if [[ ! -f $driver ]]; then
     exit 1
 fi 
 
+read -p "Press [Enter] to install $driver:"
+
 if [[ $driver == *".run" ]]; then 
     echo "Kill all graphics apps and install $driver"
     read -p "Press [Enter] to continue: "
