@@ -73,6 +73,7 @@ if [[ $USER == wanliz ]]; then
 fi
 source ~/.bashrc
 EOF
+source $HOME/.bashrc
 
 # <<<<<<<<<<<<<<<<<<<< Begin: helper functions
 function Sync-Wanli-Tools {
