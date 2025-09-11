@@ -71,7 +71,6 @@ export -f Load-Wanli-Tools
 if [[ $USER == wanliz ]]; then
     Load-Wanli-Tools
 fi
-source ~/.bashrc
 EOF
 source $HOME/.bashrc
 
