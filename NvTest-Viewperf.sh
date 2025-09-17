@@ -27,8 +27,6 @@ else
             --clean=0 \
             --api=ogl \
             --check_clocks=0 \
-            --sample=4800 \
-            --aftbuffersize=2048 \
             --startframe=100 \
             --name=viewperf-$viewset-$subtest-on-$(hostname) \
             --exe=viewperf/bin/viewperf \
