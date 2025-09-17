@@ -28,7 +28,7 @@ else
             --api=ogl \
             --check_clocks=0 \
             --startframe=100 \
-            --name=viewperf-$viewset-$subtest-on-$(hostname) \
+            --name=$name \
             --exe=viewperf/bin/viewperf \
             --arg="viewsets/$viewset/config/$viewset.xml $subtest -resolution 3840x2160" \
             --workdir=$HOME/viewperf2020v3 && {
