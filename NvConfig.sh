@@ -141,12 +141,12 @@ function Mount-Windows-Folder {
     sudo mount -t cifs $FolderURL /mnt/$(basename $FolderURL).cifs -o username=wanliz && echo "Mounted at /mnt/$(basename $FolderURL).cifs" || echo "FAILED"
 }
 
-function Read-Back-Windows {
+function Copy-to-Windows-Desktop {
     if [[ ! -z "$1" ]]; then 
         read -p "Windows Host IP: " -e -i "$(cat $HOME/.windows-host-ip 2>/dev/null)" host
         echo "$host" > $HOME/.windows-host-ip
         [[ -z $(which sshpass) ]] && sudo apt install -y sshpass
-        if [[ -f /tmp/.windows-host-passwd ]]; then  
+        if [[ ! -f /tmp/.windows-host-passwd ]]; then  
             echo "$(echo 'U2FsdGVkX1+UnE9oAYZ8DjyHzGqQ3wxZbhrJanHFw9u7ypNWEkG2dOJQShrj5dlT' | openssl enc -d -aes-256-cbc -pbkdf2 -a)" > /tmp/.windows-host-passwd
         fi 
         sshpass -p "$(cat /tmp/.windows-host-passwd)" scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@" WanliZhu@$host:'C:\Users\WanliZhu\Desktop\'

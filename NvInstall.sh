@@ -27,6 +27,7 @@ if [[ "$host" != localhost ]]; then
     sudo rm -rf /tmp/drivers  
     mkdir -p /tmp/drivers 
     Load-Wanli-Tools && NoPasswd-SSH "$host" 
+    echo "Downloading from $host:$driver"
     rsync -ah --progress "$host:$driver" /tmp/drivers  
     if [[ $driver == *".run" ]]; then 
         rsync -ah --progress "$host:$(dirname $driver)/tests-Linux-$(uname -m).tar" /tmp/drivers  
