@@ -22,7 +22,8 @@ if [[ $viewset == all ]]; then
     done 
 else
     if [[ $profile == pi ]]; then 
-        sudo rm -rf $HOME/SinglePassCapture/PerfInspector/output/viewperf-$viewset-$subtest-on-$(hostname)
+        read -e -i viewperf-$viewset-$subtest-on-$(hostname) -p "PI report name: " name
+        sudo rm -rf $HOME/SinglePassCapture/PerfInspector/output/$name 
         sudo $HOME/SinglePassCapture/pic-x \
             --api=ogl \
             --check_clocks=0 \
@@ -31,7 +32,7 @@ else
             --exe=viewperf/bin/viewperf \
             --arg="viewsets/$viewset/config/$viewset.xml $subtest -resolution 3840x2160" \
             --workdir=$HOME/viewperf2020v3 && {
-            cd $HOME/SinglePassCapture/PerfInspector/output/viewperf-$viewset-$subtest-on-$(hostname)
+            cd $HOME/SinglePassCapture/PerfInspector/output/$name 
             echo | ./upload_report.sh || {
                 read -p "Press [Enter] to upload report: " 
                 pip install -i https://sc-hw-artf.nvidia.com/artifactory/api/pypi/hwinf-pi-pypi/simple \
