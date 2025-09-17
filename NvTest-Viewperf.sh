@@ -24,7 +24,6 @@ else
     if [[ $profile == pi ]]; then 
         sudo rm -rf $HOME/SinglePassCapture/PerfInspector/output/viewperf-$viewset-$subtest-on-$(hostname)
         sudo $HOME/SinglePassCapture/pic-x \
-            --clean=0 \
             --api=ogl \
             --check_clocks=0 \
             --startframe=100 \
