@@ -32,14 +32,13 @@ else
             --exe=viewperf/bin/viewperf \
             --arg="viewsets/$viewset/config/$viewset.xml $subtest -resolution 3840x2160" \
             --workdir=$HOME/viewperf2020v3 && {
+            read -p "Press [Enter] to upload report: " 
+            sudo chown -R $USER:$USER $HOME/SinglePassCapture
             cd $HOME/SinglePassCapture/PerfInspector/output/$name 
-            echo | ./upload_report.sh || {
-                read -p "Press [Enter] to upload report: " 
-                pip install -i https://sc-hw-artf.nvidia.com/artifactory/api/pypi/hwinf-pi-pypi/simple \
-                    --extra-index-url https://urm.nvidia.com/artifactory/api/pypi/nv-shared-pypi/simple \
-                    --extra-index-url https://pypi.perflab.nvidia.com pi-uploader
-                echo | ./upload_report.sh
-            } 
+            pip install -i https://sc-hw-artf.nvidia.com/artifactory/api/pypi/hwinf-pi-pypi/simple \
+                --extra-index-url https://urm.nvidia.com/artifactory/api/pypi/nv-shared-pypi/simple \
+                --extra-index-url https://pypi.perflab.nvidia.com pi-uploader &>/dev/null 
+            echo | ./upload_report.sh
         }
     else 
         ./viewperf/bin/viewperf viewsets/$viewset/config/$viewset.xml $subtest -resolution 3840x2160 &&
