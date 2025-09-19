@@ -24,7 +24,7 @@ case $module in
     *) echo "Error: unknown module: \"$module\""; exit 1 ;;
 esac 
 if [[ "$host" != localhost ]]; then 
-    sudo rm -rf /tmp/drivers  
+    #sudo rm -rf /tmp/drivers  
     mkdir -p /tmp/drivers 
     Load-Wanli-Tools && NoPasswd-SSH "$host" 
     echo "Downloading from $host:$driver"
@@ -54,7 +54,8 @@ if [[ $driver == *".run" ]]; then
     echo "Kill all graphics apps and install $driver"
     read -p "Press [Enter] to continue: "
     Load-Wanli-Tools && Remove-Nvidia-Kernel-Module 
-
+    sleep 3
+    
     sudo env IGNORE_CC_MISMATCH=1 IGNORE_MISSING_MODULE_SYMVERS=1 $driver -s --no-kernel-module-source --skip-module-load || { 
         cat /var/log/nvidia-installer.log
         echo "Aborting..."
